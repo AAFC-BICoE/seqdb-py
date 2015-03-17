@@ -1,0 +1,229 @@
+'''
+Created on Mar 4, 2015
+
+@author: korolo
+
+Sequence DB Web Services module
+'''
+
+import requests, json
+
+
+class UnexpectedContent(requests.exceptions.RequestException):
+    """Unexpected content of the Web Services response."""
+
+
+
+# CRUD (create, retrieve, update, delete) 
+
+class seqdbWebService:
+    
+    def __init__(self, api_key, base_url):
+        self.api_key = api_key
+        self.base_url = base_url
+
+    
+        
+        
+    # Submits a request to SeqDB web services
+    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+    # @request_url": full request url
+    # Returns response (still need to format it to JSon, etc.) or nothing if resource was not found 
+    def retrieve(self, request_url):
+        
+        req_header = { 'apikey': self.api_key }
+        resp = requests.get(request_url, headers=req_header)
+        
+        if resp.status_code == 404:
+            resp = ''
+        else:
+            # Will raise HTTPError exception if response status was not ok
+            resp.raise_for_status()
+              
+        return resp
+    
+    
+    # Submits a request to SeqDB web services
+    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+    # Returns json formatted object
+    def retrieveJson(self, request_url):
+        resp = self.retrieve(request_url)
+        if resp:
+            return json.loads(resp.text)
+        else:
+            return resp
+    
+    
+    
+    def create(self, request_url, json_data):
+        
+        req_header = { 'apikey': self.api_key, 'Content-Type': 'application/json' }
+        resp = requests.post(request_url, headers=req_header, data=json_data)  #(url, data, json)
+        
+        resp.raise_for_status()
+        
+        return resp
+    
+    def delete(self, request_url):
+        req_header = { 'apikey': self.api_key }
+        resp = requests.delete(request_url, headers=req_header)
+        
+        # Will raise HTTPError exception if response status was not ok
+        resp.raise_for_status()
+        
+        return resp
+    
+      
+    
+    # Gets sequence from SeqDB and returns it in a fasta format with a unique header.
+    # Note, the fast formatting is done here, instead of using seqdb fasta web service request 
+    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+    def getFastaSeqPlus(self, seq_id):
+        jsn_resp = self.retrieveJson(self.base_url + "/sequence/" + str(seq_id))
+        if 'result' not in jsn_resp.keys() or not jsn_resp['result']:
+            raise UnexpectedContent(response=jsn_resp)
+        
+        jsn_seq = jsn_resp['result']
+        if 'seq' not in jsn_seq.keys() or 'name' not in jsn_seq.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        fasta_seq =  '>' + jsn_seq['name'] + '|seqdbId:' + str(seq_id) + '\n' + jsn_seq['seq'] + '\n';
+        
+        return fasta_seq
+       
+    # Gets sequence in fasta format (SeqDB fasta request)
+    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+    def getFastaSeq(self, seq_id):
+        url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
+        response = self.retrieve(url)
+        return response.content
+        
+    
+    # Get region IDs of ITS sequences
+    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+    def getItsRegionIds(self):
+        jsn_resp = self.retrieveJson(self.base_url + "/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true")
+        if jsn_resp:
+            if 'result' not in jsn_resp.keys():
+                raise UnexpectedContent(response=jsn_resp)
+           
+            return jsn_resp['result']
+        else:
+            return ''
+    
+    
+    # Given a region id, return sequence ids, belonging to this region
+    # api_key and base_url required for ws request
+    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+    def getSeqIds(self, region_id):
+        request_url = "/region/" + str(region_id) + "/sequence"
+        jsn_resp = self.retrieveJson(self.base_url + request_url)
+        
+        if jsn_resp:
+            if not jsn_resp or 'result' not in jsn_resp.keys():
+                raise UnexpectedContent(response=jsn_resp)
+            
+            return jsn_resp['result']
+        else:
+            return ''
+    
+    # Returns a dictionary of Feature types: featureName: featureId    
+    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+    def getFeatureTypesWithIds(self):
+        jsn_resp = self.retrieveJson(self.base_url + "/featureType")
+        
+        if jsn_resp:
+            if 'result' not in jsn_resp.keys():
+                raise UnexpectedContent(response=jsn_resp)
+            
+            feature_type_ids = jsn_resp['result']
+            feature_types = {}
+            
+            for feat_type_id in feature_type_ids:
+                jsn_resp = self.retrieveJson(self.base_url + "/featureType/" + str(feat_type_id))
+                
+                if jsn_resp:
+                    if 'result' not in jsn_resp.keys():
+                        raise UnexpectedContent(response=jsn_resp)
+                
+                    feature_name = jsn_resp['result']['featureName']
+                    feature_types[feature_name] = feat_type_id 
+                
+            return feature_types
+    
+    
+        else:
+            return ''
+    
+    def createFeatureType(self, featureTypeName, featureTypeDescription = ''):
+        post_data = {"featureType":{"featureDescription":featureTypeDescription,"featureName":featureTypeName }}
+        
+        resp = self.create(self.base_url + '/featureType', json.dumps(post_data))
+        jsn_resp = resp.json()
+        
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return jsn_resp['result']
+
+
+        
+    def deleteFeatureType(self, featureTypeId):
+        request_url = "/featureType/" + str(featureTypeId)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+  
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return jsn_resp
+        
+
+  
+    def getFeature(self, featureId):
+        jsn_resp = self.retrieveJson(self.base_url + "/feature/" + str(featureId))
+        
+        if jsn_resp:
+            if 'result' not in jsn_resp.keys():
+                raise UnexpectedContent(response=jsn_resp)
+            
+            return jsn_resp['result']
+    
+        else:
+            return ''
+
+
+    
+    def insertFeature(self, name, featureTypeId, featureLocations, sequenceId, description='', featureDefault=False):
+        post_data = {
+            "feature": {
+                "name":name,
+                "featureType":{"id":featureTypeId},
+                "featureLocations":featureLocations,
+                "description":description,
+                "featureDefault":featureDefault
+            }
+        }
+        
+        resp = self.create(self.base_url + "/sequence/" + str(sequenceId) + "/feature", json.dumps(post_data))
+                     
+        #print("name: " + name + "  featureTypeId: " + featureTypeId + "   featureLocations: " + featureLocations+"  description: " + description+ "   featureDefault: " + str(featureDefault) + "\n\n")
+        
+        jsn_resp = resp.json()
+        
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return jsn_resp['result']
+
+
+    
+    def deleteFeature(self, featureId):
+        request_url = "/feature/" + str(featureId)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+  
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return jsn_resp
+    
+    
