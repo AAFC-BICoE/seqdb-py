@@ -18,6 +18,7 @@ Other arguments:
 
 prod_url = "***REMOVED***/api/v1"
 local_url = "***REMOVED***:8181/seqdb.web-2.5/api/v1"
+output_file_name = "delete_feature_summary.txt"
 
 
 
@@ -114,6 +115,7 @@ def main(api_key, feature_ids_file_name, base_url):
         except:
             fail_ids.append(feature_id)    
     
+
     
     return success_ids, fail_ids
     
@@ -124,4 +126,14 @@ if __name__ == '__main__':
     sys.path.append("/Users/korolo/git/seqdb-py/api")
     
     seqdb_api_key, features_file_name, base_url = parse_input_args(sys.argv[1:])
-    main(seqdb_api_key, features_file_name, base_url)
+    success_ids,fail_ids = main(seqdb_api_key, features_file_name, base_url)
+
+    output_file = open(output_file_name, 'w')
+    output_file.write("Number of deleted features: %s \nNumber of failed deletes: %s \n" % (len(success_ids), len(fail_ids)))
+    
+    if fail_ids:       
+        output_file.write("Failed to delete features with the following feature ids from SeqDB: \n" )
+        for fid in fail_ids:
+            output_file.write(str(fid) + '\n')
+    
+    output_file.close()
