@@ -122,12 +122,11 @@ def main(api_key, feature_ids_file_name, base_url):
 
 if __name__ == '__main__':
     
-    sys.path.append("/Users/korolo/git/seqdb-py")
-    sys.path.append("/Users/korolo/git/seqdb-py/api")
-    
     seqdb_api_key, features_file_name, base_url = parse_input_args(sys.argv[1:])
     success_ids,fail_ids = main(seqdb_api_key, features_file_name, base_url)
-
+    
+    print("Number of features deleted from Sequence Database: %s \nNumber of failed deletes: %s " % (len(success_ids), len(fail_ids)))
+    print("Base url for Sequence Database web services:   %s" %  base_url)
     output_file = open(output_file_name, 'w')
     output_file.write("Number of deleted features: %s \nNumber of failed deletes: %s \n" % (len(success_ids), len(fail_ids)))
     

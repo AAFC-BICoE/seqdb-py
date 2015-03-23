@@ -77,7 +77,6 @@ def main(api_key, features_file_name, base_url):
     #print "Sending request to: " + base_url
     
     created_feature_ids = []
-    failed_feature_ids = []
     
     # Open an ITSx positions file
     feat_file = ''
@@ -128,7 +127,7 @@ def main(api_key, features_file_name, base_url):
                 fid = seqdbWS.insertFeature(feature_location_pair[0], feature_type_id, location, sequenceId, description=feature_description)
                 created_feature_ids.append(fid)
             except ValueError:
-                failed_feature_ids.append(fid)
+                pass
 
 
         # Write ids of the inserted features into a file
@@ -137,16 +136,14 @@ def main(api_key, features_file_name, base_url):
             output_file.write(str(fid) + '\n')
         output_file.close()
 
-    return created_feature_ids, failed_feature_ids
+    return created_feature_ids
+
     
 
 if __name__ == '__main__':
     seqdb_api_key, features_file_name, base_url = parse_input_args(sys.argv[1:])
     
-    ok_feat_ids, failed_feat_ids = main(seqdb_api_key, features_file_name, base_url)
+    ok_feat_ids = main(seqdb_api_key, features_file_name, base_url)
     
-    print("Loaded %i sequences from Sequence Dababase. \n\n Base url for Sequence Database web services:\n   %s" % (len(ok_feat_ids), base_url))
-    if failed_feat_ids:
-        print("\nFailed to write feaures with the following feature ids to SeqDB: \n")
-        for fid in failed_feat_ids:
-            print(str(fid) + '\n')
+    print("Number of features written to Sequence Dababase:   %i " % len(ok_feat_ids) )
+    print("Base url for Sequence Database web services:   %s" %  base_url)

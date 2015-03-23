@@ -7,6 +7,7 @@ import unittest, os
 from tools import push_seqdb_its_feat, delete_seqdb_features
 from api.seqdbWebService import seqdbWebService
 
+#test_url = 'http://10.117.203.138:8181/seqdb.web-2.5/api/v1'
 test_url = '***REMOVED***:8181/seqdb.web-2.5/api/v1'
 test_api_key = '***REMOVED***'
 

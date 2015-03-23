@@ -133,4 +133,5 @@ if __name__ == '__main__':
    
     seq_ids = main(api_key, base_url)
     
-    print("Loaded %i sequences from Sequence Dababase. \n\n Base url for Sequence Database web services:\n   %s" % (len(seq_ids), base_url))
+    print("Number of sequences loaded from Sequence Dababase:   %s" % len(seq_ids) )
+    print("Base url for Sequence Database web services:   %s" %  base_url)
