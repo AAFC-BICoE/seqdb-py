@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 setup: venv
 
 venv:
