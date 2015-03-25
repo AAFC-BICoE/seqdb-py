@@ -1,0 +1,10 @@
+entrez:
+   email: "your-name@your-institution.org"        # e.g. christopher.lewis@agr.gc.ca
+   query: "(*DAOM*[source] and levesque and btub) and not shotgun"
+
+# TODO permit a list of queries?
+   #query: "(*DAOM*[source] and levesque and btub) and not shotgun"
+
+seqdb:
+   url: "<seqdb-API-URL>"      # e.g. "http://10.117.203.142:10000/seqdb.web/api/v1/"
+   apikey: "<seqdb-API-key>"   # from user profile in SeqDB Web Interface
