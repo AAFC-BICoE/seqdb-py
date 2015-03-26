@@ -5,7 +5,7 @@ Deletes features
 
 @author: korolo
 '''
-import sys, getopt
+import sys, getopt, logging
 from api.seqdbWebService import seqdbWebService
 
 
@@ -17,8 +17,9 @@ Other arguments:
 
 
 prod_url = "***REMOVED***/api/v1"
-local_url = "***REMOVED***:8181/seqdb.web-2.5/api/v1"
-output_file_name = "delete_feature_summary.txt"
+local_url = "http://localhost:8181/seqdb.web-2.5/api/v1"
+output_file_name = "delete_failed_feature_ids.txt"
+log_file_name = "seqdb_delete.log"
 
 
 
@@ -80,7 +81,9 @@ def main(api_key, feature_ids_file_name, base_url):
         feat_file = open(feature_ids_file_name,"r")
     except IOError as e:
         if e.errno == 2:
-            print "Could not open feature ids file <%s>." % feature_ids_file_name
+            logging.error("Could not open feature ids file <%s>." % features_file_name)
+            logging.error(e.message)
+            print "Could not open feature ids file. See log file for details."
             sys.exit(1)
         else:
             raise
@@ -88,9 +91,10 @@ def main(api_key, feature_ids_file_name, base_url):
     seqdbWS = seqdbWebService(api_key, base_url)
     
     feature_ids = []
-    
+    line_number = 0
     # parse the file delete features
     for line in feat_file:
+        line_number = line_number +1
         current_feature_ids = []
         
         if line.__contains__(','):
@@ -104,7 +108,9 @@ def main(api_key, feature_ids_file_name, base_url):
             current_feature_ids = map(int, current_feature_ids)
             feature_ids.extend(current_feature_ids)
         except:
-            pass
+            logging.warning("Line number: %i. Could not parse line '%s' for feature ids. Ignoring." % (line_number,line.replace('\n', '')))
+    
+    logging.info("Identified %i features to be deleted." % len(feature_ids))
     
     success_ids = []
     fail_ids = []        
@@ -115,24 +121,37 @@ def main(api_key, feature_ids_file_name, base_url):
         except:
             fail_ids.append(feature_id)    
     
-
+        
+    output_file = open(output_file_name, 'w')
+    for fid in fail_ids:
+        output_file.write(str(fid) + '\n')        
+    output_file.close()        
     
+    logging.info("Number of features deleted from Sequence Dababase:   %i " % len(success_ids))  
+    logging.info("Number of features which failed to be deleted:   %i " % len(fail_ids))
+    logging.info("Feature ids, which failed to be deleted are written to a file: '%s'" % output_file_name)
+   
     return success_ids, fail_ids
     
 
 if __name__ == '__main__':
+    # Start a log file. filemode='w' overwrites the log for each program run
+    logging.basicConfig(filename=log_file_name, filemode='w', level=logging.DEBUG)
+    
+    logging.info("Script executed with the following command and arguments: %s" % sys.argv)
     
     seqdb_api_key, features_file_name, base_url = parse_input_args(sys.argv[1:])
+    
+    logging.info("Base URL for web services is: '%s'" % base_url)
+    logging.info("File name with feature ids to delete: %s" % features_file_name)
+    
     success_ids,fail_ids = main(seqdb_api_key, features_file_name, base_url)
     
-    print("Number of features deleted from Sequence Database: %s \nNumber of failed deletes: %s " % (len(success_ids), len(fail_ids)))
-    print("Base url for Sequence Database web services:   %s" %  base_url)
-    output_file = open(output_file_name, 'w')
-    output_file.write("Number of deleted features: %s \nNumber of failed deletes: %s \n" % (len(success_ids), len(fail_ids)))
     
-    if fail_ids:       
-        output_file.write("Failed to delete features with the following feature ids from SeqDB: \n" )
-        for fid in fail_ids:
-            output_file.write(str(fid) + '\n')
+    print "Execution complete."
+    print "Number of features deleted from Sequence Dababase:   %i " % len(success_ids)  
+    print "Number of features which failed to be deleted:   %i " % len(fail_ids)  
+    print "Feature ids, which failed to be deleted are written to a file: '%s'" % output_file_name
+    print "Execution log is written to a file: '%s'" % log_file_name
+
     
-    output_file.close()

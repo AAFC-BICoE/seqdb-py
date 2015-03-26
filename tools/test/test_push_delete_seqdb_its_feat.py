@@ -7,8 +7,7 @@ import unittest, os
 from tools import push_seqdb_its_feat, delete_seqdb_features
 from api.seqdbWebService import seqdbWebService
 
-#test_url = 'http://10.117.203.138:8181/seqdb.web-2.5/api/v1'
-test_url = '***REMOVED***:8181/seqdb.web-2.5/api/v1'
+test_url = 'http://localhost:8181/seqdb.web-2.5/api/v1'
 test_api_key = '***REMOVED***'
 
 class Test(unittest.TestCase):
@@ -16,24 +15,14 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         pass
-        #local: "***REMOVED***:8181/seqdb.web-2.5/api/v1"
-        #prod: "***REMOVED***/api/v1"
         
-        self.seqdbWS = seqdbWebService(test_api_key, test_url)
     
     def tearDown(self):
-        try:
-            os.remove('blah.txt')
-        except:
-            pass
         try:
             os.remove(push_seqdb_its_feat.output_file_name)
         except:
             pass
 
-    def testDelete(self):
-        pass
-        #self.seqdbWS.deleteFeature(85888)
         
 
     def testMain(self):    
@@ -51,7 +40,6 @@ class Test(unittest.TestCase):
             
                 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
     
  

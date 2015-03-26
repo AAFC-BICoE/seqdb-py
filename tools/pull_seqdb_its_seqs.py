@@ -10,8 +10,10 @@ python pull_seqdb_its_seqs.py --seqdb_api_key <SeqDB API key>
 -h is help
 -p is to use production URL (uses ***REMOVED*** (Oksana's) machine by default, since we don't have UAT for SeqDB as of this time)
 '''
-import sys, getopt, requests
+import sys, getopt, requests, logging
 from api.seqdbWebService import seqdbWebService
+#from fileinput import filename
+#from pip._vendor.distlib._backport.tarfile import filemode
 
 usage_help_line = """Usage of the script: \npull_seqdb_its_seqs.py -k <SeqDB API key>
 Other arguments:
@@ -20,9 +22,10 @@ Other arguments:
    -u <url> specify base url for web services requests"""
 
 prod_url = "***REMOVED***/api/v1"
-local_url = "***REMOVED***:8181/seqdb.web-2.5/api/v1"
+local_url = "http://localhost:8181/seqdb.web-2.5/api/v1"
 # file name where the received sequences will be stores
-output_file_name = 'seqdb_ITS_seqs.fasta'
+output_file_name = "seqdb_ITS_seqs.fasta"
+log_file_name = "seqdb_pull.log"
 
 
 
@@ -75,14 +78,22 @@ def main(api_key,base_url):
     try:
         its_region_ids = seqdbWS.getItsRegionIds()
     except requests.exceptions.ConnectionError as e:
-        print "Could not connect to Sequence DB. \n", e.message
+        logging.error("Could not connect to Sequence DB. \n")
+        logging.error(e.message)
+        print("Could not connect to Sequence DB. See log file for details.")
         sys.exit(1)
     except requests.exceptions.ReadTimeout as e:
-        print "Connection too slow for getting data from Sequence DB. \n"
+        logging.error("Connection too slow for getting data from Sequence DB. \n")
+        logging.error(e.message)
+        print "Connection too slow for getting data from Sequence DB. See log file for details."
         sys.exit(1)
     except requests.exceptions.HTTPError as e:
-        print "HTTP error when getting region ids from Sequence DB. \n", e.message
+        logging.error("HTTP error when getting region ids from Sequence DB. \n")
+        logging.error(e.message)
+        print "HTTP error when getting region ids from Sequence DB. See log file for details."
         sys.exit(1)
+        
+    logging.info("Number of ITS regions retrieved: %i \n" % len(its_region_ids))
 
    
    
@@ -93,45 +104,71 @@ def main(api_key,base_url):
             curr_seq_ids = seqdbWS.getSeqIds(region_id)
             its_seq_ids.extend(curr_seq_ids)
         except requests.exceptions.ConnectionError as e:
-            print "Could not connect to Sequence DB. \n", e.message
+            logging.error("Could not connect to Sequence DB. \n")
+            logging.error(e.message)
+            print "Could not connect to Sequence DB. See log file for details."
             sys.exit(1)
         except requests.exceptions.ReadTimeout as e:
-            print "Connection too slow for getting data from Sequence DB. \n"
+            logging.error("Connection too slow for getting data from Sequence DB. \n")
+            logging.error(e.message)
+            print "Connection too slow for getting data from Sequence DB. See log file for details."
             sys.exit(1)
         except requests.exceptions.HTTPError as e:
-            print "HTTP error when getting region ids from Sequence DB. \n", e.message
+            logging.error("HTTP error when getting region ids from Sequence DB. \n")
+            logging.error(e.message)
+            print "HTTP error when getting region ids from Sequence DB. See log file for details."
             sys.exit(1)
 
+    logging.info("Number of ITS sequences retrieved: %i \n" % len(its_seq_ids))
      
     # Get fasta sequences based on ids and write to a file 
     output_file = open(output_file_name, 'w')
     
+    success_ids = []
     for seq_id in its_seq_ids:
         try:
             # Request sequence in fasto format from SeqDB:
             fastaSequence = seqdbWS.getFastaSeq(seq_id)
             output_file.write(fastaSequence)
+            success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
-            print "Could not connect to Sequence DB. \n", e.message
+            logging.error("Could not connect to Sequence DB. \n")
+            logging.error(e.message)
+            print "Could not connect to Sequence DB. See log file for details."
             sys.exit(1)
         except requests.exceptions.ReadTimeout as e:
-            print "Connection too slow for getting data from Sequence DB. \n"
+            logging.error("Connection too slow for getting data from Sequence DB. \n")
+            logging.error(e.message)
+            print "Connection too slow for getting data from Sequence DB. See log file for details."
             sys.exit(1)
         except requests.exceptions.HTTPError as e:
-            print "HTTP error when getting region ids from Sequence DB. \n", e.message
+            logging.error("HTTP error when getting region ids from Sequence DB. \n")
+            logging.error(e.message)
+            print "HTTP error when getting region ids from Sequence DB. See log file for details."
             sys.exit(1)
-
      
     output_file.close()   
-    return its_seq_ids
+    
+    logging.info("Written %s sequences to a file: %s" % (len(success_ids), output_file.name) )
+    
+    return success_ids
     
 
 
 if __name__ == '__main__':
-     # Parse command line to get seqdb api key (necessary to request seqDB web services) and base url for web services requests
+    # Start a log file. filemode='w' overwrites the log for each program run
+    logging.basicConfig(filename=log_file_name, filemode='w', level=logging.DEBUG)
+    
+    logging.info("Script executed with the following command and arguments: %s" % sys.argv)
+    
+    # Parse command line to get seqdb api key (necessary to request seqDB web services) and base url for web services requests
     api_key, base_url = parse_input_args(sys.argv[1:])
+    
+    logging.info("Base URL for web services is: '%s'" % base_url)
    
     seq_ids = main(api_key, base_url)
     
-    print("Number of sequences loaded from Sequence Dababase:   %s" % len(seq_ids) )
-    print("Base url for Sequence Database web services:   %s" %  base_url)
+    print "Execution complete."
+    print "Number of sequences loaded from Sequence Dababase:  %s" % len(seq_ids) 
+    print "Sequences written to a file: '%s'" % output_file_name
+    print "Execution log is written to a file: '%s'" % log_file_name
