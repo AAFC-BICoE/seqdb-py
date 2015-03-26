@@ -11,27 +11,17 @@ def load_config():
     except yaml.YAMLError, exc:
         print "Error in configuration file:", exc
 
-# Try to extract the strain name if there is a feature table
-# The strainName seems to generally contain the collection code (e.g. DAOM_XXXXXX)
-def extract_strain_name(record):
-    strainName = ""
-    if record[0]['GBSeq_feature-table'] == []:
-        print "no feature-table \n"
-    else:
-        featuresTable = record[0]['GBSeq_feature-table']
-        features = featuresTable[0]['GBFeature_quals']
-        for feature in features:
-            qualName = feature['GBQualifier_name']
-            qualValue = feature['GBQualifier_value']
-            if qualName == 'strain':
-                strainName = qualValue.replace(" ", "_").replace(";","")
-
-    return strainName
-
 def pretty_print_json(j, message=None):
     if message != None:
         print message
     print json.dumps(j, sort_keys=True, indent=4)
+
+def format_sequence_name(genbankId, record):
+#    name = "gi|" + str(genbankId) + "|"
+#    name = name + "gb|" + record[0]["GBSeq_accession-version"] + "|" 
+#    name = name + record[0]["GBSeq_definition"].replace(", ", "_").replace("; ", "_").replace(" ", "_").replace(";","").replace(",","")
+#    return name
+    return record[0]["GBSeq_definition"]
 
 def main(arv):
     config = load_config()
@@ -74,9 +64,7 @@ def main(arv):
             handle.close()
             pretty_print_json(record[0], message="Retrieved Genbank Record: ")
 
-            strainName = extract_strain_name(record)
-
-            seq_name = "gi:" + str(genbankId) + "|" + record[0]["GBSeq_primary-accession"] + "|" + record[0]["GBSeq_organism"].replace(" ", "_") + "_" + strainName
+            seq_name = format_sequence_name(genbankId, record)
             sequence = record[0]["GBSeq_sequence"]
             additional = {
                     'genBankGI': genbankId,
