@@ -73,20 +73,40 @@ class seqdbWebService:
         
         return resp
     
-    def getJSONConsensusSequencesByName(self, name):
+    def getJSONConsensusSequenceIds(self, params=None):
+        jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
+
+        if 'count' and 'sortColum' and 'limit' and 'offset' and 'message' and 'statusCode' and 'sortOrder' not in jsn_resp:
+            raise UnexpectedContent(response=jsn_resp)
+
+        if jsn_resp['count'] > 0 and ('result' not in jsn_resp.keys() or not jsn_resp['result']):
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp
+
+    def getJSONConsensusSequenceIdsByName(self, name):
         params = {'filterName':'sequence.name',
                   'filterValue':name,
                   'filterOperator':'and',
                   'filterWildcard':'true'}
-        jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
-        if 'result' not in jsn_resp.keys() or not jsn_resp['result']:
-            raise UnexpectedContent(response=jsn_resp)
 
-        # TODO further response validation
+        return self.getJSONConsensusSequenceIds(params)
 
-        return jsn_resp
+    def getJSONConsensusSequenceIdsByGI(self, gi):
+            params = {'filterName':'sequence.genBankGI',
+                      'filterValue':gi,
+                      'filterOperator':'and',
+                      'filterWildcard':'false'
+                    }
 
-    # TODO verify which payload values are required
+            jsn_resp = self.getJSONConsensusSequenceIds(params)
+
+            if jsn_resp['count'] > 1:
+                raise SystemError("More than one record associated with gi, which should be unique")
+
+            return jsn_resp
+
+    # TODO verify which payload values are required by the SeqDB WS API
     def createConsensusSequence(self, name, sequence, qualities=None, seqType="N", readNum=0, additional=None):
         post_data = { 
                 'consensus': {
@@ -106,7 +126,7 @@ class seqdbWebService:
         if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
             raise UnexpectedContent(response=jsn_resp)
 
-        return jsn_resp['result']
+        return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
 
     # TODO Not tested
     def deleteConsensusSequence(self, name, sequence, qualities=None, seqType="N", readNum=0, additional=None):
@@ -118,10 +138,7 @@ class seqdbWebService:
         
         return jsn_resp
             
-    # Gets sequence from SeqDB and returns it in a fasta format with a unique header.
-    # Note, the fast formatting is done here, instead of using seqdb fasta web service request 
-    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
-    def getFastaSeqPlus(self, seq_id):
+    def getJSONSeq(self, seq_id):
         jsn_resp = self.retrieveJson(self.base_url + "/sequence/" + str(seq_id))
         if 'result' not in jsn_resp.keys() or not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
@@ -130,9 +147,15 @@ class seqdbWebService:
         if 'seq' not in jsn_seq.keys() or 'name' not in jsn_seq.keys():
             raise UnexpectedContent(response=jsn_resp)
         
+        return jsn_seq
+
+    # Gets sequence from SeqDB and returns it in a fasta format with a unique header.
+    # Note, the fast formatting is done here, instead of using seqdb fasta web service request
+    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError
+    def getFastaSeqPlus(self, seq_id):
+        jsn_seq = getJSONSeq(seq_id)
         # TODO Use BioPython to format
         fasta_seq =  '>' + jsn_seq['name'] + '|seqdbId:' + str(seq_id) + '\n' + jsn_seq['seq'] + '\n';
-        
         return fasta_seq
        
     # Gets sequence in fasta format (SeqDB fasta request)
@@ -264,8 +287,6 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
         
         return jsn_resp['result']
-
-
     
     def deleteFeature(self, featureId):
         request_url = "/feature/" + str(featureId)
