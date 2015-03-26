@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import sys, requests, json, yaml
+import sys, requests, json, yaml, urllib
 from api.seqdbWebService import seqdbWebService
 from Bio import Entrez
 
@@ -23,6 +23,9 @@ def format_sequence_name(genbankId, record):
 #    return name
     return record[0]["GBSeq_definition"]
 
+def format_tracefile_name(**keywds):
+    return "?" + urllib.urlencode(keywds)
+    
 def main(arv):
     config = load_config()
     seqdbWS = seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
@@ -66,7 +69,12 @@ def main(arv):
 
             seq_name = format_sequence_name(genbankId, record)
             sequence = record[0]["GBSeq_sequence"]
+            # Treating base URL as dir
+            tracefileDir = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi' 
+            tracefileName = format_tracefile_name(db="nucleotide", id=genbankId, rettype="gb", retmode="xml")
             additional = {
+                    'tracefileDir': tracefileDir,    # TODO check tracefile name parameter; not working
+                    'tracefileName': tracefileName,  # TODO check tracefile name parameter; not working
                     'genBankGI': genbankId,
                     'genBankAccession': record[0]["GBSeq_primary-accession"], 
                     'genBankVersion': record[0]["GBSeq_accession-version"],
