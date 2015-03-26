@@ -94,13 +94,6 @@ def main(arv):
             r = seqdbWS.getJSONSeq(seqdb_id)
             pretty_print_json(r, message="Inserted record:")
 
-            # could also/instead retrive by id
-            #    extract id of record and retrieve directly
-
-            # delete the sequence after adding it to cleanup
-            # not tested
-            #   seqdbWS.deleteConsensusSequence(seqdb_id)
-
         start += retrieve
 
 if __name__ == "__main__":
