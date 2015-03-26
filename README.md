@@ -15,7 +15,7 @@ This repo contains Python scripts and modules that extend Sequence Database func
 
 ### Running ###
 * Install python requests (preferably in virtual env):
-   > pip install requests
+   > pip install -r requirements.txt
 * Add project dir to PYTHONPATH
    > PYTHONPATH=“/path/to/project_dir:$PYTHONPATH"
    > export PYTHONPATH
