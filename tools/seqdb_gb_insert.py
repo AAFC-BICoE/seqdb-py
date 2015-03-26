@@ -5,11 +5,11 @@ from api.seqdbWebService import seqdbWebService
 from Bio import Entrez
 
 def load_config():
-        try:
-                config = yaml.load(file('config.yaml', 'r'))
-                return config
-        except yaml.YAMLError, exc:
-                print "Error in configuration file:", exc
+    try:
+        config = yaml.load(file('config.yaml', 'r'))
+        return config
+    except yaml.YAMLError, exc:
+        print "Error in configuration file:", exc
 
 def main(arv):
     config = load_config()
