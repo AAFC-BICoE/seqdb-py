@@ -29,10 +29,10 @@ class seqdbWebService:
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
     # @request_url": full request url
     # Returns response (still need to format it to JSon, etc.) or nothing if resource was not found 
-    def retrieve(self, request_url):
+    def retrieve(self, request_url, params=None):
         
         req_header = { 'apikey': self.api_key }
-        resp = requests.get(request_url, headers=req_header)
+        resp = requests.get(request_url, headers=req_header, params=params)
         
         if resp.status_code == 404:
             resp = ''
@@ -46,8 +46,8 @@ class seqdbWebService:
     # Submits a request to SeqDB web services
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
     # Returns json formatted object
-    def retrieveJson(self, request_url):
-        resp = self.retrieve(request_url)
+    def retrieveJson(self, request_url, params=None):
+        resp = self.retrieve(request_url, params=params)
         if resp:
             return json.loads(resp.text)
         else:
@@ -73,8 +73,51 @@ class seqdbWebService:
         
         return resp
     
-      
-    
+    def getJSONConsensusSequencesByName(self, name):
+        params = {'filterName':'sequence.name',
+                  'filterValue':name,
+                  'filterOperator':'and',
+                  'filterWildcard':'true'}
+        jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
+        if 'result' not in jsn_resp.keys() or not jsn_resp['result']:
+            raise UnexpectedContent(response=jsn_resp)
+
+        # TODO further response validation
+
+        return jsn_resp
+
+    # TODO verify which payload values are required
+    def createConsensusSequence(self, name, sequence, qualities=None, seqType="N", readNum=0, additional=None):
+        post_data = { 
+                'consensus': {
+                    'name': name,
+                    'seq': sequence,
+                    'seqType': seqType,
+                    'readNum': readNum,
+                    },
+                }
+
+        if additional != None:
+           post_data['consensus'].update(additional)
+
+        resp = self.create(self.base_url + "/consensus", json.dumps(post_data))
+        jsn_resp = resp.json()
+
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp['result']
+
+    # TODO Not tested
+    def deleteConsensusSequence(self, name, sequence, qualities=None, seqType="N", readNum=0, additional=None):
+        request_url = "/consensus/" + str(consensus_id)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+  
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return jsn_resp
+            
     # Gets sequence from SeqDB and returns it in a fasta format with a unique header.
     # Note, the fast formatting is done here, instead of using seqdb fasta web service request 
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
@@ -87,6 +130,7 @@ class seqdbWebService:
         if 'seq' not in jsn_seq.keys() or 'name' not in jsn_seq.keys():
             raise UnexpectedContent(response=jsn_resp)
         
+        # TODO Use BioPython to format
         fasta_seq =  '>' + jsn_seq['name'] + '|seqdbId:' + str(seq_id) + '\n' + jsn_seq['seq'] + '\n';
         
         return fasta_seq
@@ -102,7 +146,13 @@ class seqdbWebService:
     # Get region IDs of ITS sequences
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
     def getItsRegionIds(self):
-        jsn_resp = self.retrieveJson(self.base_url + "/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true")
+        params = { 
+                'filterName': 'name', 
+                'filterValue': 'ITS', 
+                'filterOperator': 'and',
+                'filterWildcard': 'true' 
+                }
+        jsn_resp = self.retrieveJson(self.base_url + "/region", params)
         if jsn_resp:
             if 'result' not in jsn_resp.keys():
                 raise UnexpectedContent(response=jsn_resp)
@@ -110,8 +160,8 @@ class seqdbWebService:
             return jsn_resp['result']
         else:
             return ''
-    
-    
+        
+        
     # Given a region id, return sequence ids, belonging to this region
     # api_key and base_url required for ws request
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
