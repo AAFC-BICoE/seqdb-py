@@ -11,6 +11,28 @@ def load_config():
     except yaml.YAMLError, exc:
         print "Error in configuration file:", exc
 
+# Try to extract the strain name if there is a feature table
+# The strainName seems to generally contain the collection code (e.g. DAOM_XXXXXX)
+def extract_strain_name(record):
+    strainName = ""
+    if record[0]['GBSeq_feature-table'] == []:
+        print "no feature-table \n"
+    else:
+        featuresTable = record[0]['GBSeq_feature-table']
+        features = featuresTable[0]['GBFeature_quals']
+        for feature in features:
+            qualName = feature['GBQualifier_name']
+            qualValue = feature['GBQualifier_value']
+            if qualName == 'strain':
+                strainName = qualValue.replace(" ", "_").replace(";","")
+
+    return strainName
+
+def pretty_print_json(j, message=None):
+    if message != None:
+        print message
+    print json.dumps(j, sort_keys=True, indent=4)
+
 def main(arv):
     config = load_config()
     seqdbWS = seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
@@ -46,35 +68,13 @@ def main(arv):
                 print "Sequence for gi: %s already exists in SeqDB. Skipping." % (genbankId)
                 continue
 
-            # retrieve genank record in the returned list of ids
+            # retrieve genbank record
             handle = Entrez.efetch(db="nucleotide", id=genbankId, rettype="gb", retmode="xml")
             record = Entrez.read(handle)
             handle.close()
-#           print(json.dumps(record[0], sort_keys=True, indent=4))
+            pretty_print_json(record[0], message="Retrieved Genbank Record: ")
 
-            # Try to extract the strain name if there is a feature table
-            # The strainName seems to generally contain the collection code (e.g. DAOM_XXXXXX)
-            strainName = ""
-            if record[0]['GBSeq_feature-table'] == []:
-                print "no feature-table \n"
-            else:
-                featuresTable = record[0]['GBSeq_feature-table']
-                features = featuresTable[0]['GBFeature_quals']
-                for feature in features:
-                    qualName = feature['GBQualifier_name']
-                    qualValue = feature['GBQualifier_value']
-                    if qualName == 'strain':
-                        strainName = qualValue.replace(" ", "_").replace(";","")                    
-
-            # display record to users for validation purposes
-            print "gi: " + genbankId + "\n" + \
-                "accession: " + record[0]["GBSeq_primary-accession"] + "\n" + \
-                "version: " + record[0]["GBSeq_accession-version"] + "\n" + \
-                "description: " + record[0]["GBSeq_definition"] + "\n" + \
-                "sequence: " + record[0]["GBSeq_sequence"] + "\n" + \
-                "organism: " + record[0]["GBSeq_organism"].replace(" ", "_") + "\n" + \
-                "strain: " + strainName + "\n"
-            
+            strainName = extract_strain_name(record)
 
             seq_name = "gi:" + str(genbankId) + "|" + record[0]["GBSeq_primary-accession"] + "|" + record[0]["GBSeq_organism"].replace(" ", "_") + "_" + strainName
             sequence = record[0]["GBSeq_sequence"]
@@ -84,12 +84,15 @@ def main(arv):
                     'genBankVersion': record[0]["GBSeq_accession-version"],
                     'submittedToInsdc': 'true'
                     }
+            tmp = {'name': seq_name, 'sequence': sequence}
+            tmp.update(additional)
+            pretty_print_json(tmp, "Creating consensus (non-default values): ")
             seqdb_id,code,message = seqdbWS.createConsensusSequence(seq_name, sequence, additional=additional)
             print "Create consensus: Id: %i, Status: %i, Message: %s" % (seqdb_id, code, message)
 
             # retrieve inserted record and display to users for validation purposes
             r = seqdbWS.getJSONSeq(seqdb_id)
-            print json.dumps(r)
+            pretty_print_json(r, message="Inserted record:")
 
             # could also/instead retrive by id
             #    extract id of record and retrieve directly
