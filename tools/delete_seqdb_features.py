@@ -6,7 +6,7 @@ Deletes features
 @author: korolo
 '''
 import sys, getopt, logging
-from api.seqdbWebService import seqdbWebService
+from api.seqdbWebService import seqdbWebService, UnexpectedContent
 
 
 usage_help_line = """Usage of the script: \ndelete_seqdb_feature.py -k <SeqDB API key> -f <feature ids file name>
@@ -118,6 +118,9 @@ def main(api_key, feature_ids_file_name, base_url):
         try:
             seqdbWS.deleteFeature(feature_id)
             success_ids.append(feature_id)
+        except UnexpectedContent as e:
+            print e
+            sys.exit(1)
         except:
             fail_ids.append(feature_id)    
     

@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        pass
+        self.seqdbWS = seqdbWebService(test_api_key, test_url)
         
     
     def tearDown(self):
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
 
     def testMain(self):    
       
-        ok_feature_ids, failed_feature_ids = push_seqdb_its_feat.main(test_api_key,"data/test.positions.txt", test_url )
+        ok_feature_ids = push_seqdb_its_feat.main(test_api_key,"data/test.positions.txt", test_url )
         
         self.assertEqual(6, len(ok_feature_ids), "Expected 6 feature ids, but created %i feature ids." % len(ok_feature_ids))
         
@@ -41,5 +41,3 @@ class Test(unittest.TestCase):
                 
 if __name__ == "__main__":
     unittest.main()
-    
- 

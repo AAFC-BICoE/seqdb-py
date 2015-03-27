@@ -4,7 +4,7 @@ Created on Mar 5, 2015
 @author: korolo
 '''
 import sys, getopt, logging
-from api.seqdbWebService import seqdbWebService
+from api.seqdbWebService import seqdbWebService, UnexpectedContent
 #from unittest.test.support import LoggingResult
 
 
@@ -142,15 +142,18 @@ def main(api_key, features_file_name, base_url):
                 location = [{"start":location[0],"end":location[1],"frame":1,"strand":1}]
                 fid = seqdbWS.insertFeature(feature_location_pair[0], feature_type_id, location, sequenceId, description=feature_description)
                 created_feature_ids.append(fid)
+            except UnexpectedContent as e:
+                print e
+                sys.exit(1)
             except:
                 logging.warning("File token '%s' is not in the expected format of <feature name>:<position>. Ignoring." % itsx_feature_token)
 
 
-        # Write ids of the inserted features into a file
-        output_file = open(output_file_name, 'w')
-        for fid in created_feature_ids:
-            output_file.write(str(fid) + '\n')
-        output_file.close()
+    # Write ids of the inserted features into a file
+    output_file = open(output_file_name, 'w')
+    for fid in created_feature_ids:
+        output_file.write(str(fid) + '\n')
+    output_file.close()
   
     logging.info("Number of features written to Sequence Dababase:   %i " % len(created_feature_ids))  
     logging.info("Created feature ids are written to a file: '%s'" % output_file_name)

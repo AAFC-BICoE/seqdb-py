@@ -11,7 +11,7 @@ python pull_seqdb_its_seqs.py --seqdb_api_key <SeqDB API key>
 -p is to use production URL (uses ***REMOVED*** (Oksana's) machine by default, since we don't have UAT for SeqDB as of this time)
 '''
 import sys, getopt, requests, logging
-from api.seqdbWebService import seqdbWebService
+from api.seqdbWebService import seqdbWebService, UnexpectedContent
 #from fileinput import filename
 #from pip._vendor.distlib._backport.tarfile import filemode
 
@@ -92,6 +92,9 @@ def main(api_key,base_url):
         logging.error(e.message)
         print "HTTP error when getting region ids from Sequence DB. See log file for details."
         sys.exit(1)
+    except UnexpectedContent as e:
+        print e
+        sys.exit(1)
         
     logging.info("Number of ITS regions retrieved: %i \n" % len(its_region_ids))
 
@@ -118,6 +121,10 @@ def main(api_key,base_url):
             logging.error(e.message)
             print "HTTP error when getting region ids from Sequence DB. See log file for details."
             sys.exit(1)
+        except UnexpectedContent as e:
+            print e
+            sys.exit(1)
+            
 
     logging.info("Number of ITS sequences retrieved: %i \n" % len(its_seq_ids))
      
@@ -145,6 +152,9 @@ def main(api_key,base_url):
             logging.error("HTTP error when getting region ids from Sequence DB. \n")
             logging.error(e.message)
             print "HTTP error when getting region ids from Sequence DB. See log file for details."
+            sys.exit(1)
+        except UnexpectedContent as e:
+            print e
             sys.exit(1)
      
     output_file.close()   
