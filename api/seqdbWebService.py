@@ -6,11 +6,17 @@ Created on Mar 4, 2015
 Sequence DB Web Services module
 '''
 
-import requests, json
+import requests, json, logging
 
 
 class UnexpectedContent(requests.exceptions.RequestException):
-    """Unexpected content of the Web Services response."""
+    error_msg = "Unexpected content of the Web Services response: "
+    def __init__(self, response):
+        self.response = response
+        logging.error(self.error_msg + str(response))
+    def __str__(self):
+        return repr(self.error_msg + str(self.response))
+
 
 
 
