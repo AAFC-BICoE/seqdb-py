@@ -26,6 +26,14 @@ def format_sequence_name(genbankId, record):
 def format_tracefile_name(**keywds):
     return "?" + urllib.urlencode(keywds)
     
+def extract_gene_names(record):
+    genes = {}
+    for feature in record["GBSeq_feature-table"]:
+        if feature["GBFeature_key"] == "gene":
+            for qualifier in feature["GBFeature_quals"]:
+                genes[qualifier["GBQualifier_value"]] = 1
+    return genes
+
 def main(arv):
     config = load_config()
     seqdbWS = seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
@@ -66,6 +74,10 @@ def main(arv):
             record = Entrez.read(handle)
             handle.close()
             pretty_print_json(record[0], message="Retrieved Genbank Record: ")
+
+            genes = extract_gene_names(record[0])
+            for key, value in genes.iteritems():
+                print "Found gene: %s" % (key)
 
             seq_name = format_sequence_name(genbankId, record)
             sequence = record[0]["GBSeq_sequence"]
