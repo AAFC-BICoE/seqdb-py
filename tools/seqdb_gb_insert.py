@@ -73,8 +73,8 @@ def main(arv):
             tracefileDir = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi' 
             tracefileName = format_tracefile_name(db="nucleotide", id=genbankId, rettype="gb", retmode="xml")
             additional = {
-                    'tracefileDir': tracefileDir,    # TODO check tracefile name parameter; not working
-                    'tracefileName': tracefileName,  # TODO check tracefile name parameter; not working
+                    'chromatDir': tracefileDir,
+                    'chromatName': tracefileName,
                     'genBankGI': genbankId,
                     'genBankAccession': record[0]["GBSeq_primary-accession"], 
                     'genBankVersion': record[0]["GBSeq_accession-version"],
