@@ -175,12 +175,18 @@ class seqdbWebService:
     # Get region IDs of ITS sequences
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
     def getItsRegionIds(self):
+        return self.getRegionIdsByName("ITS")
+
+    def getRegionIdsByName(self, name):
         params = { 
                 'filterName': 'name', 
-                'filterValue': 'ITS', 
+                'filterValue': name, 
                 'filterOperator': 'and',
-                'filterWildcard': 'true' 
+                'filterWildcard': 'false' 
                 }
+        return self.getRegionIds(params)
+
+    def getRegionIds(self, params):
         jsn_resp = self.retrieveJson(self.base_url + "/region", params)
         if jsn_resp:
             if 'result' not in jsn_resp.keys():
@@ -189,7 +195,21 @@ class seqdbWebService:
             return jsn_resp['result']
         else:
             return ''
-        
+
+    def createRegion(self, name, description):
+        # TODO Question requirement for gene region to be associated with a group
+        post_data = {"region":{"description":description, "group":{"id":1}, "name":name }}
+ 
+        resp = self.create(self.base_url + '/region', json.dumps(post_data))
+        jsn_resp = resp.json()
+
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp['result']
+
+
+
         
     # Given a region id, return sequence ids, belonging to this region
     # api_key and base_url required for ws request

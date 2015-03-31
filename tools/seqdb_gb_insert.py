@@ -34,6 +34,19 @@ def extract_gene_names(record):
                 genes[qualifier["GBQualifier_value"]] = 1
     return genes
 
+def check_region(seqdbWS, gene, create=False):
+    region_id = None
+    region_ids = seqdbWS.getRegionIdsByName(gene)
+    if len(region_ids) == 0 and create == True:
+        seqdbWS.createRegion(gene, "GenBank Gene: %s" %(gene))
+    elif len(region_ids) == 1:
+        region_id = region_ids[0]
+    else:
+        1==1
+        # TODO log warning about lack of support for duplicate region name...
+
+    return region_id
+
 def main(arv):
     config = load_config()
     seqdbWS = seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
@@ -77,6 +90,7 @@ def main(arv):
 
             genes = extract_gene_names(record[0])
             for key, value in genes.iteritems():
+                check_region(seqdbWS, key, create=True)
                 print "Found gene: %s" % (key)
 
             seq_name = format_sequence_name(genbankId, record)
