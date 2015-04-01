@@ -8,3 +8,37 @@ entrez:
 seqdb:
     url: "<seqdb-API-URL>"       # e.g. "http://10.117.203.142:10000/seqdb.web/api/v1/"
     apikey: "<seqdb-API-key>"    # from user profile in SeqDB Web Interface
+
+http_connect:
+    debug_level: 0 # 0 - No output, 1 - Output to stderr
+
+logging:
+
+    version: 1
+    disable_existing_loggers: true
+
+    formatters:
+        simpleFormater:
+            format: '%(asctime)s - %(module)s - %(levelname)s: %(message)s'
+            datefmt: '%Y/%m/%d %H:%M:%S'
+
+    handlers:
+        console:
+            class: logging.StreamHandler
+            formatter: simpleFormater
+            level: WARN
+            stream: ext://sys.stdout
+        file:
+            class : logging.FileHandler
+            formatter: simpleFormater
+            level: INFO
+            filename: tools.log
+        debug:
+            class : logging.FileHandler
+            formatter: simpleFormater
+            level: DEBUG
+            filename: tools_debug.log
+
+    root:
+        level: INFO # Not producing debug info by default
+        handlers: [console, file, debug]

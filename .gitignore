@@ -3,3 +3,5 @@
 *.pyc
 venv
 config.yaml
+tools.log
+tools_debug.log
