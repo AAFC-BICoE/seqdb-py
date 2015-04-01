@@ -32,13 +32,13 @@ def extract_gene_names(record):
         if feature["GBFeature_key"] == "gene":
             for qualifier in feature["GBFeature_quals"]:
                 genes[qualifier["GBQualifier_value"]] = 1
-    return genes
+    return genes.keys()
 
 def check_region(seqdbWS, gene, create=False):
     region_id = None
     region_ids = seqdbWS.getRegionIdsByName(gene)
     if len(region_ids) == 0 and create == True:
-        seqdbWS.createRegion(gene, "GenBank Gene: %s" %(gene))
+        region_id = seqdbWS.createRegion(gene, "GenBank Gene: %s" %(gene))
     elif len(region_ids) == 1:
         region_id = region_ids[0]
     else:
@@ -88,10 +88,15 @@ def main(arv):
             handle.close()
             pretty_print_json(record[0], message="Retrieved Genbank Record: ")
 
+            seqdb_gene_region = None
             genes = extract_gene_names(record[0])
-            for key, value in genes.iteritems():
-                check_region(seqdbWS, key, create=True)
-                print "Found gene: %s" % (key)
+            if len(genes) > 1:
+                1==1
+                # TODO log warning about lack of support for targets containing
+                # multiple genes
+            elif len(genes) == 1:
+                seqdb_gene_region = check_region(seqdbWS, genes[0], create=True)
+                print "Found gene: %s, SeqDB region id: %i" % (genes[0], seqdb_gene_region)
 
             seq_name = format_sequence_name(genbankId, record)
             sequence = record[0]["GBSeq_sequence"]
@@ -110,7 +115,18 @@ def main(arv):
             tmp.update(additional)
             pretty_print_json(tmp, "Creating consensus (non-default values): ")
             seqdb_id,code,message = seqdbWS.createConsensusSequence(seq_name, sequence, additional=additional)
-            print "Create consensus: Id: %i, Status: %i, Message: %s" % (seqdb_id, code, message)
+            print "Created consensus: Id: %i, Status: %i, Message: %s" % (seqdb_id, code, message)
+
+            if seqdb_gene_region != None:
+                seqsource = {
+                        "seqSource": {
+                            "region": {
+                                "id": seqdb_gene_region,
+                                }
+                            }
+                        }
+                region_id,code,message = seqdbWS.updateSeqSource(seqdb_id, seqsource)
+                print "Updated SeqSource: Id: %i, Status: %i, Message: %s" % (seqdb_id, code, message)
 
             # retrieve inserted record and display to users for validation purposes
             r = seqdbWS.getJSONSeq(seqdb_id)

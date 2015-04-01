@@ -59,10 +59,15 @@ class seqdbWebService:
         else:
             return resp
     
-    
+    def update(self, request_url, json_data):
+        req_header = { 'apikey': self.api_key, 'Content-Type': 'application/json' }
+        resp = requests.put(request_url, headers=req_header, data=json_data)
+
+        resp.raise_for_status()
+
+        return resp
     
     def create(self, request_url, json_data):
-        
         req_header = { 'apikey': self.api_key, 'Content-Type': 'application/json' }
         resp = requests.post(request_url, headers=req_header, data=json_data)  #(url, data, json)
         
@@ -127,6 +132,15 @@ class seqdbWebService:
            post_data['consensus'].update(additional)
 
         resp = self.create(self.base_url + "/consensus", json.dumps(post_data))
+        jsn_resp = resp.json()
+
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+
+    def updateSeqSource(self, seqdb_id, params):
+        resp = self.update(self.base_url + "/sequence/" + str(seqdb_id) + "/seqSource", json.dumps(params))
         jsn_resp = resp.json()
 
         if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
