@@ -149,7 +149,7 @@ class seqdbWebService:
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
 
     # TODO Not tested
-    def deleteConsensusSequence(self, name, sequence, qualities=None, seqType="N", readNum=0, additional=None):
+    def deleteConsensusSequence(self, consensus_id):
         request_url = "/consensus/" + str(consensus_id)
         jsn_resp = self.delete(self.base_url + request_url).json()
   
