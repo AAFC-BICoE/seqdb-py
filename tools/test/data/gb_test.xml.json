@@ -1,0 +1,2013 @@
+{
+    "GBSeq_accession-version": "AF281475.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea perennans strain RGR 90.0123; DAOM 227093 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281475.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea perennans"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "RGR 90.0123; DAOM 227093"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:143941"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "USA: WA"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281475.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281475.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281475.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTCCCATCCCCCAAGGTCTCTGACACCGTTGTCGAGCCATATAACGCCACTCTCTCCGTCCATCAATTGGTTGAGAACTCTGATGAGACCTTCTGTATCGACAACGAGGCTCTTTACGACATCTGCATGAGAACCCTCAAGCTCAACAACCCATCTTATGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCCGATTCCCAGGTCAACTCAACTCCGATCTTCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTCCCAGAGTTGACACAACAGATGTTCGACCCAAAGAACATGATGGCTGCTTCTGACTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTTTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTTCAGAACAAGAACAACTCCTACTTCGTCGAGTGGATCCCCAACAATGTCCAGACTGCTCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281475.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281475.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69162.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579207"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281475", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea perennans", 
+    "GBSeq_other-seqids": [
+        "gb|AF281475.1|", 
+        "gi|14579206"
+    ], 
+    "GBSeq_primary-accession": "AF281475", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgtcccatcccccaaggtctctgacaccgttgtcgagccatataacgccactctctccgtccatcaattggttgagaactctgatgagaccttctgtatcgacaacgaggctctttacgacatctgcatgagaaccctcaagctcaacaacccatcttatggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctccgattcccaggtcaactcaactccgatcttcgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgtcccagagttgacacaacagatgttcgacccaaagaacatgatggctgcttctgacttccgtaacggtcgctacttgacttgctctgctatcttgtaggttttattactttcttatagtgctactcttgctaacattttaatagccgtggtaaggtttccatgaaggaggttgaggaccagatgcgcaatgttcagaacaagaacaactcctacttcgtcgagtggatccccaacaatgtccagactgctctct", 
+    "GBSeq_source": "Neofabraea perennans", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281473.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea perennans strain DAOM 227089 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281473.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea perennans"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "DAOM 227089"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:143941"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Canada"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281473.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281473.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281473.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTCCCATCCCCCAAGGTCTCTGACACCGTTGTCGAGCCATATAACGCCACTCTCTCCGTCCATCAATTGGTTGAGAACTCTGATGAGACCTTCTGTATCGACAACGAGGCTCTTTACGACATCTGCATGAGAACCCTCAAGCTCAACAACCCATCTTATGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCCGATTCCCAGGTCAACTCAACTCCGATCTTCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTCCCAGAGTTGACACAACAGATGTTCGACCCAAAGAACATGATGGCTGCTTCTGACTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTTTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTTCAGAACAAGAACAACTCCTACTTCGTCGAGTGGATCCCCAACAATGTCCAGACTGCTCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281473.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281473.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69160.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579203"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281473", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea perennans", 
+    "GBSeq_other-seqids": [
+        "gb|AF281473.1|", 
+        "gi|14579202"
+    ], 
+    "GBSeq_primary-accession": "AF281473", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgtcccatcccccaaggtctctgacaccgttgtcgagccatataacgccactctctccgtccatcaattggttgagaactctgatgagaccttctgtatcgacaacgaggctctttacgacatctgcatgagaaccctcaagctcaacaacccatcttatggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctccgattcccaggtcaactcaactccgatcttcgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgtcccagagttgacacaacagatgttcgacccaaagaacatgatggctgcttctgacttccgtaacggtcgctacttgacttgctctgctatcttgtaggttttattactttcttatagtgctactcttgctaacattttaatagccgtggtaaggtttccatgaaggaggttgaggaccagatgcgcaatgttcagaacaagaacaactcctacttcgtcgagtggatccccaacaatgtccagactgctctct", 
+    "GBSeq_source": "Neofabraea perennans", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281470.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea malicorticis strain RGR 90.0136; DAOM 227092 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281470.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea malicorticis"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "RGR 90.0136; DAOM 227092"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:108569"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "USA: WA"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281470.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281470.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281470.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTCCCATCCCCCAAGGTCTCTGACACCGTTGTCGAGCCATATAACGCCACTCTCTCCGTCCATCAATTGGTTGAGAACTCTGATGAGACCTTCTGTATCGACAACGAGGCTCTTTACGACATCTGCATGAGAACTCTCAAGCTCAACAACCCATCTTATGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCCGATTCCCAGGTCAACTCAACTCCGATCTCCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTCCCAGAGTTGACTCAACAAATGTTCGACCCAAAGAACATGATGGCTGCTTCTGATTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTTTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTTCAGAACAAGAACAACTCCTACTTCGTCGAGTGGATCCCCAACAATGTCCAGACTGCCCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281470.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281470.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69157.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579197"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281470", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea malicorticis", 
+    "GBSeq_other-seqids": [
+        "gb|AF281470.1|", 
+        "gi|14579196"
+    ], 
+    "GBSeq_primary-accession": "AF281470", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgtcccatcccccaaggtctctgacaccgttgtcgagccatataacgccactctctccgtccatcaattggttgagaactctgatgagaccttctgtatcgacaacgaggctctttacgacatctgcatgagaactctcaagctcaacaacccatcttatggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctccgattcccaggtcaactcaactccgatctccgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgtcccagagttgactcaacaaatgttcgacccaaagaacatgatggctgcttctgatttccgtaacggtcgctacttgacttgctctgctatcttgtaggttttattactttcttatagtgctactcttgctaacatttttatagccgtggtaaggtttccatgaaggaggttgaggaccagatgcgcaatgttcagaacaagaacaactcctacttcgtcgagtggatccccaacaatgtccagactgccctct", 
+    "GBSeq_source": "Neofabraea malicorticis", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281467.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea malicorticis strain DAOM 227090 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281467.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea malicorticis"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "DAOM 227090"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:108569"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Canada"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281467.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281467.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281467.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTCCCATCCCCCAAGGTCTCTGACACCGTTGTCGAGCCATATAACGCCACTCTCTCCGTCCATCAATTGGTTGAGAACTCTGATGAGACCTTCTGTATCGACAACGAGGCTCTTTACGACATCTGCATGAGAACTCTCAAGCTCAACAACCCATCTTATGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCCGATTCCCAGGTCAACTCAACTCCGATCTCCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTCCCAGAGTTGACTCAACAAATGTTCGACCCAAAGAACATGATGGCTGCTTCTGATTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTTTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTTCAGAACAAGAACAACTCCTACTTCGTCGAGTGGATCCCCAACAATGTCCAGACTGCCCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281467.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281467.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69154.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579191"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281467", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea malicorticis", 
+    "GBSeq_other-seqids": [
+        "gb|AF281467.1|", 
+        "gi|14579190"
+    ], 
+    "GBSeq_primary-accession": "AF281467", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgtcccatcccccaaggtctctgacaccgttgtcgagccatataacgccactctctccgtccatcaattggttgagaactctgatgagaccttctgtatcgacaacgaggctctttacgacatctgcatgagaactctcaagctcaacaacccatcttatggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctccgattcccaggtcaactcaactccgatctccgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgtcccagagttgactcaacaaatgttcgacccaaagaacatgatggctgcttctgatttccgtaacggtcgctacttgacttgctctgctatcttgtaggttttattactttcttatagtgctactcttgctaacatttttatagccgtggtaaggtttccatgaaggaggttgaggaccagatgcgcaatgttcagaacaagaacaactcctacttcgtcgagtggatccccaacaatgtccagactgccctct", 
+    "GBSeq_source": "Neofabraea malicorticis", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281466.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea malicorticis strain DAOM 227085 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281466.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea malicorticis"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "DAOM 227085"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:108569"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Canada"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281466.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281466.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281466.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTCCCATCCCCCAAGGTCTCTGACACCGTTGTCGAGCCATATAACGCCACTCTCTCCGTCCATCAATTGGTTGAGAACTCTGATGAGACCTTCTGTATCGACAACGAGGCTCTTTACGACATCTGCATGAGAACTCTCAAGCTCAACAACCCATCTTATGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCCGATTCCCAGGTCAACTCAACTCCGATCTCCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTCCCAGAGTTGACTCAACAAATGTTCGACCCAAAGAACATGATGGCTGCTTCTGATTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTTTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTTCAGAACAAGAACAACTCCTACTTCGTCGAGTGGATCCCCAACAATGTCCAGACTGCCCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281466.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281466.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69153.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579189"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281466", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea malicorticis", 
+    "GBSeq_other-seqids": [
+        "gb|AF281466.1|", 
+        "gi|14579188"
+    ], 
+    "GBSeq_primary-accession": "AF281466", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgtcccatcccccaaggtctctgacaccgttgtcgagccatataacgccactctctccgtccatcaattggttgagaactctgatgagaccttctgtatcgacaacgaggctctttacgacatctgcatgagaactctcaagctcaacaacccatcttatggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctccgattcccaggtcaactcaactccgatctccgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgtcccagagttgactcaacaaatgttcgacccaaagaacatgatggctgcttctgatttccgtaacggtcgctacttgacttgctctgctatcttgtaggttttattactttcttatagtgctactcttgctaacatttttatagccgtggtaaggtttccatgaaggaggttgaggaccagatgcgcaatgttcagaacaagaacaactcctacttcgtcgagtggatccccaacaatgtccagactgccctct", 
+    "GBSeq_source": "Neofabraea malicorticis", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281465.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea malicorticis strain DAOM 227084 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281465.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea malicorticis"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "DAOM 227084"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:108569"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Canada"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281465.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281465.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281465.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTCCCATCCCCCAAGGTCTCTGACACCGTTGTCGAGCCATATAACGCCACTCTCTCCGTCCATCAATTGGTTGAGAACTCTGATGAGACCTTCTGTATCGACAACGAGGCTCTTTACGACATCTGCATGAGAACTCTCAAGCTCAACAACCCATCTTATGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCCGATTCCCAGGTCAACTCAACTCCGATCTCCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTCCCAGAGTTGACTCAACAAATGTTCGACCCAAAGAACATGATGGCTGCTTCTGATTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTTTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTTCAGAACAAGAACAACTCCTACTTCGTCGAGTGGATCCCCAACAATGTCCAGACTGCCCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281465.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281465.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69152.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579187"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281465", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea malicorticis", 
+    "GBSeq_other-seqids": [
+        "gb|AF281465.1|", 
+        "gi|14579186"
+    ], 
+    "GBSeq_primary-accession": "AF281465", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgtcccatcccccaaggtctctgacaccgttgtcgagccatataacgccactctctccgtccatcaattggttgagaactctgatgagaccttctgtatcgacaacgaggctctttacgacatctgcatgagaactctcaagctcaacaacccatcttatggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctccgattcccaggtcaactcaactccgatctccgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgtcccagagttgactcaacaaatgttcgacccaaagaacatgatggctgcttctgatttccgtaacggtcgctacttgacttgctctgctatcttgtaggttttattactttcttatagtgctactcttgctaacatttttatagccgtggtaaggtttccatgaaggaggttgaggaccagatgcgcaatgttcagaacaagaacaactcctacttcgtcgagtggatccccaacaatgtccagactgccctct", 
+    "GBSeq_source": "Neofabraea malicorticis", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281464.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea malicorticis strain DAOM 227083 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281464.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea malicorticis"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "DAOM 227083"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:108569"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Canada"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281464.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281464.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281464.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTCCCATCCCCCAAGGTCTCTGACACCGTTGTCGAGCCATATAACGCCACTCTCTCCGTCCATCAATTGGTTGAGAACTCTGATGAGACCTTCTGTATCGACAACGAGGCTCTTTACGACATCTGCATGAGAACTCTCAAGCTCAACAACCCATCTTATGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCCGATTCCCAGGTCAACTCAACTCCGATCTCCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTCCCAGAGTTGACTCAACAAATGTTCGACCCAAAGAACATGATGGCTGCTTCTGATTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTTTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTTCAGAACAAGAACAACTCCTACTTCGTCGAGTGGATCCCCAACAATGTCCAGACTGCCCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281464.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281464.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69151.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579185"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281464", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea malicorticis", 
+    "GBSeq_other-seqids": [
+        "gb|AF281464.1|", 
+        "gi|14579184"
+    ], 
+    "GBSeq_primary-accession": "AF281464", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgtcccatcccccaaggtctctgacaccgttgtcgagccatataacgccactctctccgtccatcaattggttgagaactctgatgagaccttctgtatcgacaacgaggctctttacgacatctgcatgagaactctcaagctcaacaacccatcttatggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctccgattcccaggtcaactcaactccgatctccgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgtcccagagttgactcaacaaatgttcgacccaaagaacatgatggctgcttctgatttccgtaacggtcgctacttgacttgctctgctatcttgtaggttttattactttcttatagtgctactcttgctaacatttttatagccgtggtaaggtttccatgaaggaggttgaggaccagatgcgcaatgttcagaacaagaacaactcctacttcgtcgagtggatccccaacaatgtccagactgccctct", 
+    "GBSeq_source": "Neofabraea malicorticis", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281462.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea sp. DAOM 227086 strain DAOM 227086 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281462.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea sp. DAOM 227086"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "DAOM 227086"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:143939"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Canada"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281462.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281462.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281462.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTTCCATCCCCCAAGGTCTCTGACACCGTTGTCGAGCCATATAACGCCACTCTCTCCGTCCATCAATTGGTTGAGAACTCTGATGAGACCTTCTGTATCGATAACGAGGCTCTCTACGACATCTGCATGAGAACTCTCAAGCTCAACAACCCATCTTACGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTTACCACTTGTCTCCGATTCCCAGGTCAACTCAACTCTGATCTTCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGGTTCGCTCCTCTCACCAGTCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTCCCAGAATTGACTCAACAAATGTTCGACCCAAAGAACATGATGGCTGCTTCCGATTTCCGCAACGGTCGCTACTTGACTTGCTCCGCTATCTTCCGTGGTAAGGTTTCCATGAAGGAGGTTGAGGATCAGATGCGCAATGTTCAGAACAAGAACAACTCCTACTTCGTCGAGTGGATTCCCAACAACGTCCAGACCGCTCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281462.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281462.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69149.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579181"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281462", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea sp. DAOM 227086", 
+    "GBSeq_other-seqids": [
+        "gb|AF281462.1|", 
+        "gi|14579180"
+    ], 
+    "GBSeq_primary-accession": "AF281462", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgttccatcccccaaggtctctgacaccgttgtcgagccatataacgccactctctccgtccatcaattggttgagaactctgatgagaccttctgtatcgataacgaggctctctacgacatctgcatgagaactctcaagctcaacaacccatcttacggtgatcttaaccacttggtctccgcagttatgtctggtgttaccacttgtctccgattcccaggtcaactcaactctgatcttcgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttgggttcgctcctctcaccagtcgtggtgctcactctttccgtgctgtcaccgtcccagaattgactcaacaaatgttcgacccaaagaacatgatggctgcttccgatttccgcaacggtcgctacttgacttgctccgctatcttgtaggttttattacttcgttatggtgctactcctgctgacatttttatagccgtggtaaggtttccatgaaggaggttgaggatcagatgcgcaatgttcagaacaagaacaactcctacttcgtcgagtggattcccaacaacgtccagaccgctctct", 
+    "GBSeq_source": "Neofabraea sp. DAOM 227086", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281460.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea krawtzewii strain NISK 66-65/6 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281460.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea krawtzewii"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "NISK 66-65/6; DAOM 227088"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:143940"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Norway"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281460.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281460.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281460.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCTGTTGTCCCATCCCCTAAGGTCTCTGACACCGTCGTTGAGCCATACAACGCTACTCTCTCCGTCCATCAATTGGTTGAGAACTCCGATGAGACCTTCTGTATCGATAACGAGGCTCTCTACGATATCTGCATGAGAACCCTCAAGCTCAACAACCCATCTTACGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCAGATTCCCAGGTCAACTCAACTCCGATCTTCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTTCCAGAGTTGACTCAACAAATGTTCGACCCAAAGAACATGATGGCTGCTTCTGATTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTCTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTCCAGAACAAGAACAACTCATACTTCGTCGAGTGGATCCCCAACAATGTCCAGACCGCCCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281460.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281460.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69147.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579177"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281460", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea krawtzewii", 
+    "GBSeq_other-seqids": [
+        "gb|AF281460.1|", 
+        "gi|14579176"
+    ], 
+    "GBSeq_primary-accession": "AF281460", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctctgttgtcccatcccctaaggtctctgacaccgtcgttgagccatacaacgctactctctccgtccatcaattggttgagaactccgatgagaccttctgtatcgataacgaggctctctacgatatctgcatgagaaccctcaagctcaacaacccatcttacggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctcagattcccaggtcaactcaactccgatcttcgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgttccagagttgactcaacaaatgttcgacccaaagaacatgatggctgcttctgatttccgtaacggtcgctacttgacttgctctgctatcttgtaggcttcattactttcttatggtgctactcttgctaacatttctttagccgtggtaaggtctccatgaaggaggttgaggaccagatgcgcaatgtccagaacaagaacaactcatacttcgtcgagtggatccccaacaatgtccagaccgccctct", 
+    "GBSeq_source": "Neofabraea krawtzewii", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281459.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea krawtzewii strain NISK 66-66/1 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281459.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea krawtzewii"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "NISK 66-66/1; DAOM 227087"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:143940"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Norway"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281459.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281459.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281459.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCTGTTGTCCCATCCCCTAAGGTCTCTGACACCGTCGTTGAGCCATACAACGCTACTCTCTCCGTCCATCAATTGGTTGAGAACTCCGATGAGACCTTCTGTATCGATAACGAGGCTCTCTACGATATCTGCATGAGAACCCTCAAGCTCAACAACCCATCTTACGGTGATCTTAACCACTTGGTCTCCGCAGTTATGTCTGGTGTCACCACTTGTCTCAGATTCCCAGGTCAACTCAACTCCGATCTTCGCAAGTTGGCTGTCAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTCGCTCCTCTCACCAGCCGTGGTGCTCACTCTTTCCGTGCTGTCACCGTTCCAGAGTTGACTCAACAAATGTTCGACCCAAAGAACATGATGGCTGCTTCTGATTTCCGTAACGGTCGCTACTTGACTTGCTCTGCTATCTTCCGTGGTAAGGTCTCCATGAAGGAGGTTGAGGACCAGATGCGCAATGTCCAGAACAAGAACAACTCATACTTCGTCGAGTGGATCCCCAACAATGTCCAGACCGCCCTCT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281459.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281459.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69146.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579175"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAHSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQNKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281459", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea krawtzewii", 
+    "GBSeq_other-seqids": [
+        "gb|AF281459.1|", 
+        "gi|14579174"
+    ], 
+    "GBSeq_primary-accession": "AF281459", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctctgttgtcccatcccctaaggtctctgacaccgtcgttgagccatacaacgctactctctccgtccatcaattggttgagaactccgatgagaccttctgtatcgataacgaggctctctacgatatctgcatgagaaccctcaagctcaacaacccatcttacggtgatcttaaccacttggtctccgcagttatgtctggtgtcaccacttgtctcagattcccaggtcaactcaactccgatcttcgcaagttggctgtcaacatggttcctttccctcgtcttcatttcttcatggttggattcgctcctctcaccagccgtggtgctcactctttccgtgctgtcaccgttccagagttgactcaacaaatgttcgacccaaagaacatgatggctgcttctgatttccgtaacggtcgctacttgacttgctctgctatcttgtaggcttcattactttcttatggtgctactcttgctaacatttctttagccgtggtaaggtctccatgaaggaggttgaggaccagatgcgcaatgtccagaacaagaacaactcatacttcgtcgagtggatccccaacaatgtccagaccgccctct", 
+    "GBSeq_source": "Neofabraea krawtzewii", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
+{
+    "GBSeq_accession-version": "AF281455.1", 
+    "GBSeq_create-date": "01-JUL-2001", 
+    "GBSeq_definition": "Neofabraea alba strain DAOM 227091 beta-tubulin (btub) gene, partial cds", 
+    "GBSeq_division": "PLN", 
+    "GBSeq_feature-table": [
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281455.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "source", 
+            "GBFeature_location": "1..622", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "organism", 
+                    "GBQualifier_value": "Neofabraea alba"
+                }, 
+                {
+                    "GBQualifier_name": "mol_type", 
+                    "GBQualifier_value": "genomic DNA"
+                }, 
+                {
+                    "GBQualifier_name": "strain", 
+                    "GBQualifier_value": "DAOM 227091"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "taxon:108571"
+                }, 
+                {
+                    "GBQualifier_name": "country", 
+                    "GBQualifier_value": "Canada"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281455.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "gene", 
+            "GBFeature_location": "<1..>622", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281455.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281455.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "mRNA", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "transcription", 
+                    "GBQualifier_value": "GATGGCAACTTTCTCCGTTGTCCCATCTCCAAAGGTATCTGACACCGTTGTCGAGCCATACAATGCCACCCTCTCTGTCCATCAATTGGTTGAGAACTCCGATGAGACCTTCTGTATCGACAACGAGGCTCTCTACGATATCTGCATGAGAACCCTCAAGCTCAACAACCCATCCTATGGTGACCTTAACCACTTGGTCTCCGCAGTCATGTCTGGTGTCACCACCTGTCTTCGTTTCCCTGGTCAACTCAACTCCGATCTCCGAAAGTTGGCTGTTAACATGGTTCCTTTCCCTCGTCTTCATTTCTTCATGGTTGGATTTGCTCCTCTCACCAGCCGTGGTGCTTACTCTTTCCGCGCTGTCACCGTCCCAGAGTTAACTCAACAAATGTTCGACCCAAAGAACATGATGGCCGCTTCTGATTTCCGTAACGGTCGTTACTTGACCTGCTCTGCTATCTTCCGTGGTAAGGTCTCCATGAAGGAGGTCGAGGACCAGATGCGCAACGTCCAGAGCAAGAACAACTCCTACTTCGTCGAGTGGATCCCCAACAACGTTCAAACCGCCCTTT"
+                }
+            ]
+        }, 
+        {
+            "GBFeature_intervals": [
+                {
+                    "GBInterval_accession": "AF281455.1", 
+                    "GBInterval_from": "1", 
+                    "GBInterval_to": "462"
+                }, 
+                {
+                    "GBInterval_accession": "AF281455.1", 
+                    "GBInterval_from": "513", 
+                    "GBInterval_to": "622"
+                }
+            ], 
+            "GBFeature_key": "CDS", 
+            "GBFeature_location": "join(<1..462,513..>622)", 
+            "GBFeature_operator": "join", 
+            "GBFeature_partial3": "", 
+            "GBFeature_partial5": "", 
+            "GBFeature_quals": [
+                {
+                    "GBQualifier_name": "gene", 
+                    "GBQualifier_value": "btub"
+                }, 
+                {
+                    "GBQualifier_name": "codon_start", 
+                    "GBQualifier_value": "2"
+                }, 
+                {
+                    "GBQualifier_name": "transl_table", 
+                    "GBQualifier_value": "1"
+                }, 
+                {
+                    "GBQualifier_name": "product", 
+                    "GBQualifier_value": "beta-tubulin"
+                }, 
+                {
+                    "GBQualifier_name": "protein_id", 
+                    "GBQualifier_value": "AAK69142.1"
+                }, 
+                {
+                    "GBQualifier_name": "db_xref", 
+                    "GBQualifier_value": "GI:14579167"
+                }, 
+                {
+                    "GBQualifier_name": "translation", 
+                    "GBQualifier_value": "MATFSVVPSPKVSDTVVEPYNATLSVHQLVENSDETFCIDNEALYDICMRTLKLNNPSYGDLNHLVSAVMSGVTTCLRFPGQLNSDLRKLAVNMVPFPRLHFFMVGFAPLTSRGAYSFRAVTVPELTQQMFDPKNMMAASDFRNGRYLTCSAIFRGKVSMKEVEDQMRNVQSKNNSYFVEWIPNNVQTAL"
+                }
+            ]
+        }
+    ], 
+    "GBSeq_length": "622", 
+    "GBSeq_locus": "AF281455", 
+    "GBSeq_moltype": "DNA", 
+    "GBSeq_organism": "Neofabraea alba", 
+    "GBSeq_other-seqids": [
+        "gb|AF281455.1|", 
+        "gi|14579166"
+    ], 
+    "GBSeq_primary-accession": "AF281455", 
+    "GBSeq_references": [
+        {
+            "GBReference_authors": [
+                "de Jong,S.N.", 
+                "Levesque,C.A.", 
+                "Verkley,G.J.M.", 
+                "Abeln,E.C.A.", 
+                "Rahe,J.E.", 
+                "Braun,P.G."
+            ], 
+            "GBReference_journal": "Mycol. Res. 105 (6), 658-669 (2001)", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "1", 
+            "GBReference_title": "Phylogenetic relationships among Neofabraea species causing tree cankers and bull's-eye rot of apple based on DNA sequencing of ITS nuclear rDNA, mitochondrial rDNA, and the beta-tubulin gene"
+        }, 
+        {
+            "GBReference_authors": [
+                "Levesque,C.A.", 
+                "de Jong,S.N."
+            ], 
+            "GBReference_journal": "Submitted (23-JUN-2000) Agriculture and Agri-Food Canada, Eastern Cereal and Oilseed Research Centre (ECORC), 960 Carling Avenue, K.W. Neatby Bldg., Ottawa, Ontario K1A 0C6, Canada", 
+            "GBReference_position": "1..622", 
+            "GBReference_reference": "2", 
+            "GBReference_title": "Direct Submission"
+        }
+    ], 
+    "GBSeq_sequence": "gatggcaactttctccgttgtcccatctccaaaggtatctgacaccgttgtcgagccatacaatgccaccctctctgtccatcaattggttgagaactccgatgagaccttctgtatcgacaacgaggctctctacgatatctgcatgagaaccctcaagctcaacaacccatcctatggtgaccttaaccacttggtctccgcagtcatgtctggtgtcaccacctgtcttcgtttccctggtcaactcaactccgatctccgaaagttggctgttaacatggttcctttccctcgtcttcatttcttcatggttggatttgctcctctcaccagccgtggtgcttactctttccgcgctgtcaccgtcccagagttaactcaacaaatgttcgacccaaagaacatgatggccgcttctgatttccgtaacggtcgttacttgacctgctctgctatcttgtaagttccactacattccttgaagagatatcctgctaatattattccagccgtggtaaggtctccatgaaggaggtcgaggaccagatgcgcaacgtccagagcaagaacaactcctacttcgtcgagtggatccccaacaacgttcaaaccgcccttt", 
+    "GBSeq_source": "Neofabraea alba", 
+    "GBSeq_strandedness": "double", 
+    "GBSeq_taxonomy": "Eukaryota; Fungi; Dikarya; Ascomycota; Pezizomycotina; Leotiomycetes; Helotiales; Dermateaceae; Neofabraea", 
+    "GBSeq_topology": "linear", 
+    "GBSeq_update-date": "29-JUL-2002"
+}
