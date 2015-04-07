@@ -1,13 +1,17 @@
 # README #
 
-This repo contains Python scripts and modules that extend Sequence Database functionality.
+This repo contains a Python module to interact with the SeqDB WS API, and python scripts that use this module to interact with SeqDB.
 
 
 ## How do I get set up? ##
 
 ### Requirements ###
+* Running instance of SeqDB (not currently Open Source)
 * Python 2.7
-* python requests module
+* python requests module (2.6.0)
+* python biopython module (1.65)
+* python PyYAML module (3.11)
+* See requirements.txt for full / current list of requirements
 
 ### Not required, but recommended ###
 * pip (sudo apt-get install python-pip python-dev build-essential)
@@ -15,26 +19,51 @@ This repo contains Python scripts and modules that extend Sequence Database func
 * make
 
 ### Running ###
-* Install python requests (preferably in virtual env):
+* Install required modules (preferably in virtual env):
    > pip install -r requirements.txt
 * Add project dir to PYTHONPATH
    > PYTHONPATH=“/path/to/project_dir:$PYTHONPATH"
    > export PYTHONPATH
+* Run desired tool
 
-### Running seqdb_gb_insert.py
-* cp config.yaml.sample config.yaml
- * Update config.yaml
+### Example: Running seqdb_gb_insert.py from a clean directory using make and a virtual environment
+* Create config.yaml file
+```
+cp config.yaml.sample config.yaml
+```
+* Initialize config.yaml file
+  * Update entrez email address entry
+  * Update seqdb url
+  * Update seqdb apikey
+* Create and activate virtual environment
+```
+make
+source venv/bin/activate
+```
+* Update PYTHONPATH
+```
+   PYTHONPATH=“`pwd`:$PYTHONPATH"
+   export PYTHONPATH
+```
+* Run script
+```
+./bin/seqdb_gb_insert.py
+```
 
-### Linux Requirements (Needs to be updated / integrated)
-* sudo apt-get install python-pip python-dev build-essential
-* sudo apt-get install python-virtualenv
-
-### Linux Running (Needs to be updated / integrated)
-* sudo make
-* source sdbgbload/bin/activate
-* cp config.yaml.sample config.yaml
- * Update config.yaml
-* ./bin/seqdb_gb_insert.py
+### Subsequent use of seqdb_gb_insert.py
+* Update PYTHONPATH
+```
+   PYTHONPATH=“`pwd`:$PYTHONPATH"
+   export PYTHONPATH
+```
+* Activate virtual environment
+```
+source venv/bin/activate
+```
+* Run script
+```
+./bin/seqdb_gb_insert.py
+```
 
 ## Who do I talk to? ##
 * Oksana Korol
