@@ -129,7 +129,7 @@ class seqdbWebService:
                 }
 
         if additional != None:
-           post_data['consensus'].update(additional)
+            post_data['consensus'].update(additional)
 
         resp = self.create(self.base_url + "/consensus", json.dumps(post_data))
         jsn_resp = resp.json()
