@@ -173,7 +173,7 @@ class seqdbWebService:
     # Note, the fast formatting is done here, instead of using seqdb fasta web service request
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError
     def getFastaSeqPlus(self, seq_id):
-        jsn_seq = getJSONSeq(seq_id)
+        jsn_seq = self.getJSONSeq(seq_id)
         # TODO Use BioPython to format
         fasta_seq =  '>' + jsn_seq['name'] + '|seqdbId:' + str(seq_id) + '\n' + jsn_seq['seq'] + '\n';
         return fasta_seq
