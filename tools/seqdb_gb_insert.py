@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-import sys, requests, json, yaml, urllib
-import logging, logging.config
+import sys, json, yaml, urllib
+import logging.config
 import httplib as http_client
 
 from api.seqdbWebService import seqdbWebService
