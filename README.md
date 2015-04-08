@@ -42,7 +42,7 @@ source venv/bin/activate
 ```
 * Update PYTHONPATH
 ```
-   PYTHONPATH=“`pwd`:$PYTHONPATH"
+   PYTHONPATH=`pwd`:"$PYTHONPATH"
    export PYTHONPATH
 ```
 * Run script
@@ -53,7 +53,7 @@ source venv/bin/activate
 ### Subsequent use of seqdb_gb_insert.py
 * Update PYTHONPATH
 ```
-   PYTHONPATH=“`pwd`:$PYTHONPATH"
+   PYTHONPATH=`pwd`:"$PYTHONPATH"
    export PYTHONPATH
 ```
 * Activate virtual environment
