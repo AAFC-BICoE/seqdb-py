@@ -18,24 +18,24 @@ logging:
     disable_existing_loggers: true
 
     formatters:
-        simpleFormater:
+        simpleFormatter:
             format: '%(asctime)s - %(module)s - %(levelname)s: %(message)s'
             datefmt: '%Y/%m/%d %H:%M:%S'
 
     handlers:
         console:
             class: logging.StreamHandler
-            formatter: simpleFormater
+            formatter: simpleFormatter
             level: WARN
             stream: ext://sys.stdout
         file:
             class : logging.FileHandler
-            formatter: simpleFormater
+            formatter: simpleFormatter
             level: INFO
             filename: tools.log
         debug:
             class : logging.FileHandler
-            formatter: simpleFormater
+            formatter: simpleFormatter
             level: DEBUG
             filename: tools_debug.log
 
