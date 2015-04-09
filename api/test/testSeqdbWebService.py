@@ -7,164 +7,184 @@ import unittest, requests, yaml
 from api import seqdbWebService
 
 #from seqdb_ws import json_seqdb_request, seqdb_ws_request
-
-class TestSeqdbWebService(unittest.TestCase):
-    pass
     
-    # curl -H "apikey: ***REMOVED***" http://localhost:10000/seqdb.web/api/v1/sequence/1
-    # curl -H "apikey: ***REMOVED***" http://localhost:10000/seqdb.web/api/v1/sequence/1.fasta
-    # curl -H "apikey: ***REMOVED***" http://localhost:10000/seqdb.web/api/v1//region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true
-    # curl -H "apikey: ***REMOVED***" http://localhost:8181/seqdb.web-2.5/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true
-
+    # curl -H "apikey: ***REMOVED***" ***REMOVED***/sequence/1
+    # curl -H "apikey: ***REMOVED***" ***REMOVED***/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true
+    
 class TestSeqdbWebService(unittest.TestCase):
 
     def setUp(self):
-        mock_for_test_TESTNAME = new Mock()
-        mock1.addSequence()
-        mock1.addFeatureType()
-        mock1.addFeature()
-
-        mock2 = clone(mock1)
-        mock2.addSequence()
-
-        # create list of mocks
         config = yaml.load(file('config.yaml', 'r'))
         self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+        
+        # garbage clean-up: delete before commit
+        #self.seqdbWS.deleteFeatureType("119")
+        self.seqdbWS.deleteRegion("296")
+        self.seqdbWS.deleteRegion("261")
+        self.seqdbWS.deleteRegion("162")
     
+        
     def tearDown(self):
         pass
 
-    def testSeqdbWS():
-        # use appropriate mock
 
-        # validated that the seqdbWS created / works
-        # ensure database connection
-        pass
+    def testConnection(self):
+        print "Cleanup done"
 
-class TestSeqdbWebService_FeatureType_Existing(unittest.TestCase):
-
+class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
+    
     def setUp(self):
         config = yaml.load(file('config.yaml', 'r'))
         self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
-        self.featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
         self.featureTypeIds = []
+
     
     def tearDown(self):
-        # ensure empty
-        for ftId in featureTypeIds:
-            self.seqdbWS.deleteFeatureType(ftId)
-        # need to ensure that it wasn't deleted in a test...
-        self.seqdbWS.deleteFeatureType(self.featureTypeId)
-
-    def testDeleteFeatureType(self):
-        self.seqdbWS.deleteFeatureType(self.featureTypeId)
-
-
-class TestSeqdbWebService_FeatureType(unittest.TestCase):
-
-    def setUp(self):
-        config = yaml.load(file('config.yaml', 'r'))
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
-        # starts empty
-        self.featureTypeIds = []
-    
-    def tearDown(self):
-        # ensure empty
-        for ftId in featureTypeIds:
+        for ftId in self.featureTypeIds:
             self.seqdbWS.deleteFeatureType(ftId)
 
-    def testCreateFeature(self):
 
-        self.seqdbWS = seqdbWebService.seqdbWebService()
-        """Test creation of a feature - expected to fail because sequence too long"""
-        featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
-        self.featureTypeIds.add(featureTypeId)
-        self.assertTrue(featureTypeId, "Feature type ID was not returned after feature type creation.")
-
-    def testCreateMultipleFeature(self):
-        """Test creation of a feature - expected to work because of unique names"""
-        featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
-        self.featureTypeIds.add(featureTypeId)
-        featureTypeId = self.seqdbWS.createFeatureType("Test1", "Test")
-        self.featureTypeIds.add(featureTypeId)
-        self.assertTrue(featureTypeId, "Feature type ID was not returned after feature type creation.")
-
-    def testCreateMultipleFeature_failduplicate(self):
-        """Test creation of a feature - expected to fail because of duplicate feature type id"""
-        featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
-        self.featureTypeIds.add(featureTypeId)
-        featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
-        self.featureTypeIds.add(featureTypeId)
-        self.assertTrue(featureTypeId, "Feature type ID was not returned after feature type creation.")
-
-
-class TestSeqdbWebService_FeatureType_Delete(unittest.TestCase):
-
-    featureTypes = []
-
-    def setUp(self):
-        config = yaml.load(file('config.yaml', 'r'))
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
-        featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
-    
-    def tearDown(self):
-        for ftId in self.featureTypes:
-            self.seqdbWS.deleteFeatureType(ftId)
-
-    def testDeleteFeature():
-        pass
-
-class TestSeqdbWebService_Feature:
-    def testRetrieve(self):
+    def testConnection(self):
         self.assertRaises(requests.exceptions.ConnectionError, self.seqdbWS.retrieve, "http://jibberish")
         # TODO: test wrong api key
 
-    def testGetItsRegionIds(self):
-        # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true"
-        # curl -H "apikey: ***REMOVED***"  "***REMOVED***/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true"
-        actual = self.seqdbWS.getItsRegionIds()
-        self.assertTrue(actual, "No ITS region ids returned.")
-        self.assertIn(8, actual, "Region id 8 is not in the results.")
+
+    def testCreateFeature_valid(self):
+        """Test creation of a feature - expected to pass"""
+        featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
+        self.featureTypeIds.append(featureTypeId)
+        self.assertTrue(featureTypeId, "Feature type ID was not returned after feature type creation.")
+
+
+    def testCreateMultipleFeatureTypes_valid(self):
+        """Test creation of two feature - expected to work because of unique names"""
+        featureTypeId = self.seqdbWS.createFeatureType("Test1", "Test")
+        self.featureTypeIds.append(featureTypeId)
+        featureTypeId = self.seqdbWS.createFeatureType("Test2", "Test")
+        self.featureTypeIds.append(featureTypeId)
+        self.assertTrue(featureTypeId, "Second feature type ID was not returned after feature type creation.")
+
     
-    def testGetSeqIds(self):
-        actual = self.seqdbWS.getSeqIds("8")
-        self.assertTrue(actual, "No Sequence ids returned.")
-        self.assertIn(1685, actual, "Sequence id 1685 is not in the results.")
-    
-    def testGetFastaSeq(self):
-        actual = self.seqdbWS.getFastaSeq("1")
-        self.assertTrue(actual, "Fasta sequence is empty.")
-        self.assertIn(">", actual, "Fasta does not contain >.")        
-    
-    def testGetFastaSeqPlus(self):
-        # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/sequence/1"
-        actual = self.seqdbWS.getFastaSeqPlus("1")
-        self.assertTrue(actual, "Fasta sequence is empty.")
-        self.assertIn(">", actual, "Fasta does not contain >.")
-        self.assertIn("seqdbId:1", actual, "Fasta does not contain seqdbId.")
+    def testCreateMultipleFeature_failduplicate(self):
+        """Test creation of a feature - expected to fail because of duplicate feature type id"""
+        featureTypeId = self.seqdbWS.createFeatureType("Test", "Tesdst")
+        self.featureTypeIds.append(featureTypeId)
+        
+        self.assertRaises(requests.exceptions.HTTPError, self.seqdbWS.createFeatureType, "Test", "Test")
+        #featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
     
 
+class TestSeqdbWebService_FeatureType_Existing(unittest.TestCase):
+
+    
+    def setUp(self):
+        config = yaml.load(file('config.yaml', 'r'))
+        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+        featureTypeId = self.seqdbWS.createFeatureType("TestType", "Test")
+        
+        self.featureTypeIds = [featureTypeId]
+    
+    def tearDown(self):
+        for ftId in self.featureTypeIds:
+            self.seqdbWS.deleteFeatureType(ftId)
     
     def testGetFeatureTypes(self):
         # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/featureType"
         # curl -H "apikey: ***REMOVED***"  "***REMOVED***/api/v1/featureType"
         actual = self.seqdbWS.getFeatureTypesWithIds()
         self.assertTrue(actual, "No feature types returned.")
-        self.assertIn("Quality Trim", actual, "No feature type 'Quality Trim' found.")
-    
-    
-    def testCreateDeleteFeatureType(self):
-        #curl -X POST -H "apikey: ***REMOVED***" -H "Content-Type: application/json" -d '{"featureType":{"featureDescription":"test description 1231q","featureName":"test type 123123"}}' "***REMOVED***:8181/seqdb.web-2.5/api/v1/featureType"
-        
-        #self.seqdbWS.deleteFeatureType("19")
-        
-        featureTypeID = self.seqdbWS.createFeatureType("test type", "test type description")
-        self.assertTrue(featureTypeID, "Feature type ID was not returned after feature type creation.")
-        
-        #curl -X DELETE -H "apikey: ***REMOVED***" "***REMOVED***:8181/seqdb.web-2.5/api/v1/featureType/6"
-        actual = self.seqdbWS.deleteFeatureType(featureTypeID)
-        self.assertEqual(200, actual['statusCode'], "Could not delete feature type.")
+        self.assertIn("TestType", actual, "No feature type 'Test' found.")
 
+    def testDeleteFeatureType(self):
+        idToDelete = self.featureTypeIds[0]
+        actual = self.seqdbWS.deleteFeatureType(idToDelete)
+        self.assertEqual(200, actual['statusCode'], "Could not delete feature type.")
+        self.featureTypeIds.remove(idToDelete)
+
+
+#### Works till here
+
+class TestSeqdbWebService_Region_Existing(unittest.TestCase):
+
+    
+    def setUp(self):
+        config = yaml.load(file('config.yaml', 'r'))
+        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+        regionId = self.seqdbWS.createRegion("Test", "Test")
+        self.regionIds = [regionId]
+    
+    def tearDown(self):
+        for rgId in self.regionIds:
+            self.seqdbWS.deleteRegion(rgId)
+
+
+    def testGetItsRegionIds(self):
+        # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true"
+        # curl -H "apikey: ***REMOVED***"  "***REMOVED***/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true"
+        actual = self.seqdbWS.getItsRegionIds()
+        self.assertTrue(actual, "No ITS region ids returned.")
+        self.assertIn(self.regionIds[0], actual, "Region id is not in the results.")
+
+
+
+
+class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
+
+    
+    def setUp(self):
+        config = yaml.load(file('config.yaml', 'r'))
+        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+        seqId = self.seqdbWS.createConsensusSequence("Test", "ACGTCTGATCGATC")
+        self.sequenceIds = [seqId]
+    
+    def tearDown(self):
+        for seqId in self.sequenceIds:
+            self.seqdbWS.deleteSequence(seqId)
+            
+    def testGetSeqIds(self):
+        actual = self.seqdbWS.getSeqIds(self.sequenceIds[0])
+        self.assertTrue(actual, "No Sequence ids returned.")
+        self.assertIn(self.sequenceIds[0], actual, "Expected sequence id is not in the results.")
+    
+    def testGetFastaSeq(self):
+        actual = self.seqdbWS.getFastaSeq(self.sequenceIds[0])
+        self.assertTrue(actual, "Fasta sequence is empty.")
+        self.assertIn(">", actual, "Fasta does not contain >.")        
+    
+    def testGetFastaSeqPlus(self):
+        # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/sequence/1"
+        actual = self.seqdbWS.getFastaSeqPlus(self.sequenceIds[0])
+        self.assertTrue(actual, "Fasta sequence is empty.")
+        self.assertIn(">", actual, "Fasta does not contain >.")
+        self.assertIn("seqdbId:1", actual, "Fasta does not contain seqdbId.")
+    
+
+
+class TestSeqdbWebService_Sequence_FeatureType_Existing:
+
+    sequenceIds = []
+    featureTypeIds = []
+    
+    def setUp(self):
+        config = yaml.load(file('config.yaml', 'r'))
+        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+        seqId = self.seqdbWS.createConsensusSequence("Test", "ACGTCTGATCGATC")
+        self.sequenceIds.append(seqId)
+        featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
+        self.featureTypeIds.append(featureTypeId)
+    
+    
+    
+    def tearDown(self):
+        for ftId in self.featureTypeIds:
+            self.seqdbWS.deleteFeatureType(ftId)
+            self.featureTypeIds.remove(ftId)
+    
+        for seqId in self.sequenceIds:
+            self.seqdbWS.deleteSequence(seqId)
+            self.sequenceIds.remove(seqId)
+
+    
     def testCreateGetDeleteFeature(self):
         
         # Create feature
