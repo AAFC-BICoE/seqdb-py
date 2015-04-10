@@ -6,10 +6,6 @@ Created on Feb 12, 2015
 import unittest, requests, yaml
 from api import seqdbWebService
 
-#from seqdb_ws import json_seqdb_request, seqdb_ws_request
-    
-    # curl -H "apikey: ***REMOVED***" ***REMOVED***/sequence/1
-    # curl -H "apikey: ***REMOVED***" ***REMOVED***/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true
     
 class TestSeqdbWebService(unittest.TestCase):
 
@@ -67,11 +63,10 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
         self.featureTypeIds.append(featureTypeId)
         
         self.assertRaises(requests.exceptions.HTTPError, self.seqdbWS.createFeatureType, "Test", "Test")
-        #featureTypeId = self.seqdbWS.createFeatureType("Test", "Test")
+    
     
 
 class TestSeqdbWebService_FeatureType_Existing(unittest.TestCase):
-
     
     def setUp(self):
         config = yaml.load(file('config.yaml', 'r'))
@@ -79,20 +74,21 @@ class TestSeqdbWebService_FeatureType_Existing(unittest.TestCase):
         featureTypeId = self.seqdbWS.createFeatureType("TestType", "Test")
         
         self.featureTypeIds = [featureTypeId]
+
     
     def tearDown(self):
         for ftId in self.featureTypeIds:
             self.seqdbWS.deleteFeatureType(ftId)
+
     
-    def testGetFeatureTypes(self):
-        """Test retrieving of a feature - expected to pass"""
-        # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/featureType"
-        # curl -H "apikey: ***REMOVED***"  "***REMOVED***/api/v1/featureType"
+    def testGetFeatureTypes_valid(self):
+        """Test retrieval of a feature - expected to pass"""
         actual = self.seqdbWS.getFeatureTypesWithIds()
         self.assertTrue(actual, "No feature types returned.")
         self.assertIn("TestType", actual, "No feature type 'Test' found.")
 
-    def testDeleteFeatureType(self):
+
+    def testDeleteFeatureType_valid(self):
         """Test deletion of a feature - expected to pass"""
         idToDelete = self.featureTypeIds[0]
         actual = self.seqdbWS.deleteFeatureType(idToDelete)
@@ -102,20 +98,21 @@ class TestSeqdbWebService_FeatureType_Existing(unittest.TestCase):
 
 
 class TestSeqdbWebService_Region_Existing(unittest.TestCase):
-
     
     def setUp(self):
         config = yaml.load(file('config.yaml', 'r'))
         self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
         regionId = self.seqdbWS.createRegion("ITS", "Test")
         self.regionIds = [regionId]
+
     
     def tearDown(self):
         for rgId in self.regionIds:
             self.seqdbWS.deleteRegion(rgId)
 
 
-    def testGetItsRegionIds(self):
+    def testGetItsRegionIds_valid(self):
+        """Test retrieval of an ITS region ids - expected to pass"""
         # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true"
         # curl -H "apikey: ***REMOVED***"  "***REMOVED***/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true"
         actual = self.seqdbWS.getItsRegionIds()
@@ -124,26 +121,29 @@ class TestSeqdbWebService_Region_Existing(unittest.TestCase):
 
 
 
-
 class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
-
     
     def setUp(self):
         config = yaml.load(file('config.yaml', 'r'))
         self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
         seqId, errCod, msg = self.seqdbWS.createConsensusSequence("Test", "ACGTCTGATCGATC")
         self.sequenceIds = [seqId]
+
     
     def tearDown(self):
         for seqId in self.sequenceIds:
             self.seqdbWS.deleteConsensusSequence(seqId)
+
             
     def testGetFastaSeq(self):
+        """Test retrieval of a sequence in fasta format (seqdb api fasta) - expected to pass"""
         actual = self.seqdbWS.getFastaSeq(self.sequenceIds[0])
         self.assertTrue(actual, "Fasta sequence is empty.")
         self.assertIn(">", actual, "Fasta does not contain >.")        
+
     
     def testGetFastaSeqPlus(self):
+        """Test retrieval of a sequence in fasta format (python fasta formatting) - expected to pass"""
         # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/sequence/1"
         actual = self.seqdbWS.getFastaSeqPlus(self.sequenceIds[0])
         self.assertTrue(actual, "Fasta sequence is empty.")
@@ -160,7 +160,7 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
         self.assertIn(self.sequenceIds[0], actual, "Expected sequence id is not in the results.")
     '''
 
-#### Works till here
+
 
 class TestSeqdbWebService_Sequence_FeatureType_Feature_Existing(unittest.TestCase):
 
@@ -190,9 +190,9 @@ class TestSeqdbWebService_Sequence_FeatureType_Feature_Existing(unittest.TestCas
         for ftId in self.featureTypeIds:
             self.seqdbWS.deleteFeatureType(ftId)
     
-    
 
     def testGetFeature(self):
+        """Test retrieval of a feature - expected to pass"""
         featureId = self.featureIds[0]
         retrieved_feature = self.seqdbWS.getFeature(featureId)
         self.assertTrue(retrieved_feature, "No feature was retrieved.") 
@@ -204,7 +204,7 @@ class TestSeqdbWebService_Sequence_FeatureType_Feature_Existing(unittest.TestCas
     
     
     def testCreateFeature(self):
-
+        """Test creation of a feature - expected to pass"""
         sampleFeatureLocations2 = [{"start":3,"end":5,"frame":1,"strand":1}, {"start":334,"end":454,"frame":2,"strand":1}]
         
         featureId = self.seqdbWS.insertFeature("testName", self.featureTypeIds[0], sampleFeatureLocations2, self.sequenceIds[0], "sample description", True)
@@ -213,6 +213,7 @@ class TestSeqdbWebService_Sequence_FeatureType_Feature_Existing(unittest.TestCas
             
         
     def testDeleteFeature(self):
+        """Test deletion of a feature - expected to pass"""
         featureId = self.featureIds.pop()
         actual = self.seqdbWS.deleteFeature(featureId)
         self.assertEqual(200, actual['statusCode'], "Could not delete feature type.")
@@ -221,6 +222,7 @@ class TestSeqdbWebService_Sequence_FeatureType_Feature_Existing(unittest.TestCas
         retrieved_feature = self.seqdbWS.getFeature(featureId)
         self.assertFalse(retrieved_feature, "Unexpected: Feature was found after being deleted.") 
         
+    
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
