@@ -184,7 +184,7 @@ class seqdbWebService:
         url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
         response = self.retrieve(url)
         return response.content
-        
+
     
     # Get region IDs of ITS sequences
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
@@ -222,6 +222,16 @@ class seqdbWebService:
 
         return jsn_resp['result']
 
+    
+    def deleteRegion(self, regionId):
+        request_url = "/region/" + str(regionId)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+  
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return jsn_resp
+        
 
 
         
