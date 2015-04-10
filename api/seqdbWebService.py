@@ -84,7 +84,7 @@ class seqdbWebService:
         
         return resp
     
-    def getJSONConsensusSequenceIds(self, params=None):
+    def getJsonConsensusSequenceIds(self, params=None):
         jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
 
         if 'count' and 'sortColum' and 'limit' and 'offset' and 'message' and 'statusCode' and 'sortOrder' not in jsn_resp:
@@ -95,22 +95,22 @@ class seqdbWebService:
 
         return jsn_resp
 
-    def getJSONConsensusSequenceIdsByName(self, name):
+    def getJsonConsensusSequenceIdsByName(self, name):
         params = {'filterName':'sequence.name',
                   'filterValue':name,
                   'filterOperator':'and',
                   'filterWildcard':'true'}
 
-        return self.getJSONConsensusSequenceIds(params)
+        return self.getJsonConsensusSequenceIds(params)
 
-    def getJSONConsensusSequenceIdsByGI(self, gi):
+    def getJsonConsensusSequenceIdsByGI(self, gi):
             params = {'filterName':'sequence.genBankGI',
                       'filterValue':gi,
                       'filterOperator':'and',
                       'filterWildcard':'false'
                     }
 
-            jsn_resp = self.getJSONConsensusSequenceIds(params)
+            jsn_resp = self.getJsonConsensusSequenceIds(params)
 
             if jsn_resp['count'] > 1:
                 raise SystemError("More than one record associated with gi, which should be unique")
@@ -158,7 +158,7 @@ class seqdbWebService:
         
         return jsn_resp
             
-    def getJSONSeq(self, seq_id):
+    def getJsonSeq(self, seq_id):
         jsn_resp = self.retrieveJson(self.base_url + "/sequence/" + str(seq_id))
         if 'result' not in jsn_resp.keys() or not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
@@ -173,7 +173,7 @@ class seqdbWebService:
     # Note, the fast formatting is done here, instead of using seqdb fasta web service request
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError
     def getFastaSeqPlus(self, seq_id):
-        jsn_seq = self.getJSONSeq(seq_id)
+        jsn_seq = self.getJsonSeq(seq_id)
         # TODO Use BioPython to format
         fasta_seq =  '>' + jsn_seq['name'] + '|seqdbId:' + str(seq_id) + '\n' + jsn_seq['seq'] + '\n';
         return fasta_seq
@@ -184,7 +184,7 @@ class seqdbWebService:
         url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
         response = self.retrieve(url)
         return response.content
-        
+
     
     # Get region IDs of ITS sequences
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
@@ -222,6 +222,16 @@ class seqdbWebService:
 
         return jsn_resp['result']
 
+    
+    def deleteRegion(self, regionId):
+        request_url = "/region/" + str(regionId)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+  
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return jsn_resp
+        
 
 
         

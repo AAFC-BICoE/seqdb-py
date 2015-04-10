@@ -381,7 +381,7 @@ def process_entrez_entry(seqdb_ws, genbank_id):
     # If it does, continue with the next record
     logging.debug("Checking for gi:%s in SeqDB" % (genbank_id))
 
-    result = seqdb_ws.getJSONConsensusSequenceIdsByGI(genbank_id)
+    result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
 
     if result['count'] == 0:
         # retrieve genbank record
@@ -398,7 +398,7 @@ def process_entrez_entry(seqdb_ws, genbank_id):
         if logging.getLogger().isEnabledFor(logging.DEBUG):
             # retrieve inserted record and display to users for validation
             # purposes
-            result = seqdb_ws.getJSONSeq(seqdb_id)
+            result = seqdb_ws.getJsonSeq(seqdb_id)
             pretty_log_json(
                 result, level="debug", message="Record as inserted:")
 
