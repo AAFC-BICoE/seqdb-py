@@ -15,6 +15,7 @@ import logging.config
 import shutil
 import psycopg2
 import yaml
+from api.seqdbWebService import seqdbWebService, UnexpectedContent
 
 #log_file_name = "/tmp/extract_LIMS_chromats.log"
 api_blob_file_name = 'blob_api.ab1.gz'
@@ -71,6 +72,13 @@ def get_chromat_from_db(db_host, db_name, db_user, db_pass, db_query):
 
     return blob[0]    
 
+def test_seqdb_api(base_url, api_key):
+    seqdbWS = seqdbWebService(api_key, base_url)
+    
+    # Get all feature types from seqDB
+    seqdb_feat_types = seqdbWS.getFeatureTypesWithIds()
+    print "Got SeqDB regions back! Number of regions: %s" % len(seqdb_feat_types)
+
 
 def main():
     """Load completed LIMS chromats into SeqDB."""
@@ -80,14 +88,15 @@ def main():
    
     logging.info("Script executed with the following command and arguments: %s" % (sys.argv))
 
-    
+    '''
+    # Retrieving chromatograms through SQL API does not work (yet). The file comes back corrupted.
     blob = get_chromat_from_api(
                                 api_key = config['lims']['sql_api']['key'], 
                                 api_url = config['lims']['sql_api']['url'], 
                                 query_id = config['lims']['query_ids']['get_sample_chromat'])
 
     write_blob_to_file(blob, api_blob_file_name)
-
+    '''
 
     blob = get_chromat_from_db(
                                db_host=config['lims']['db']['host'], 
@@ -97,6 +106,10 @@ def main():
                                db_query = config['lims']['db']['sample_chromat_query'])
     
     write_blob_to_file(blob, db_blob_file_name)
+    
+    print "Sample chromat was written to a file %s" % db_blob_file_name
+    
+    test_seqdb_api(base_url=config['seqdb']['api']['url'], api_key=config['seqdb']['api']['key'])
 
     #open(db_blob_file_name, 'wb').write(blob[0])
       
