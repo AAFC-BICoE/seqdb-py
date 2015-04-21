@@ -63,6 +63,11 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
         self.featureTypeIds.append(featureTypeId)
         
         self.assertRaises(requests.exceptions.HTTPError, self.seqdbWS.createFeatureType, "Test", "Test")
+        
+        
+    def testCreateChromatSequence_valid(self):
+        """ Test creating a sequence with binary .abi or .ab1 file (chromatogram) """
+        sequenceId = self.seqdbWS.createChromatSequence(name = "Test chromat", chromat_file = "data/blob_db.ab1")
     
     
 

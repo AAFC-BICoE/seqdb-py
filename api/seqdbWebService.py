@@ -120,13 +120,13 @@ class seqdbWebService:
     # TODO verify which payload values are required by the SeqDB WS API
     def createConsensusSequence(self, name, sequence, qualities=None, seqType="N", readNum=0, additional=None):
         post_data = { 
-                'consensus': {
-                    'name': name,
-                    'seq': sequence,
-                    'seqType': seqType,
-                    'readNum': readNum,
-                    },
-                }
+            'consensus': {
+                'name': name,
+                'seq': sequence,
+                'seqType': seqType,
+                'readNum': readNum,
+            },
+        }
 
         if additional != None:
             post_data['consensus'].update(additional)
@@ -138,6 +138,27 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+    
+    
+    def importChromatSequences(self, name, chromat_file):
+        post_data = {
+            "sequenceImportPayload": {
+                "base64File": "QUJJRgBldGRpcgAAAAED/wAcAAAATAAACMAAAXCQAAAAAP",
+                "fileName": "1551N13-15-3-A1_SF1769_01.ab1",
+                "plateType": 1,
+                "createLocation": False,
+                "traceFilePath": "/seqdb_working/taxon_seq"
+            }
+        }
+        
+        resp = self.create(self.base_url + '/sequenceimport', json.dumps(post_data))
+        jsn_resp = resp.json()
+        
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return (jsn_resp['statusCode'] == 401 )
+    
 
     def updateSeqSource(self, seqdb_id, params):
         resp = self.update(self.base_url + "/sequence/" + str(seqdb_id) + "/seqSource", json.dumps(params))
