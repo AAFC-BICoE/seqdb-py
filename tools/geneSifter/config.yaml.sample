@@ -1,3 +1,5 @@
+chromat_files_dir: <directory where chromatograms will be saved> # e.g. "/tmp/"
+
 lims:
     sql_api:
         url: "<URL to GeneSifter LE SQL API>"  # e.g. "***REMOVED***/SQLApi"

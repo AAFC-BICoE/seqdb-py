@@ -19,7 +19,7 @@ chromatograms to SeqDB.
 * virtualenv (sudo apt-get install python-virtualenv)
 * Following will be installed using Makefile:
   * python requests module (2.6.0)
-  * python psycopg2 module (2.6)
+  * python psycopg2 module (2.4)
   * python PyYAML module (3.11)
   * See requirements.txt for full / current list of requirements
 
