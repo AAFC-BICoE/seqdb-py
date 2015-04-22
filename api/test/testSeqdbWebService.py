@@ -67,7 +67,8 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
         
     def testCreateChromatSequence_valid(self):
         """ Test creating a sequence with binary .abi or .ab1 file (chromatogram) """
-        sequenceId = self.seqdbWS.createChromatSequence(name = "Test chromat", chromat_file = "data/blob_db.ab1")
+        success = self.seqdbWS.importChromatSequences(name = "Test chromat", chromat_file = "data/blob_db.ab1")
+        self.assertTrue(success, "Chromatogram was not persisted.")
     
     
 
