@@ -35,7 +35,7 @@ chromatograms to SeqDB.
 
 
 ## Project file description ##
-* run.sh: run script that invokes main project file with all the necessary environments. (Registered as an event handler in GSLE.)
+
 * extract_LIMS_chromats.py: main project file. Contains instructions to extract data from GSLE and load it to SeqDB.
 * api/seqdbWebService.py: python-wrapped SeqDB API calls. Used in main project file to communicate with SeqDB.
 * config.yaml: configuration file required by main project file. Contains particulars about GSLE, SeqDB, logging, etc.
@@ -43,7 +43,7 @@ chromatograms to SeqDB.
 * requirements.txt: file containing 3rd party python modules that need to be installed before the project execution.
 * README.txt: this file. Information about this project.
 * Makefile: describes metadata about this project and is used to build it
- 
+* run.sh: run script that invokes main project file with all the necessary environments. (Registered as an event handler in GSLE.) This is a system specific file and is here only to give an example on how this project can be executed. 
 
 ## Who do I talk to? ##
 * Oksana Korol

@@ -1,18 +1,26 @@
 #!/bin/bash
 
-date >> /tmp/test.log
-echo "New run activated" >> /tmp/test.log
+#############################################################################
+# This is a runner script for a python program, which loads chromatograms   #
+# from GeneSifter LIMS (GSLE) and pushed them to SeqDB.                     #
+#																			#
+# Author: Oksana Korol														#
+# Date created: 20.04.2015													#
+#############################################################################
+
+## This directory is where python code, its virtual environment and config is. 
+## See config.yaml for where logs and chromatograms will be written.
+cd /home/geospiza/scripts/uploadChromatsToSeqdb
+
 source /usr/local/geospiza/bin/genv
-echo "source /usr/local/geospiza/bin/genv  - Done" >> /tmp/test.log
-source venv/bin/activate
-echo "source venv/bin/activate  - Done" >> /tmp/test.log
 export LD_LIBRARY_PATH=/usr/local/geospiza/lib/
-echo "export LD_LIBRARY_PATH=/usr/local/geospiza/lib/  - Done. Attempting to run a script" >> /tmp/test.log
 
-python /home/geospiza/scripts/uploadChromatsToSqdb/extract_LIMS_chromats.py $@
+# Activate virtual environment for the python code to run. The virtual 
+# environment should be created with ">make" for this project (see README)
+source venv/bin/activate
 
-echo "Script finished execution." >> /tmp/test.log
+
+python extract_LIMS_chromats.py $@
+
 
 deactivate
-
-echo "Deactivated venv. Execution complete." >> /tmp/test.log
