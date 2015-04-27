@@ -10,3 +10,4 @@ pep8.log
 pep8.err
 pylint.log
 pylint.err
+dist
