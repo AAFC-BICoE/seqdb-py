@@ -25,13 +25,11 @@ chromatograms to SeqDB.
 
 ### Running ###
 
-* Create config.yaml:
-  * Copy config.yaml.sample to config.yaml
-  * Open config.yaml and provide all the information required
+* Create config.yaml (use provided config.yaml.sample as a template)
 * Build project:
-  * 
+  * make
 * Run project:
-  * 
+  * run.sh
 
 
 ## Project file description ##

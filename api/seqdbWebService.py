@@ -6,7 +6,7 @@ Created on Mar 4, 2015
 Sequence DB Web Services module
 '''
 
-import requests, json, logging
+import requests, json, logging, base64
 
 
 class UnexpectedContent(requests.exceptions.RequestException):
@@ -141,17 +141,23 @@ class seqdbWebService:
     
     
     def importChromatSequences(self, name, chromat_file):
+        
+        chromat_file_name = chromat_file.split("/")[-1]
+        with open(chromat_file, "r") as file_strem:
+            chromat_b64 = base64.b64encode(file_strem.read())
+        
         post_data = {
             "sequenceImportPayload": {
-                "base64File": "QUJJRgBldGRpcgAAAAED/wAcAAAATAAACMAAAXCQAAAAAP",
-                "fileName": "1551N13-15-3-A1_SF1769_01.ab1",
+                "base64File": chromat_b64,
+                "fileName": chromat_file_name,
                 "plateType": 1,
                 "createLocation": False,
                 "traceFilePath": "/seqdb_working/taxon_seq"
             }
         }
         
-        resp = self.create(self.base_url + '/sequenceimport', json.dumps(post_data))
+        
+        resp = self.create(self.base_url + '/sequenceImport', json.dumps(post_data))
         jsn_resp = resp.json()
         
         if 'statusCode' and 'message' not in jsn_resp.keys():

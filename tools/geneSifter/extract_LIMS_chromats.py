@@ -20,12 +20,6 @@ from api.seqdbWebService import seqdbWebService, UnexpectedContent
 api_blob_file_name = 'blob_api.ab1.gz'
 db_blob_file_name = 'blob_db.ab1.gz'
 
-def write_simple_log(msg):
-    with open("test.log", "a") as log_file:
-        log_file.write(msg + "\n")
-    log_file.close();
-    
-
 
 def load_config():
     """Return a config object populated from 'config.yaml'"""
@@ -84,18 +78,15 @@ def test_seqdb_api(base_url, api_key):
     # Get all feature types from seqDB
     seqdb_feat_types = seqdbWS.getFeatureTypesWithIds()
     logging.info("Got SeqDB regions back! Number of regions: %s" % len(seqdb_feat_types))
-    write_simple_log("Script: Got SeqDB regions back! Number of regions: %s" % len(seqdb_feat_types))
 
 
 def main():
     """Load completed LIMS chromats into SeqDB."""
     
-    write_simple_log("Script: in main().")
     
     config = load_config()
     logging.config.dictConfig(config['logging'])
     
-    write_simple_log("Script: got yaml config.")
    
     logging.info("Script executed with the following command and arguments: %s" % (sys.argv))
 
@@ -118,7 +109,6 @@ def main():
     
     write_blob_to_file(blob, config['chromat_files_dir'] + db_blob_file_name)
     
-    write_simple_log("Script: Sample chromat was written to a file %s" % config['chromat_files_dir'] + db_blob_file_name)
     print "Sample chromat was written to a file %s" % db_blob_file_name
     
     test_seqdb_api(base_url=config['seqdb']['api']['url'], api_key=config['seqdb']['api']['key'])
@@ -127,6 +117,4 @@ def main():
       
 
 if __name__ == '__main__':    
-    write_simple_log("Script: begin.")
     main()
-    write_simple_log("Script: end.")
