@@ -6,28 +6,36 @@ This repo contains a Python module to interact with the SeqDB WS API, and python
 ## How do I get set up? ##
 
 ### Requirements ###
-* Running instance of SeqDB (not currently Open Source)
-* Python 2.7
-* pip 6.0.8 (sudo apt-get install python-pip python-dev build-essential)
+
+    * Running instance of SeqDB (not currently Open Source)
+    * Python 2.7
+    * pip 6.0.8 (sudo apt-get install python-pip python-dev build-essential)
 
 
-### Not required, but recommended ###
+### Not required, but recommended
+
 * virtualenv (sudo apt-get install python-virtualenv)
 * make
 
 ### Running ###
 
 ## Method 1: Install everything from git repo ##
+
 This is a quickest way to install. It will install the source distribution directly from bitbucket git repo. 
 
 * Create and start your virtual environment:
+
    > virtualenv venv
    > source venv/bin/activate
+
 * Install source distribution from git:
+
    > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@module_distribution#egg=seqdb-py
+
 * Run desired tool
 
 ## Method 2: Install only API ##
+
 Lightweight install of only the api module with its dependencies.
 
 * Checkout code from bitbucket
