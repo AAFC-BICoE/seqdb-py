@@ -1,11 +1,11 @@
-#########
+=========
 SeqDB-Py 
-##########
+=========
 
 SeqDB-Py is a Python extension of SeqDB project. It allows access to SeqDB through its RESful API. The project contains both the API wrapper and the command line tools that use it.
 
 How do I get set up?
-####################
+====================
 
 Requirements:
   * Running instance of SeqDB (not currently Open Source)
@@ -19,11 +19,11 @@ Not required, but recommended
 
 
 Running
-#######
+=======
 
 
 Method 1: Install everything from git repo
-   This is a quickest way to install. It will install the source distribution directly from bitbucket git repo. 
+  This is a quickest way to install. It will install the source distribution directly from bitbucket git repo. 
 
 * Create and start your virtual environment:
 
@@ -38,7 +38,7 @@ Method 1: Install everything from git repo
 
 
 Method 2: Install only API
-   Lightweight install of only the api module with its dependencies.
+  Lightweight install of only the api module with its dependencies.
 
 * Checkout code from bitbucket
 * Go to api directory
@@ -48,9 +48,7 @@ Method 2: Install only API
 
 
 Example: Running seqdb_gb_insert.py 
-###################################
-
-This example assumes running from a clean directory using make and a virtual environment
+  This example assumes running from a clean directory using make and a virtual environment
 
 * Create config.yaml file
 
@@ -78,22 +76,23 @@ This example assumes running from a clean directory using make and a virtual env
 
 
 Subsequent use of seqdb_gb_insert.py
-  * Update PYTHONPATH
+  .
+* Update PYTHONPATH
 
    > PYTHONPATH=`pwd`:"$PYTHONPATH"
    > export PYTHONPATH
 
-  * Activate virtual environment
+* Activate virtual environment
 
    > source venv/bin/activate
 
-  * Run script
+* Run script
 
    > ./bin/seqdb_gb_insert.py
 
 
 Who do I talk to?
-#################
+=================
 
 * Oksana Korol
 * MBB team
