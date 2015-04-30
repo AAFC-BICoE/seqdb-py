@@ -1,6 +1,5 @@
 # README #
-
-This repo contains a Python module to interact with the SeqDB WS API, and python scripts that use this module to interact with SeqDB.
+    This repo contains a Python module to interact with the SeqDB WS API, and python scripts that use this module to interact with SeqDB.
 
 
 ## How do I get set up? ##
@@ -46,8 +45,9 @@ Lightweight install of only the api module with its dependencies.
 
 
 ### Example: Running seqdb_gb_insert.py from a clean directory using make and a virtual environment
+
 * Create config.yaml file
-   > cp config.yaml.sample config.yaml
+    > cp config.yaml.sample config.yaml
 
 * Initialize config.yaml file
   * Update entrez email address entry
