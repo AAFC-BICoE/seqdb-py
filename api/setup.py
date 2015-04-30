@@ -15,10 +15,9 @@ setup(name='seqdb-py-api',
     author='Oksana Korol',
     author_email='oksana.korol@agr.gc.ca',
     url='https://bitbucket.org/aafc-mbb/seqdb-py',
-    packages=['api'],
     #data_files=[('', 'requirements.txt')],
+    py_modules = ['seqdbWebService'],
     install_requires = [
-        'PyYAML==3.11',
         'requests==2.6.0', 
      ]
 )
