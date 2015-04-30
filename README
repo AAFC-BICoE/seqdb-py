@@ -4,21 +4,22 @@
 
 ## How do I get set up? ##
 
-### Requirements ###
 
+Requirements:
     * Running instance of SeqDB (not currently Open Source)
     * Python 2.7
     * pip 6.0.8 (sudo apt-get install python-pip python-dev build-essential)
 
 
-### Not required, but recommended
+Not required, but recommended
+    * virtualenv (sudo apt-get install python-virtualenv)
+    * make
 
-* virtualenv (sudo apt-get install python-virtualenv)
-* make
 
 ### Running ###
 
-## Method 1: Install everything from git repo ##
+
+Method 1: Install everything from git repo
 
 This is a quickest way to install. It will install the source distribution directly from bitbucket git repo. 
 
@@ -40,30 +41,37 @@ Lightweight install of only the api module with its dependencies.
 * Checkout code from bitbucket
 * Go to api directory
 * Install api distribution by running this in the api directory:
-   > python setup.api install
+
+  > python setup.api install
 
 
 
 ### Example: Running seqdb_gb_insert.py from a clean directory using make and a virtual environment
 
+
 * Create config.yaml file
+
     > cp config.yaml.sample config.yaml
 
 * Initialize config.yaml file
+
   * Update entrez email address entry
   * Update seqdb url
   * Update seqdb apikey
+
 * Create and activate virtual environment
+
    > make
    > source venv/bin/activate
 
 * Update PYTHONPATH
+
    > PYTHONPATH=`pwd`:"$PYTHONPATH"
    > export PYTHONPATH
 
 * Run script
 
-> ./bin/seqdb_gb_insert.py
+   > ./bin/seqdb_gb_insert.py
 
 
 ### Subsequent use of seqdb_gb_insert.py
@@ -74,13 +82,13 @@ Lightweight install of only the api module with its dependencies.
 
 * Activate virtual environment
 
-> source venv/bin/activate
+  > source venv/bin/activate
 
 * Run script
 
-> ./bin/seqdb_gb_insert.py
+  > ./bin/seqdb_gb_insert.py
 
 
 ## Who do I talk to? ##
-* Oksana Korol
-* MBB team
+    * Oksana Korol
+    * MBB team
