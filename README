@@ -77,17 +77,17 @@ This example assumes running from a clean directory using make and a virtual env
    > ./bin/seqdb_gb_insert.py
 
 
-### Subsequent use of seqdb_gb_insert.py
-* Update PYTHONPATH
+Subsequent use of seqdb_gb_insert.py
+  * Update PYTHONPATH
 
    > PYTHONPATH=`pwd`:"$PYTHONPATH"
    > export PYTHONPATH
 
-* Activate virtual environment
+  * Activate virtual environment
 
    > source venv/bin/activate
 
-* Run script
+  * Run script
 
    > ./bin/seqdb_gb_insert.py
 
