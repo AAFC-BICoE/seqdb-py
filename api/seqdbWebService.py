@@ -149,23 +149,15 @@ class seqdbWebService:
         
         return jsn_resp
 
-    # Imports a chromatogram from a file
-    # Param: chromat_file name of the chromatogram file
-    # Returns list of sequence ids of the sequences that were imported from the chromatogram
-    # Raises IOError
-    def importChromatSequences(self, chromat_file):
-        if not os.path.isfile(chromat_file):
-            raise IOError("Expecting a file, but got a directory.")
+
+    def importChromatSequences(self, blob, file_name):
         
-        chromat_file_name = os.path.basename(chromat_file)
-        
-        with open(chromat_file, "r") as file_strem:
-            chromat_b64 = base64.b64encode(file_strem.read())
+        chromat_b64 = base64.b64encode(blob)
         
         post_data = {
             "sequenceImportPayload": {
                 "base64File": chromat_b64,
-                "fileName": chromat_file_name,
+                "fileName": file_name,
                 "plateType": 1,
                 "createLocation": False,
                 "traceFilePath": "/seqdb_working/sanger_sequence"
@@ -181,7 +173,24 @@ class seqdbWebService:
         
         return jsn_resp['result']
 
-    
+
+    # Imports a chromatogram from a file
+    # Param: chromat_file name of the chromatogram file
+    # Returns list of sequence ids of the sequences that were imported from the chromatogram
+    # Raises IOError
+    def importChromatSequencesFromFile(self, chromat_file):
+        if not os.path.isfile(chromat_file):
+            raise IOError("Expecting a file, but got a directory.")
+        
+        chromat_file_name = os.path.basename(chromat_file)
+        
+        with open(chromat_file, "r") as file_strem:
+            blob = file_strem.read()
+        
+        return self.importChromatSequences(blob, chromat_file_name)
+       
+       
+       
     def deleteSequence(self, seq_id):
         request_url = "sequence/" + str(seq_id)
         jsn_resp = self.delete(self.base_url + request_url).json()
