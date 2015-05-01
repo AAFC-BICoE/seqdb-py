@@ -8,11 +8,18 @@ from api import seqdbWebService
 
     
 class TestSeqdbWebService(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(self):
+        try:
+            config = yaml.load(file('config.yaml', 'r'))
+        except IOError:
+            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
+        
+        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
 
     def setUp(self):
-        config = yaml.load(file('config.yaml', 'r'))
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
-        
+        pass
         
     def tearDown(self):
         pass
@@ -25,15 +32,26 @@ class TestSeqdbWebService(unittest.TestCase):
 
 class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
     
-    def setUp(self):
-        config = yaml.load(file('config.yaml', 'r'))
+    @classmethod
+    def setUpClass(self):
+        try:
+            config = yaml.load(file('config.yaml', 'r'))
+        except IOError:
+            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
+        
         self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+
+    def setUp(self):
         self.featureTypeIds = []
+        self.sequenceIds = []
 
     
     def tearDown(self):
         for ftId in self.featureTypeIds:
             self.seqdbWS.deleteFeatureType(ftId)
+
+        for sId in self.sequenceIds:
+            self.seqdbWS.deleteSequence(sId)
 
 
     def testConnection(self):
@@ -63,20 +81,45 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
         self.featureTypeIds.append(featureTypeId)
         
         self.assertRaises(requests.exceptions.HTTPError, self.seqdbWS.createFeatureType, "Test", "Test")
-        
+   
         
     def testCreateChromatSequence_valid(self):
         """ Test creating a sequence with binary .abi or .ab1 file (chromatogram) """
-        seq_id = self.seqdbWS.importChromatSequences(name = "Test chromat", chromat_file = "data/blob_db.ab1")
-        self.assertTrue(seq_id, "Chromatogram was not persisted.")
-    
-    
+        seq_id = self.seqdbWS.importChromatSequences(chromat_file = "data/GRDI_test_seq.ab1")
+        self.sequenceIds.extend(seq_id)
+        
+        self.assertTrue(seq_id, "Persisting chromatogram did not return an id.")
+
+    def testCreateChromatSequence_wrongPath(self):
+        """ Test creating a sequence with non-existent file (should throw exception)"""
+        self.assertRaises(IOError, self.seqdbWS.importChromatSequences, "data/")
+        self.assertRaises(IOError, self.seqdbWS.importChromatSequences, "zzz/non-existent.ab1")
+        
+
+
+    def testDelete(self):
+        #curl -X DELETE -H "apikey: ***REMOVED***" "***REMOVED***/sequence/4709479"
+        #curl -X GET -H "apikey: ***REMOVED***" "***REMOVED***/sequence/4709479"
+        pass
+        #self.seqdbWS.deleteSequence(4709474)
+        #self.seqdbWS.deleteSequence(4709476)
+        #self.seqdbWS.deleteSequence(4709481)
+        
+
 
 class TestSeqdbWebService_FeatureType_Existing(unittest.TestCase):
     
-    def setUp(self):
-        config = yaml.load(file('config.yaml', 'r'))
+    @classmethod
+    def setUpClass(self):
+        try:
+            config = yaml.load(file('config.yaml', 'r'))
+        except IOError:
+            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
+        
         self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+
+    
+    def setUp(self):
         featureTypeId = self.seqdbWS.createFeatureType("TestType", "Test")
         
         self.featureTypeIds = [featureTypeId]
@@ -105,9 +148,17 @@ class TestSeqdbWebService_FeatureType_Existing(unittest.TestCase):
 
 class TestSeqdbWebService_Region_Existing(unittest.TestCase):
     
-    def setUp(self):
-        config = yaml.load(file('config.yaml', 'r'))
+    @classmethod
+    def setUpClass(self):
+        try:
+            config = yaml.load(file('config.yaml', 'r'))
+        except IOError:
+            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
+        
         self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+
+    
+    def setUp(self):
         regionId = self.seqdbWS.createRegion("ITS", "Test")
         self.regionIds = [regionId]
 
@@ -117,10 +168,9 @@ class TestSeqdbWebService_Region_Existing(unittest.TestCase):
             self.seqdbWS.deleteRegion(rgId)
 
 
+
     def testGetItsRegionIds_valid(self):
         """Test retrieval of an ITS region ids - expected to pass"""
-        # curl -H "apikey: ***REMOVED***"  "***REMOVED***:8181/seqdb.web-2.5/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true"
-        # curl -H "apikey: ***REMOVED***"  "***REMOVED***/api/v1/region?filterName=name&filterValue=ITS&filterOperator=and&filterWildcard=true"
         actual = self.seqdbWS.getItsRegionIds()
         self.assertTrue(actual, "No ITS region ids returned.")
         self.assertIn(self.regionIds[0], actual, "Region id is not in the results.")
@@ -129,9 +179,17 @@ class TestSeqdbWebService_Region_Existing(unittest.TestCase):
 
 class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
     
-    def setUp(self):
-        config = yaml.load(file('config.yaml', 'r'))
+    @classmethod
+    def setUpClass(self):
+        try:
+            config = yaml.load(file('config.yaml', 'r'))
+        except IOError:
+            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
+        
         self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+
+    
+    def setUp(self):
         seqId, errCod, msg = self.seqdbWS.createConsensusSequence("Test", "ACGTCTGATCGATC")
         self.sequenceIds = [seqId]
 
@@ -140,7 +198,7 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
         for seqId in self.sequenceIds:
             self.seqdbWS.deleteConsensusSequence(seqId)
 
-            
+        
     def testGetFastaSeq(self):
         """Test retrieval of a sequence in fasta format (seqdb api fasta) - expected to pass"""
         actual = self.seqdbWS.getFastaSeq(self.sequenceIds[0])
@@ -155,7 +213,7 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
         self.assertTrue(actual, "Fasta sequence is empty.")
         self.assertIn(">", actual, "Fasta does not contain >.")
         self.assertIn("seqdbId:", actual, "Fasta does not contain seqdbId.")
-        
+         
 
     '''
     # TODO: this test requires sequence to be associated with region. The ability to do this via API is not yet implemented,
@@ -170,10 +228,17 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
 
 class TestSeqdbWebService_Sequence_FeatureType_Feature_Existing(unittest.TestCase):
 
-    def setUp(self):
-        config = yaml.load(file('config.yaml', 'r'))
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+    @classmethod
+    def setUpClass(self):
+        try:
+            config = yaml.load(file('config.yaml', 'r'))
+        except IOError:
+            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
         
+        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+
+
+    def setUp(self):
         seqId, code, msg = self.seqdbWS.createConsensusSequence("Test", "ACsdgafGTCTGATCGATC")
         self.sequenceIds = [seqId]
         

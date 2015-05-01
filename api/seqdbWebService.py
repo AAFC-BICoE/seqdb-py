@@ -6,7 +6,7 @@ Created on Mar 4, 2015
 Sequence DB Web Services module
 '''
 
-import requests, json, logging, base64
+import requests, json, logging, base64, os
 
 
 class UnexpectedContent(requests.exceptions.RequestException):
@@ -139,10 +139,26 @@ class seqdbWebService:
 
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
     
-    
-    def importChromatSequences(self, name, chromat_file):
+    # TODO Not tested
+    def deleteConsensusSequence(self, consensus_id):
+        request_url = "/consensus/" + str(consensus_id)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+  
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
         
-        chromat_file_name = chromat_file.split("/")[-1]
+        return jsn_resp
+
+    # Imports a chromatogram from a file
+    # Param: chromat_file name of the chromatogram file
+    # Returns list of sequence ids of the sequences that were imported from the chromatogram
+    # Raises IOError
+    def importChromatSequences(self, chromat_file):
+        if not os.path.isfile(chromat_file):
+            raise IOError("Expecting a file, but got a directory.")
+        
+        chromat_file_name = os.path.basename(chromat_file)
+        
         with open(chromat_file, "r") as file_strem:
             chromat_b64 = base64.b64encode(file_strem.read())
         
@@ -152,7 +168,7 @@ class seqdbWebService:
                 "fileName": chromat_file_name,
                 "plateType": 1,
                 "createLocation": False,
-                "traceFilePath": "/seqdb_working/taxon_seq"
+                "traceFilePath": "/seqdb_working/sanger_sequence"
             }
         }
         
@@ -160,11 +176,21 @@ class seqdbWebService:
         resp = self.create(self.base_url + '/sequenceImport', json.dumps(post_data))
         jsn_resp = resp.json()
         
+        if 'statusCode' and 'message' and 'result' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+        
+        return jsn_resp['result']
+
+    
+    def deleteSequence(self, seq_id):
+        request_url = "sequence/" + str(seq_id)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+  
         if 'statusCode' and 'message' not in jsn_resp.keys():
             raise UnexpectedContent(response=jsn_resp)
         
-        return (jsn_resp['statusCode'] == 401 )
-    
+        return jsn_resp
+
 
     def updateSeqSource(self, seqdb_id, params):
         resp = self.update(self.base_url + "/sequence/" + str(seqdb_id) + "/seqSource", json.dumps(params))
@@ -175,15 +201,6 @@ class seqdbWebService:
 
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
 
-    # TODO Not tested
-    def deleteConsensusSequence(self, consensus_id):
-        request_url = "/consensus/" + str(consensus_id)
-        jsn_resp = self.delete(self.base_url + request_url).json()
-  
-        if 'statusCode' and 'message' not in jsn_resp.keys():
-            raise UnexpectedContent(response=jsn_resp)
-        
-        return jsn_resp
             
     def getJsonSeq(self, seq_id):
         jsn_resp = self.retrieveJson(self.base_url + "/sequence/" + str(seq_id))
