@@ -90,6 +90,13 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
         
         self.assertTrue(seq_id, "Persisting chromatogram did not return an id.")
 
+    def testCreateChromatSequenceGz_valid(self):
+        """ Test creating a sequence with binary .abi or .ab1 file (chromatogram) """
+        seq_id = self.seqdbWS.importChromatSequencesFromFile(chromat_file = "data/blob_db.ab1.gz")
+        self.sequenceIds.extend(seq_id)
+        
+        self.assertTrue(seq_id, "Persisting chromatogram did not return an id.")
+
     def testCreateChromatSequence_wrongPath(self):
         """ Test creating a sequence with non-existent file (should throw exception)"""
         self.assertRaises(IOError, self.seqdbWS.importChromatSequencesFromFile, "data/")

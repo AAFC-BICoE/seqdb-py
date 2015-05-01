@@ -7,6 +7,7 @@ Sequence DB Web Services module
 '''
 
 import requests, json, logging, base64, os
+import gzip, mimetypes
 
 
 class UnexpectedContent(requests.exceptions.RequestException):
@@ -184,11 +185,14 @@ class seqdbWebService:
         
         chromat_file_name = os.path.basename(chromat_file)
         
-        with open(chromat_file, "r") as file_strem:
-            blob = file_strem.read()
+        if mimetypes.guess_type(chromat_file_name)[1] == "gzip":
+            file_strem = gzip.open(chromat_file, "r")
+        else:    
+            file_strem = open(chromat_file, "r")
+        
+        blob = file_strem.read()
         
         return self.importChromatSequences(blob, chromat_file_name)
-       
        
        
     def deleteSequence(self, seq_id):
