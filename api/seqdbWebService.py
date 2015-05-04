@@ -186,14 +186,21 @@ class seqdbWebService:
         chromat_file_name = os.path.basename(chromat_file)
         
         if mimetypes.guess_type(chromat_file_name)[1] == "gzip":
-            file_strem = gzip.open(chromat_file, "r")
+            
+            file_strem = gzip.open(chromat_file, "rb")
+            
+            # Remove .gz extension for file name
+            chromat_file_name = chromat_file_name[:-3]
+
         else:    
-            file_strem = open(chromat_file, "r")
+            file_strem = open(chromat_file, "r")    
         
         blob = file_strem.read()
         
-        return self.importChromatSequences(blob, chromat_file_name)
-       
+        file_strem.close()
+
+        return self.importChromatSequences(blob = blob, file_name = chromat_file_name)
+                   
        
     def deleteSequence(self, seq_id):
         request_url = "sequence/" + str(seq_id)
