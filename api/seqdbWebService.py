@@ -212,6 +212,11 @@ class seqdbWebService:
         return jsn_resp
 
 
+    def bulkDeleteSequence(self, seq_ids):
+        for seq_id in seq_ids:
+            self.deleteSequence(seq_id)
+
+
     def updateSeqSource(self, seqdb_id, params):
         resp = self.update(self.base_url + "/sequence/" + str(seqdb_id) + "/seqSource", json.dumps(params))
         jsn_resp = resp.json()
