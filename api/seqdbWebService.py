@@ -151,17 +151,19 @@ class seqdbWebService:
         return jsn_resp
 
 
-    def importChromatSequences(self, blob, file_name):
+    def importChromatSequences(self, blob, seq_name, trace_file_path="seqdb-py-api"):
+        '''
+        '''
         
         chromat_b64 = base64.b64encode(blob)
         
         post_data = {
             "sequenceImportPayload": {
                 "base64File": chromat_b64,
-                "fileName": file_name,
+                "fileName": seq_name,
                 "plateType": 1,
                 "createLocation": False,
-                "traceFilePath": "/seqdb_working/sanger_sequence"
+                "traceFilePath": trace_file_path
             }
         }
         
@@ -199,7 +201,7 @@ class seqdbWebService:
         
         file_strem.close()
 
-        return self.importChromatSequences(blob = blob, file_name = chromat_file_name)
+        return self.importChromatSequences(blob = blob, seq_name = chromat_file_name)
                    
        
     def deleteSequence(self, seq_id):

@@ -109,10 +109,17 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
     def testDelete(self):
         #curl -X DELETE -H "apikey: ***REMOVED***" "***REMOVED***/sequence/4709479"
         #curl -X GET -H "apikey: ***REMOVED***" "***REMOVED***/sequence/4709479"
-        pass
-        #self.seqdbWS.deleteSequence(4709474)
+        '''
+        delete_ids = (
+            4719324,
+            4719325,
+            4719355
+            )
+        self.seqdbWS.bulkDeleteSequence(delete_ids)
+        '''        
         #self.seqdbWS.deleteSequence(4709476)
         #self.seqdbWS.deleteSequence(4709481)
+        pass
         
 
 
