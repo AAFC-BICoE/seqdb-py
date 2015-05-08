@@ -323,7 +323,7 @@ class seqdbWebService:
         else:
             return ''
     
-    # Returns a dictionary of Feature types: featureName: featureId    
+    # Returns a dictionary of Feature types: name: featureId    
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
     def getFeatureTypesWithIds(self):
         jsn_resp = self.retrieveJson(self.base_url + "/featureType")
@@ -342,7 +342,7 @@ class seqdbWebService:
                     if 'result' not in jsn_resp.keys():
                         raise UnexpectedContent(response=jsn_resp)
                 
-                    feature_name = jsn_resp['result']['featureName']
+                    feature_name = jsn_resp['result']['name']
                     feature_types[feature_name] = feat_type_id 
                 
             return feature_types
@@ -352,7 +352,7 @@ class seqdbWebService:
             return ''
     
     def createFeatureType(self, featureTypeName, featureTypeDescription = ''):
-        post_data = {"featureType":{"featureDescription":featureTypeDescription,"featureName":featureTypeName }}
+        post_data = {"featureType":{"description":featureTypeDescription,"name":featureTypeName }}
         
         resp = self.create(self.base_url + '/featureType', json.dumps(post_data))
         jsn_resp = resp.json()
