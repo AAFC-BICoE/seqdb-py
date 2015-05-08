@@ -151,7 +151,7 @@ class seqdbWebService:
         return jsn_resp
 
 
-    def importChromatSequences(self, blob, seq_name, trace_file_path="seqdb-py-api"):
+    def importChromatSequences(self, blob, seq_name, notes="", trace_file_path=""):
         '''
         '''
         
@@ -163,7 +163,9 @@ class seqdbWebService:
                 "fileName": seq_name,
                 "plateType": 1,
                 "createLocation": False,
-                "traceFilePath": trace_file_path
+                "traceFilePath": trace_file_path,
+                "notes": notes
+                
             }
         }
         
@@ -181,7 +183,7 @@ class seqdbWebService:
     # Param: chromat_file name of the chromatogram file
     # Returns list of sequence ids of the sequences that were imported from the chromatogram
     # Raises IOError
-    def importChromatSequencesFromFile(self, chromat_file):
+    def importChromatSequencesFromFile(self, chromat_file, notes="", trace_file_path=""):
         if not os.path.isfile(chromat_file):
             raise IOError("Expecting a file, but got a directory.")
         
@@ -201,7 +203,7 @@ class seqdbWebService:
         
         file_strem.close()
 
-        return self.importChromatSequences(blob = blob, seq_name = chromat_file_name)
+        return self.importChromatSequences(blob = blob, seq_name = chromat_file_name, notes=notes)
                    
        
     def deleteSequence(self, seq_id):
