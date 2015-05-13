@@ -151,7 +151,9 @@ class seqdbWebService:
         return jsn_resp
 
 
-    def importChromatSequences(self, blob, seq_name, notes="", trace_file_path=""):
+    # returns a list of seqdb sequence ids for the created sequences OR empty list id created failed
+    # dest_file_name name with which the chromatogram will be saved on sedDB side; i.e. expected to have .ab1 extension
+    def importChromatSequences(self, blob, dest_file_name, notes="", trace_file_path=""):
         '''
         '''
         
@@ -160,7 +162,7 @@ class seqdbWebService:
         post_data = {
             "sequenceImportPayload": {
                 "base64File": chromat_b64,
-                "fileName": seq_name,
+                "fileName": dest_file_name,
                 "plateType": 1,
                 "createLocation": False,
                 "traceFilePath": trace_file_path,
@@ -173,21 +175,31 @@ class seqdbWebService:
         resp = self.create(self.base_url + '/sequenceImport', json.dumps(post_data))
         jsn_resp = resp.json()
         
-        if 'statusCode' and 'message' and 'result' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp.keys():
             raise UnexpectedContent(response=jsn_resp)
         
-        return jsn_resp['result']
+        result = ""
+        if 'result' in jsn_resp.keys():
+            result = jsn_resp['result']
+        else:
+            logging.warn("Importing chromatogram failed with status code: '%s' and message: '%s'" % (jsn_resp['statusCode'], jsn_resp['message']) )
+        
+        return result
 
 
     # Imports a chromatogram from a file
     # Param: chromat_file name of the chromatogram file
     # Returns list of sequence ids of the sequences that were imported from the chromatogram
     # Raises IOError
-    def importChromatSequencesFromFile(self, chromat_file, notes="", trace_file_path=""):
+    def importChromatSequencesFromFile(self, chromat_file, notes="", trace_file_path="", dest_file_name=""):
         if not os.path.isfile(chromat_file):
             raise IOError("Expecting a file, but got a directory.")
         
         chromat_file_name = os.path.basename(chromat_file)
+        
+        if not dest_file_name:
+            # get just the file name, no extension
+            dest_file_name = os.path.splitext(os.path.basename(chromat_file_name))[0]
         
         if mimetypes.guess_type(chromat_file_name)[1] == "gzip":
             
@@ -203,7 +215,7 @@ class seqdbWebService:
         
         file_strem.close()
 
-        return self.importChromatSequences(blob = blob, seq_name = chromat_file_name, notes=notes)
+        return self.importChromatSequences(blob = blob, dest_file_name = dest_file_name, notes=notes, trace_file_path=trace_file_path)
                    
        
     def deleteSequence(self, seq_id):
@@ -310,6 +322,7 @@ class seqdbWebService:
         
     # Given a region id, return sequence ids, belonging to this region
     # api_key and base_url required for ws request
+    # returns a list of seqdb sequence ids for the created sequences OR empty list id created failed
     # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
     def getSeqIds(self, region_id):
         request_url = "/region/" + str(region_id) + "/sequence"

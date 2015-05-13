@@ -85,7 +85,9 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
         
     def testCreateChromatSequence_valid(self):
         """ Test creating a sequence with binary .abi or .ab1 file (chromatogram) """
-        seq_id = self.seqdbWS.importChromatSequencesFromFile(chromat_file = "data/GRDI_test_seq.ab1", notes="test", trace_file_path="test_path")
+        seq_id = self.seqdbWS.importChromatSequencesFromFile(chromat_file = "data/GRDI_test_seq.ab1", notes="This is a test upload.", 
+                    trace_file_path="test_path",dest_file_name="test.ab1",)
+        
         self.sequenceIds.extend(seq_id)
         
         self.assertTrue(seq_id, "Persisting chromatogram did not return an id.")
@@ -111,12 +113,12 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
         #curl -X GET -H "apikey: ***REMOVED***" "***REMOVED***/sequence/4709479"
         '''
         delete_ids = (
-            4719324,
-            4719325,
-            4719355
+4709635,
+4709636,
             )
         self.seqdbWS.bulkDeleteSequence(delete_ids)
-        '''        
+        '''
+        
         #self.seqdbWS.deleteSequence(4709476)
         #self.seqdbWS.deleteSequence(4709481)
         pass
