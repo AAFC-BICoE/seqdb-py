@@ -23,5 +23,13 @@ setup(name='seqdb-py',
         'PyYAML==3.11',
         'requests==2.6.0', 
         'six==1.9.0',
-     ]
+     ],
+    entry_points={
+    'console_scripts': [
+        'pull_seqdb_its_seqs = tools.pull_seqdb_its_seqs:main',
+        'push_seqdb_its_feat = tools.push_seqdb_its_feat:main',
+        'delete_seqdb_features = tools.delete_seqdb_features:main',
+        'seqdb_gb_insert = tools.seqdb_gb_insert:main',
+    ],
+},
 )

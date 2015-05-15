@@ -70,7 +70,9 @@ def parse_input_args(argv):
 
 
 
-def main(api_key,base_url):
+def pull_its_seqs(api_key,base_url):
+    ''' Downloads all ITS sequences from SeqDB and writes them to a file '''
+    
     #print "Sending request to: " + base_url
     
     seqdbWS = seqdbWebService(api_key, base_url)
@@ -164,8 +166,7 @@ def main(api_key,base_url):
     return success_ids
     
 
-
-if __name__ == '__main__':
+def main():
     # Start a log file. filemode='w' overwrites the log for each program run
     logging.basicConfig(filename=log_file_name, filemode='w', level=logging.DEBUG)
     
@@ -176,9 +177,14 @@ if __name__ == '__main__':
     
     logging.info("Base URL for web services is: '%s'" % base_url)
    
-    seq_ids = main(api_key, base_url)
+    seq_ids = pull_its_seqs(api_key, base_url)
     
     print "Execution complete."
     print "Number of sequences loaded from Sequence Dababase:  %s" % len(seq_ids) 
     print "Sequences written to a file: '%s'" % output_file_name
     print "Execution log is written to a file: '%s'" % log_file_name
+
+
+
+if __name__ == '__main__':
+    main()
