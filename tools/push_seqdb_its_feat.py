@@ -70,7 +70,7 @@ def parse_input_args(argv):
     else:
         base_url = local_url
     
-    return seqdb_api_key, features_file_name, base_url
+    return (seqdb_api_key, features_file_name, base_url)
 
 
 

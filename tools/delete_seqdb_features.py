@@ -66,7 +66,7 @@ def parse_input_args(argv):
     else:
         base_url = local_url
     
-    return seqdb_api_key, features_file_name, base_url
+    return (seqdb_api_key, features_file_name, base_url)
 
 
 
@@ -86,7 +86,7 @@ def delete_features(api_key, feature_ids_file_name, base_url):
         feat_file = open(feature_ids_file_name,"r")
     except IOError as e:
         if e.errno == 2:
-            logging.error("Could not open feature ids file <%s>." % features_file_name)
+            logging.error("Could not open feature ids file <%s>." % feature_ids_file_name)
             logging.error(e.message)
             print "Could not open feature ids file. See log file for details."
             sys.exit(1)

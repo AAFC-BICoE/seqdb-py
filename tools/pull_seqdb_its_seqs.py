@@ -65,7 +65,7 @@ def parse_input_args(argv):
     else:
         base_url = local_url
     
-    return seqdb_api_key, base_url
+    return (seqdb_api_key, base_url)
 
 
 
