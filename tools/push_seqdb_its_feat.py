@@ -76,7 +76,7 @@ def parse_input_args(argv):
 
 
 # B15_17_SH817_ITS_ITS5    622 bp.    SSU: Not found    ITS1: 1-241    5.8S: 242-399    ITS2: 400-557    LSU: 558-622
-def main(api_key, features_file_name, base_url):
+def push_its_features(api_key, features_file_name, base_url):
     print_error_line = "Execution was not successful. See log for details: '%s'" %log_file_name
     
     created_feature_ids = []
@@ -172,8 +172,9 @@ def main(api_key, features_file_name, base_url):
     return created_feature_ids
 
     
-
-if __name__ == '__main__':
+def main():
+    ''' Writes ITS features to SeqDB '''
+    
     # Start a log file. filemode='w' overwrites the log for each program run
     logging.basicConfig(filename=log_file_name, filemode='w', level=logging.DEBUG)
     
@@ -184,10 +185,13 @@ if __name__ == '__main__':
     logging.info("Base URL for web services is: '%s'" % base_url)
     logging.info("File name with features: %s" % features_file_name)
     
-    ok_feat_ids = main(seqdb_api_key, features_file_name, base_url)
+    ok_feat_ids = push_its_features(seqdb_api_key, features_file_name, base_url)
     
     print "Execution complete."
     print "Number of features written to Sequence Dababase:   %i " % len(ok_feat_ids)  
     print "Created feature ids are written to a file: '%s'" % output_file_name
     print "Execution log is written to a file: '%s'" % log_file_name
 
+
+if __name__ == '__main__':
+    main()

@@ -71,8 +71,13 @@ def parse_input_args(argv):
 
 
 
-# File should contain feature ids either: 1) on a separate line; 2) one line, separated by comma; 3) separated by tab
-def main(api_key, feature_ids_file_name, base_url):
+def delete_features(api_key, feature_ids_file_name, base_url):
+    ''' Deletes features with the ids, specified in the file. 
+    File should contain feature ids either:
+        1) on a separate line; 
+        2) one line, separated by comma; 
+        3) separated by tab
+    '''
     #print "Sending request to: " + base_url
     
     # Open an ITSx positions file
@@ -136,8 +141,10 @@ def main(api_key, feature_ids_file_name, base_url):
    
     return success_ids, fail_ids
     
-
-if __name__ == '__main__':
+    
+def main():
+    ''' Deletes features from SeqDB with the feature ids, specified in the input file. '''
+    
     # Start a log file. filemode='w' overwrites the log for each program run
     logging.basicConfig(filename=log_file_name, filemode='w', level=logging.DEBUG)
     
@@ -148,7 +155,7 @@ if __name__ == '__main__':
     logging.info("Base URL for web services is: '%s'" % base_url)
     logging.info("File name with feature ids to delete: %s" % features_file_name)
     
-    success_ids,fail_ids = main(seqdb_api_key, features_file_name, base_url)
+    success_ids,fail_ids = delete_features(seqdb_api_key, features_file_name, base_url)
     
     
     print "Execution complete."
@@ -157,4 +164,7 @@ if __name__ == '__main__':
     print "Feature ids, which failed to be deleted are written to a file: '%s'" % output_file_name
     print "Execution log is written to a file: '%s'" % log_file_name
 
+
+if __name__ == '__main__':
+    main()
     
