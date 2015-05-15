@@ -15,41 +15,42 @@ Requirements:
 
 Not required, but recommended
   * virtualenv (sudo apt-get install python-virtualenv)
-  * make
 
 
 Running
 =======
 
 
-Method 1: Install everything from git repo
-  This is a quickest way to install. It will install the source distribution directly from bitbucket git repo. 
-
 * Create and start your virtual environment:
 
    > virtualenv venv
    > source venv/bin/activate
 
-* Install source distribution from git:
+* Install seqdb-py from git:
+
+1. Source distribution:
 
    > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@module_distribution#egg=seqdb-py
 
-* Run desired tool
+2. Version 0.2:
+
+   > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@v0.2#egg=seqdb-py
 
 
-Method 2: Install only API
-  Lightweight install of only the api module with its dependencies.
+* Run desired tool (below are available as entry points):
 
-* Checkout code from bitbucket
-* Go to api directory
-* Install api distribution by running this in the api directory:
+   > pull_seqdb_its_seqs
+   > push_seqdb_its_feat
+   > delete_seqdb_features
+   > seqdb_gb_insert 
+   
+   Note: see help on each tool for usage
 
-   > python setup.api install
 
 
 Example: Running seqdb_gb_insert.py 
-  This example assumes running from a clean directory using make and a virtual environment
-
+  This example assumes you've activated a virtual environment and installed seqdb-py in it.
+  
 * Create config.yaml file
 
    > cp config.yaml.sample config.yaml
@@ -60,35 +61,12 @@ Example: Running seqdb_gb_insert.py
   * Update seqdb url
   * Update seqdb apikey
 
-* Create and activate virtual environment
-
-   > make
-   > source venv/bin/activate
-
-* Update PYTHONPATH
-
-   > PYTHONPATH=`pwd`:"$PYTHONPATH"
-   > export PYTHONPATH
 
 * Run script
 
-   > ./bin/seqdb_gb_insert.py
+   > seqdb_gb_insert
 
 
-Subsequent use of seqdb_gb_insert.py
-  .
-* Update PYTHONPATH
-
-   > PYTHONPATH=`pwd`:"$PYTHONPATH"
-   > export PYTHONPATH
-
-* Activate virtual environment
-
-   > source venv/bin/activate
-
-* Run script
-
-   > ./bin/seqdb_gb_insert.py
 
 
 Who do I talk to?
