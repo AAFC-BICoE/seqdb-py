@@ -32,12 +32,18 @@ class seqdbWebService:
     
         
         
-    # Submits a request to SeqDB web services
-    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
-    # @request_url": full request url
-    # Returns response (still need to format it to JSon, etc.) or nothing if resource was not found 
+    
     def retrieve(self, request_url, params=None):
-        
+        ''' Submits a request to SeqDB web services
+        Kwargs:
+            request_url: full request url
+        Returns:
+            SeqDB API response (still need to format it to JSon, etc.) or nothing if resource was not found 
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError  
+        '''    
         req_header = { 'apikey': self.api_key }
         resp = requests.get(request_url, headers=req_header, params=params)
         
@@ -50,33 +56,61 @@ class seqdbWebService:
         return resp
     
     
-    # Submits a request to SeqDB web services
-    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
-    # Returns json formatted object
+
     def retrieveJson(self, request_url, params=None):
+        ''' Submits a request to SeqDB web services
+        Returns:
+            json formatted object
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError  
+        '''
         resp = self.retrieve(request_url, params=params)
         if resp:
             return json.loads(resp.text)
         else:
             return resp
     
+
+    
     def update(self, request_url, json_data):
+        ''' Updates a SeqDB entity
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError  
+        '''
         req_header = { 'apikey': self.api_key, 'Content-Type': 'application/json' }
         resp = requests.put(request_url, headers=req_header, data=json_data)
 
         resp.raise_for_status()
 
         return resp
+
+
     
     def create(self, request_url, json_data):
+        ''' Creates a SeqDB entity
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError  
+        '''
         req_header = { 'apikey': self.api_key, 'Content-Type': 'application/json' }
         resp = requests.post(request_url, headers=req_header, data=json_data)  #(url, data, json)
         
         resp.raise_for_status()
         
         return resp
-    
+
+
+
     def delete(self, request_url):
+        ''' Creates a SeqDB entity
+        Raises:
+            requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+        '''
         req_header = { 'apikey': self.api_key }
         resp = requests.delete(request_url, headers=req_header)
         
@@ -84,8 +118,17 @@ class seqdbWebService:
         resp.raise_for_status()
         
         return resp
+
+
     
     def getJsonConsensusSequenceIds(self, params=None):
+        ''' Gets sequence ids of all consensus sequences
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent  
+        '''
         jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
 
         if 'count' and 'sortColum' and 'limit' and 'offset' and 'message' and 'statusCode' and 'sortOrder' not in jsn_resp:
@@ -96,6 +139,8 @@ class seqdbWebService:
 
         return jsn_resp
 
+
+
     def getJsonConsensusSequenceIdsByName(self, name):
         params = {'filterName':'sequence.name',
                   'filterValue':name,
@@ -103,6 +148,8 @@ class seqdbWebService:
                   'filterWildcard':'true'}
 
         return self.getJsonConsensusSequenceIds(params)
+
+
 
     def getJsonConsensusSequenceIdsByGI(self, gi):
             params = {'filterName':'sequence.genBankGI',
@@ -117,6 +164,7 @@ class seqdbWebService:
                 raise SystemError("More than one record associated with gi, which should be unique")
 
             return jsn_resp
+
 
     # TODO verify which payload values are required by the SeqDB WS API
     def createConsensusSequence(self, name, sequence, qualities=None, seqType="N", readNum=0, additional=None):
@@ -139,6 +187,8 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+
+
     
     # TODO Not tested
     def deleteConsensusSequence(self, consensus_id):
@@ -151,10 +201,14 @@ class seqdbWebService:
         return jsn_resp
 
 
-    # returns a list of seqdb sequence ids for the created sequences OR empty list id created failed
-    # dest_file_name name with which the chromatogram will be saved on sedDB side; i.e. expected to have .ab1 extension
     def importChromatSequences(self, blob, dest_file_name, notes="", trace_file_path=""):
-        '''
+        ''' Imports a binary blob (i.e. chromatogram) to seqdb
+        Kwargs:
+            dest_file_name name with which the chromatogram will be saved on sedDB side; i.e. expected to have .ab1 extension
+        Returns:
+            a list of seqdb sequence ids for the created sequences OR empty list if creation failed
+        Raises:
+            UnexpectedContent
         '''
         
         chromat_b64 = base64.b64encode(blob)
@@ -187,11 +241,18 @@ class seqdbWebService:
         return result
 
 
-    # Imports a chromatogram from a file
-    # Param: chromat_file name of the chromatogram file
-    # Returns list of sequence ids of the sequences that were imported from the chromatogram
-    # Raises IOError
+
     def importChromatSequencesFromFile(self, chromat_file, notes="", trace_file_path="", dest_file_name=""):
+        ''' Imports a chromatogram from a file
+        Args:
+            chromat_file name of the chromatogram file
+        Returns:
+            list of sequence ids of the sequences that were imported from the chromatogram
+        Raises:
+            IOError
+            UnexpectedContent
+        '''
+        
         if not os.path.isfile(chromat_file):
             raise IOError("Expecting a file, but got a directory.")
         
@@ -216,9 +277,19 @@ class seqdbWebService:
         file_strem.close()
 
         return self.importChromatSequences(blob = blob, dest_file_name = dest_file_name, notes=notes, trace_file_path=trace_file_path)
-                   
-       
+
+
+
     def deleteSequence(self, seq_id):
+        ''' Deletes a SeqDB sequence
+        Args:
+            seq_id: id of the sequence to be deleted
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent  
+        '''
         request_url = "sequence/" + str(seq_id)
         jsn_resp = self.delete(self.base_url + request_url).json()
   
@@ -228,9 +299,20 @@ class seqdbWebService:
         return jsn_resp
 
 
+
     def bulkDeleteSequence(self, seq_ids):
+        ''' Deletes a list of SeqDB sequences
+        Args:
+            seq_ids: list of seqdb sequence ids to be deleted
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent  
+        '''
         for seq_id in seq_ids:
             self.deleteSequence(seq_id)
+
 
 
     def updateSeqSource(self, seqdb_id, params):
@@ -242,7 +324,8 @@ class seqdbWebService:
 
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
 
-            
+
+
     def getJsonSeq(self, seq_id):
         jsn_resp = self.retrieveJson(self.base_url + "/sequence/" + str(seq_id))
         if 'result' not in jsn_resp.keys() or not jsn_resp['result']:
@@ -254,27 +337,43 @@ class seqdbWebService:
         
         return jsn_seq
 
-    # Gets sequence from SeqDB and returns it in a fasta format with a unique header.
-    # Note, the fast formatting is done here, instead of using seqdb fasta web service request
-    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError
     def getFastaSeqPlus(self, seq_id):
+        ''' Gets sequence from SeqDB and returns it in a fasta format with a unique header. Note, the fasta 
+            formatting is done here, instead of using seqdb fasta web service request
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         jsn_seq = self.getJsonSeq(seq_id)
         # TODO Use BioPython to format
         fasta_seq =  '>' + jsn_seq['name'] + '|seqdbId:' + str(seq_id) + '\n' + jsn_seq['seq'] + '\n';
         return fasta_seq
-       
-    # Gets sequence in fasta format (SeqDB fasta request)
-    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+
+
+
     def getFastaSeq(self, seq_id):
+        ''' Gets sequence in fasta format (SeqDB fasta request)
+        Raises:
+            requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError
+        '''
         url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
         response = self.retrieve(url)
         return response.content
 
     
-    # Get region IDs of ITS sequences
-    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
     def getItsRegionIds(self):
+        ''' Get region IDs of ITS sequences
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''  
         return self.getRegionIdsByName("ITS")
+
+
 
     def getRegionIdsByName(self, name):
         params = { 
@@ -285,7 +384,16 @@ class seqdbWebService:
                 }
         return self.getRegionIds(params)
 
+
+
     def getRegionIds(self, params):
+        ''' Get region IDs
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''  
         jsn_resp = self.retrieveJson(self.base_url + "/region", params)
         if jsn_resp:
             if 'result' not in jsn_resp.keys():
@@ -295,7 +403,19 @@ class seqdbWebService:
         else:
             return ''
 
+
+
     def createRegion(self, name, description):
+        ''' Creates a region
+        Args:
+            name: region name
+            description: region description
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         # TODO Question requirement for gene region to be associated with a group
         post_data = {"region":{"description":description, "group":{"id":1}, "name":name }}
  
@@ -309,6 +429,15 @@ class seqdbWebService:
 
     
     def deleteRegion(self, regionId):
+        ''' Deletes a region
+        Args:
+            regionId: id of a region to be created
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         request_url = "/region/" + str(regionId)
         jsn_resp = self.delete(self.base_url + request_url).json()
   
@@ -316,15 +445,19 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
         
         return jsn_resp
-        
 
 
-        
-    # Given a region id, return sequence ids, belonging to this region
-    # api_key and base_url required for ws request
-    # returns a list of seqdb sequence ids for the created sequences OR empty list id created failed
-    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+
     def getSeqIds(self, region_id):
+        ''' Given a region id, return sequence ids, belonging to this region
+        Returns:
+            a list of seqdb sequence ids for the created sequences OR empty list id created failed
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         request_url = "/region/" + str(region_id) + "/sequence"
         jsn_resp = self.retrieveJson(self.base_url + request_url)
         
@@ -335,10 +468,20 @@ class seqdbWebService:
             return jsn_resp['result']
         else:
             return ''
-    
-    # Returns a dictionary of Feature types: name: featureId    
-    # Raises requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, and requests.exceptions.HTTPError  
+
+
+
     def getFeatureTypesWithIds(self):
+        ''' 
+        Returns:
+            a dictionary of Feature types: name: featureId
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        
         jsn_resp = self.retrieveJson(self.base_url + "/featureType")
         
         if jsn_resp:
@@ -363,8 +506,19 @@ class seqdbWebService:
     
         else:
             return ''
-    
+
+
+
     def createFeatureType(self, featureTypeName, featureTypeDescription = ''):
+        ''' Creates a FeatureType 
+        Returns:
+            'result' from the json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         post_data = {"featureType":{"description":featureTypeDescription,"name":featureTypeName }}
         
         resp = self.create(self.base_url + '/featureType', json.dumps(post_data))
@@ -378,6 +532,15 @@ class seqdbWebService:
 
         
     def deleteFeatureType(self, featureTypeId):
+        ''' Deletes a FeatureType 
+        Returns:
+            json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         request_url = "/featureType/" + str(featureTypeId)
         jsn_resp = self.delete(self.base_url + request_url).json()
   
@@ -389,6 +552,17 @@ class seqdbWebService:
 
   
     def getFeature(self, featureId):
+        ''' Retrieves a Feature 
+        Args:
+            featureId: id of a feature to be retrieved
+        Returns:
+            'result' from the json response OR nothing is feature was not found
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         jsn_resp = self.retrieveJson(self.base_url + "/feature/" + str(featureId))
         
         if jsn_resp:
@@ -401,8 +575,18 @@ class seqdbWebService:
             return ''
 
 
-    
+
     def insertFeature(self, name, featureTypeId, featureLocations, sequenceId, description='', featureDefault=False):
+        ''' Creates a Feature 
+        Args:
+            name: name of the feature
+        Returns:
+            'result' from the json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         post_data = {
             "feature": {
                 "name":name,
@@ -425,6 +609,16 @@ class seqdbWebService:
         return jsn_resp['result']
     
     def deleteFeature(self, featureId):
+        ''' Deletes a Feature 
+        Args:
+            featureId: id of the feature to be deleted
+        Returns:
+            json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
         request_url = "/feature/" + str(featureId)
         jsn_resp = self.delete(self.base_url + request_url).json()
   
