@@ -32,9 +32,9 @@ Running
 
    > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@module_distribution#egg=seqdb-py
 
-2. Version 0.2:
+2. Installing a particular version (i.e. Version 1.0 in the example below):
 
-   > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@v0.2#egg=seqdb-py
+   > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@1.0#egg=seqdb-py
 
 
 * Run desired tool (below are available as entry points):
