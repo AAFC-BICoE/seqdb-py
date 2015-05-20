@@ -93,11 +93,47 @@ def extract_gene_names(record):
     for feature in record["GBSeq_feature-table"]:
         if feature["GBFeature_key"] == "gene":
             for qualifier in feature["GBFeature_quals"]:
-                genes[qualifier["GBQualifier_value"]] = 1
-                logging.debug("Gene name: %s" %
-                              (qualifier["GBQualifier_value"]))
+                # TODO: Should only be looking at GBQualifier_name == "gene"
+                if qualifier["GBQualifier_name"] == "gene":
+                    genes[qualifier["GBQualifier_value"]] = 1
+                    logging.debug("Gene name: %s" %
+                                  (qualifier["GBQualifier_value"]))
     logging.info("Found %i gene names" % (len(genes.keys())))
     return genes.keys()
+
+
+def check_feature_type(seqdb_ws, ftn, create=False):
+    """Check to see if SeqDB contains a Feature Type with desired name
+
+    Args:
+        seqdb_ws (obj): reference to instance of api.seqdbWebService
+        ftn (str): name of feature type to lookup
+
+    Kargs:
+        create (bool): If True, create feature types which are not found
+
+    Returns:
+        int or None. SeqDB feature type id if found/created. None if not
+                     found/created or there are multiple gene regions
+                     with the same name.
+
+    Raises:
+        None
+    """
+    logging.info("Checking SeqDB for feature type: %s.  Create == %r" %
+                 (ftn, create))
+    feature_type_id = None
+    feature_types = seqdb_ws.getFeatureTypesWithIds()
+    if ftn in feature_types:
+        feature_type_id = feature_types[ftn]
+    elif create is True:
+        feature_type_id = seqdb_ws.createFeatureType(ftn, "Genbank Feature Type: %s" % (ftn))
+
+    logging.info("Returning feature type id: %r" % (feature_type_id))
+
+    return feature_type_id
+
+
 
 
 def check_region(seqdb_ws, gene, create=False):
@@ -315,6 +351,21 @@ def seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_region_id):
 
     return region_id
 
+def add_features(seqdb_ws, seqdb_id, record):
+    logging.info("Adding features from Entry: %s to Sequence seqdbid:%i" % (record['GBSeq_accession-version'], seqdb_id))
+    for entry in record['GBSeq_feature-table']:
+        logging.info("\tFeature Key: \"%s\"" % (entry['GBFeature_key']))
+        if entry['GBFeature_key'] == "source":
+            logging.info("\t\tTODO: add this as a sequence annotation")
+        #elif entry['GBFeature_key'] == "gene":
+        else:
+            logging.info("Adding feature")
+            feature_type_id = check_feature_type(seqdb_ws, entry['GBFeature_key'], create=True)
+            locations = []
+            for interval in entry['GBFeature_intervals']:
+                locations.append({"start":interval['GBInterval_from'], "end":interval['GBInterval_to'], "frame":1, "strand":1})
+            for qual in entry['GBFeature_quals']:
+                seqdb_ws.insertFeature(qual['GBQualifier_name'], feature_type_id, locations, seqdb_id, description=qual['GBQualifier_value'])
 
 def process_entrez_entry(seqdb_ws, genbank_id):
     """Process an entrez entry.
@@ -339,6 +390,8 @@ def process_entrez_entry(seqdb_ws, genbank_id):
             * If this Genbank entry contains a single gene region, and it is
               present in SeqDB (or we have created the correponding gene
               region), associate the Sequence with the Gene Region.
+            * If this Genbank entry contains feature annotations, add them
+              to SeqDB
     """
     logging.info("Processing gi:%s" % (genbank_id))
 
@@ -360,6 +413,8 @@ def process_entrez_entry(seqdb_ws, genbank_id):
         if seqdb_gene_region_id is not None:
             seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_gene_region_id)
 
+        add_features(seqdb_ws, seqdb_id, record[0])
+
         if logging.getLogger().isEnabledFor(logging.DEBUG):
             # retrieve inserted record and display to users for validation
             # purposes
@@ -371,7 +426,6 @@ def process_entrez_entry(seqdb_ws, genbank_id):
         logging.info(
             "Sequence for gi:%s already exists in SeqDB. Skipping." % (
                 genbank_id))
-
 
 def main():
     """Load sequences matching Entrez query into SeqDB.

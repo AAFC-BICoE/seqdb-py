@@ -533,8 +533,6 @@ class seqdbWebService:
         else:
             return ''
 
-
-
     def createFeatureType(self, featureTypeName, featureTypeDescription = ''):
         ''' Creates a FeatureType 
         Returns:
@@ -554,7 +552,6 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
         
         return jsn_resp['result']
-
 
         
     def deleteFeatureType(self, featureTypeId):
