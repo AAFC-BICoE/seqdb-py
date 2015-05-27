@@ -14,8 +14,17 @@ clean-log:
 	rm *.log *.err
 
 .PHONY: clean
-clean: clean-log
+clean:
 	rm -rf venv
+	rm -rf ve
+	rm -r dist/
+	rm -r seqdb_py.egg-info/
+
+.PHONY: install
+install:
+	virtualenv ve
+	#virtualenv -p /usr/bin/python ve
+	ve/bin/python setup.py install
 
 pep8.log:
 	pep8 --show-source --show-pep8 tools/ > pep8.log || true

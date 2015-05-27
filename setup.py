@@ -10,7 +10,7 @@ Created on Apr 27, 2015
 from setuptools import setup
 
 setup(name='seqdb-py',
-    version='0.3',
+    version='1.0',
     description='SeqDB Python Extensions: API and tools',
     author='Oksana Korol',
     author_email='oksana.korol@agr.gc.ca',
@@ -19,10 +19,8 @@ setup(name='seqdb-py',
     #data_files=[('', 'requirements.txt')],
     install_requires = [
         'biopython==1.65',
-        'logilab-common==0.63.2',
         'PyYAML==3.11',
         'requests==2.6.0', 
-        'six==1.9.0',
      ],
     entry_points={
     'console_scripts': [

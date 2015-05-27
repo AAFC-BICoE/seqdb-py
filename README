@@ -40,8 +40,11 @@ Running
 * Run desired tool (below are available as entry points):
 
    > pull_seqdb_its_seqs
+   
    > push_seqdb_its_feat
+   
    > delete_seqdb_features
+   
    > seqdb_gb_insert 
    
    Note: see help on each tool for usage
