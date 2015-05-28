@@ -20,8 +20,8 @@ clean:
 
 .PHONY: install
 install:
-	virtualenv ve
-	#virtualenv -p /usr/bin/python ve
+	#virtualenv ve
+	virtualenv -p /usr/bin/python ve
 	ve/bin/python setup.py install
 	
 clean_install:
