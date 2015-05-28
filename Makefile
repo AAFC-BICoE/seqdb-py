@@ -5,7 +5,8 @@ venv:
 	# somehow check python version
 	# somehow permit python interpretter to be provided as a parameter to Makefile
 	#virtualenv -p ${PYTHON} venv
-	virtualenv venv
+	virtualenv -p /usr/bin/python venv
+	#virtualenv venv
 	venv/bin/pip install -r requirements.txt
 	echo "Run 'source venv/bin/activate' before executing"
 
@@ -16,15 +17,18 @@ clean-log:
 .PHONY: clean
 clean:
 	rm -rf venv
-	rm -rf ve
-	rm -r dist/
-	rm -r seqdb_py.egg-info/
 
 .PHONY: install
 install:
 	virtualenv ve
 	#virtualenv -p /usr/bin/python ve
 	ve/bin/python setup.py install
+	
+clean_install:
+	rm -rf ve
+	rm -r dist/
+	rm -r seqdb_py.egg-info/
+    
 
 pep8.log:
 	pep8 --show-source --show-pep8 tools/ > pep8.log || true
