@@ -22,7 +22,7 @@ Other arguments:
    -u <url> specify base url for web services requests"""
 
 prod_url = "***REMOVED***/api/v1"
-local_url = "http://localhost:8181/seqdb.web-2.5/api/v1"
+local_url = "***REMOVED***:2002/seqdb/api/v1"
 # file name where the received sequences will be stores
 output_file_name = "seqdb_ITS_seqs.fasta"
 log_file_name = "seqdb_pull.log"
@@ -44,7 +44,7 @@ def parse_input_args(argv):
         sys.exit(2)
         
     if len(opts)==0:
-        print usage_help_line
+        print(usage_help_line)
         sys.exit(2)
     
     for opt, arg in opts:
