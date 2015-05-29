@@ -23,11 +23,8 @@ Other arguments:
    -h   help (prints this message)
  """
 
-prod_url = "***REMOVED***/api/v1"
-local_url = "***REMOVED***:2002/seqdb/api/v1"
-# file name where the received sequences will be stores
-output_file_name = "seqdb_ITS_seqs.fasta"
-log_file_name = "seqdb_pull.log"
+# file name where of the resulting config file
+user_config_file = "user_config.yaml"
 
 
 class seqdbConfigMaker:
@@ -43,7 +40,7 @@ class seqdbConfigMaker:
         else:
             main_config = tools_helper.load_config('../config.yaml')
             self.apiUrl = main_config['seqdb']['url']
-            self.configFileName = main_config['user_config_file']
+            self.configFileName = user_config_file
             
             
 
