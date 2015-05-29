@@ -1,5 +1,5 @@
 seqdb:
-    url: "seqdb_url/api/v1"       # e.g. "***REMOVED***/api/v1/"
+    url: "***REMOVED***"       # e.g. "***REMOVED***/api/v1/"
 
 http_connect:
     debug_level: 0 # 0 - No output, 1 - Output to stderr
