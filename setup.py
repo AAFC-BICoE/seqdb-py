@@ -10,7 +10,7 @@ Created on Apr 27, 2015
 from setuptools import setup
 
 setup(name='seqdb-py',
-    version='1.0',
+    version='1.1',
     description='SeqDB Python Extensions: API and tools',
     author='Oksana Korol',
     author_email='oksana.korol@agr.gc.ca',

@@ -210,9 +210,9 @@ def main():
     config_file, api_url, api_key = parse_input_args(sys.argv[1:])
     
     if config_file:
-        config = tools_helper.load_config(config_file)
-        api_url = config['seqdb']['api_url'] 
-        api_key = config['seqdb']['api_key'] 
+        tool_config = tools_helper.load_config(config_file)
+        api_url = tool_config['seqdb']['api_url'] 
+        api_key = tool_config['seqdb']['api_key'] 
     
     logging.info("Base URL for web services is: '%s'" % api_url)
     user_log.info("Base URL for web services is: '%s'" % api_url)
