@@ -11,15 +11,17 @@ python pull_seqdb_its_seqs.py --seqdb_api_key <SeqDB API key>
 -p is to use production URL (uses ***REMOVED*** (Oksana's) machine by default, since we don't have UAT for SeqDB as of this time)
 '''
 import sys, getopt, requests, logging
+import tools_helper
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
 #from fileinput import filename
 #from pip._vendor.distlib._backport.tarfile import filemode
 
-usage_help_line = """Usage of the script: \npull_seqdb_its_seqs.py -k <SeqDB API key>
+usage_help_line = """Usage of the script: \npull_seqdb_its_seqs -c <Path to yaml config with SeqDB API info>
+or
+pull_seqdb_its_seqs -k <SeqDB API key> -u <SeqDB API URL> 
 Other arguments:
    -h   help (prints this message)
-   -p   use production url for web service requests
-   -u <url> specify base url for web services requests"""
+"""
 
 prod_url = "***REMOVED***/api/v1"
 local_url = "***REMOVED***:2002/seqdb/api/v1"
@@ -32,13 +34,18 @@ log_file_name = "seqdb_pull.log"
 # Parses command line arguments 
 # Returns seqdb api_key and base url to use for web services requests
 def parse_input_args(argv):
-    seqdb_api_key = ''
-    base_url=''
-    prod=False
-    user_url=''
+    ''' Parses command line arguments
+    Returns:
+        config_file: path to a config file with has api information, 
+            or empty string if no such usage 
+        seqdb api_key to use for web services requests
+    '''
+    config_file=''
+    api_url=''
+    api_key = ''
     
     try:
-        opts, args = getopt.getopt(argv,"hpk:u:",["seqdb_api_key=", "seqdb_ws_url="])
+        opts, args = getopt.getopt(argv,"hk:u:",["seqdb_api_key=", "seqdb_ws_url="])
     except getopt.GetoptError:
         print usage_help_line
         sys.exit(2)
@@ -51,21 +58,15 @@ def parse_input_args(argv):
         if opt == '-h':
             print usage_help_line
             sys.exit()
+        elif opt in ("-c", "--config_file"):
+            config_file = arg
         elif opt in ("-k", "--seqdb_api_key"):
-            seqdb_api_key = arg
-        elif opt == "-p":
-            prod=True
+            api_key = arg
         elif opt in ("-u", "--seqdb_ws_url"):
-            user_url = arg
+            api_url = arg
             
-    if user_url:
-        base_url = user_url
-    elif prod:
-        base_url = prod_url
-    else:
-        base_url = local_url
     
-    return (seqdb_api_key, base_url)
+    return (config_file, api_url, api_key)
 
 
 
@@ -73,7 +74,6 @@ def parse_input_args(argv):
 def pull_its_seqs(api_key,base_url):
     ''' Downloads all ITS sequences from SeqDB and writes them to a file '''
     
-    #print "Sending request to: " + base_url
     
     seqdbWS = seqdbWebService(api_key, base_url)
     
@@ -100,7 +100,6 @@ def pull_its_seqs(api_key,base_url):
         
     logging.info("Number of ITS regions retrieved: %i \n" % len(its_region_ids))
 
-   
    
     #Get sequence IDs for the ITS regions
     its_seq_ids = []
@@ -161,7 +160,7 @@ def pull_its_seqs(api_key,base_url):
      
     output_file.close()   
     
-    logging.info("Written %s sequences to a file: %s" % (len(success_ids), output_file.name) )
+    logging.info("Number of ITS sequences written to a file (%s): %s" % (output_file.name, len(success_ids)) )
     
     return success_ids
     
@@ -173,14 +172,19 @@ def main():
     logging.info("Script executed with the following command and arguments: %s" % sys.argv)
     
     # Parse command line to get seqdb api key (necessary to request seqDB web services) and base url for web services requests
-    api_key, base_url = parse_input_args(sys.argv[1:])
+    config_file, api_url, api_key = parse_input_args(sys.argv[1:])
     
-    logging.info("Base URL for web services is: '%s'" % base_url)
+    if config_file:
+        config = tools_helper.load_config(config_file)
+        api_url = config['seqdb']['api_url'] 
+        api_key = config['seqdb']['api_key'] 
+    
+    logging.info("Base URL for web services is: '%s'" % api_url)
    
-    seq_ids = pull_its_seqs(api_key, base_url)
+    success_seq_ids = pull_its_seqs(api_key, api_url)
     
     print "Execution complete."
-    print "Number of sequences loaded from Sequence Dababase:  %s" % len(seq_ids) 
+    print "Number of sequences loaded from Sequence Dababase:  %s" % len(success_seq_ids) 
     print "Sequences written to a file: '%s'" % output_file_name
     print "Execution log is written to a file: '%s'" % log_file_name
 

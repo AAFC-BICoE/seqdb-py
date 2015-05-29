@@ -14,7 +14,7 @@ import sys
 import os
 import getopt
 import logging
-import yaml
+import tools_helper
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
 
 
@@ -41,24 +41,11 @@ class seqdbConfigMaker:
             self.apiUrl = api_url
             self.configFileName = config_file_name
         else:
-            main_config = self.loadConfig('../config.yaml')
+            main_config = tools_helper.load_config('../config.yaml')
             self.apiUrl = main_config['seqdb']['url']
             self.configFileName = main_config['user_config_file']
             
             
-        
-    def loadConfig(self, config_file):
-        ''' Return a config object populated from "config.yaml" 
-
-        Raises: 
-            yaml.YAMLError
-        '''
-        try:
-            config = yaml.load(file(config_file, 'r'))
-            return config
-        except yaml.YAMLError, exc:
-            print("Error in configuration file:", exc)
-
 
     def createConfigFile(self, api_key):
         ''' Writes a yaml file with seqdb api configuration info

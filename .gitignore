@@ -2,13 +2,8 @@
 .pydevproject
 *.pyc
 venv
-config.yaml
-tools.log
-tools_debug.log
-.vim
-pep8.log
-pep8.err
-pylint.log
-pylint.err
+*.yaml
+*.log
+*.err
 dist
 *.egg-info

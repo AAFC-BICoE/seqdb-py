@@ -16,8 +16,7 @@ class Test(unittest.TestCase):
     
     def tearDown(self):
         if os.path.isfile(self.config_file_name):
-            #os.remove(self.config_file_name)
-            pass
+            os.remove(self.config_file_name)
         
 
     def testCreateConfigFile(self):
