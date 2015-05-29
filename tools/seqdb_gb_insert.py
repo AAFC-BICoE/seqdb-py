@@ -4,54 +4,19 @@
 
 import sys
 import json
-import yaml
 import urllib
 import logging.config
 import httplib as http_client
 
+import tools_helper
 from api.seqdbWebService import seqdbWebService
 from Bio import Entrez
 
-# Note: Can't log here - statements would occur before logger config
 
-
-def load_config():
-    """Return a config object populated from 'config.yaml'"""
-    try:
-        config = yaml.load(file('config.yaml', 'r'))
-        return config
-    except yaml.YAMLError, exc:
-        print "Error in configuration file:", exc
 
 # Note: Not logging method call as method is a logging helper
 
 
-def pretty_log_json(obj, level="info", message=None):
-    """Pretty print an object as a JSON formatted str to the log
-
-    Args:
-        obj: Object to pretty log
-
-    Kargs:
-        level (str): One of "debug", "info", "warn", "error".  Default="info".
-
-    Returns:
-        None
-
-    Raises:
-        None
-
-    Example usage:
-    >>> pretty_log_json({"a":1})
-    >>> pretty_log_json({"a":1}, level="debug")
-    >>> pretty_log_json({"a":1}, message="Contents of obj:")
-    >>> pretty_log_json({"a":1}, level="debug", message="Contents of obj:")
-    """
-    display = ""
-    if message is not None:
-        display = display + message + "\n"
-    display = display + json.dumps(obj, sort_keys=True, indent=4)
-    getattr(logging, level)(display)
 
 
 def format_sequence_name(genbank_id, record):
@@ -219,7 +184,7 @@ def entrez_fetch(
         db=database, id=genbank_id, rettype=rettype, retmode=retmode)
     record = Entrez.read(handle)
     handle.close()
-    pretty_log_json(
+    tools_helper.pretty_log_json(
         record[0], level="debug", message="Retrieved Genbank Record: ")
     return record
 
@@ -298,7 +263,7 @@ def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
 
     dict_for_logging = {'name': seq_name, 'sequence': sequence}
     dict_for_logging.update(additional)
-    pretty_log_json(dict_for_logging, level="debug",
+    tools_helper.pretty_log_json(dict_for_logging, level="debug",
                     message="Creating consensus (non-default values): ")
 
     seqdb_id, code, message = seqdb_ws.createConsensusSequence(
@@ -399,7 +364,7 @@ def process_entrez_entry(seqdb_ws, genbank_id):
             # retrieve inserted record and display to users for validation
             # purposes
             result = seqdb_ws.getJsonSeq(seqdb_id)
-            pretty_log_json(
+            tools_helper.pretty_log_json(
                 result, level="debug", message="Record as inserted:")
 
     elif result['count'] == 1:
@@ -423,9 +388,10 @@ def main():
     Raises:
         None
     """
-    config = load_config()
-    logging.config.dictConfig(config['logging'])
-    http_client.HTTPConnection.debuglevel = config[
+    main_conf = tools_helper.load_config('../config.yaml')
+    tool_config = tools_helper.load_config('seqdb_gb_insert_config.yaml')
+    logging.config.dictConfig(main_conf['logging'])
+    http_client.HTTPConnection.debuglevel = main_conf[
         'http_connect']['debug_level']
 
     logging.info(
@@ -433,12 +399,12 @@ def main():
             sys.argv))
 
     seqdb_ws = seqdbWebService(
-        config['seqdb']['apikey'], config['seqdb']['url'])
+        tool_config['seqdb']['apikey'], main_conf['seqdb']['url'])
 
-    Entrez.email = config['entrez']['email']
-    query = config['entrez']['query']
+    Entrez.email = tool_config['entrez']['email']
+    query = tool_config['entrez']['query']
 
-    logging.info("Querying GenBank: \'%s\'" % (config['entrez']['query']))
+    logging.info("Querying GenBank: \'%s\'" % (tool_config['entrez']['query']))
 
     # preliminary query to find out how many records there are
     record = entrez_search(query)

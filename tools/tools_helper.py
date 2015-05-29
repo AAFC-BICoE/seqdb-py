@@ -8,6 +8,9 @@ Collection of methods, used in tools
 import yaml
 import os
 import datetime
+import json
+import logging
+
 
 def load_config(config_file):
     ''' Return a config object populated from "config.yaml" 
@@ -20,6 +23,36 @@ def load_config(config_file):
         return config
     except yaml.YAMLError, exc:
         print("Error in configuration file:", exc)
+
+
+
+def pretty_log_json(obj, level="info", message=None):
+    """Pretty print an object as a JSON formatted str to the log
+
+    Args:
+        obj: Object to pretty log
+
+    Kargs:
+        level (str): One of "debug", "info", "warn", "error".  Default="info".
+
+    Returns:
+        None
+
+    Raises:
+        None
+
+    Example usage:
+    >>> pretty_log_json({"a":1})
+    >>> pretty_log_json({"a":1}, level="debug")
+    >>> pretty_log_json({"a":1}, message="Contents of obj:")
+    >>> pretty_log_json({"a":1}, level="debug", message="Contents of obj:")
+    """
+    display = ""
+    if message is not None:
+        display = display + message + "\n"
+    display = display + json.dumps(obj, sort_keys=True, indent=4)
+    getattr(logging, level)(display)
+
 
 
 class SimpleLog():
