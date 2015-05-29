@@ -7,6 +7,7 @@ Sequence DB Web Services module
 '''
 
 import requests, json, logging, base64, os
+import urlparse
 import gzip, mimetypes
 
 
@@ -42,9 +43,11 @@ class seqdbWebService:
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout
-            requests.exceptions.HTTPError  
+            requests.exceptions.HTTPError
+            requests.exceptions.InvalidSchema  
         '''    
         req_header = { 'apikey': self.api_key }
+        
         resp = requests.get(request_url, headers=req_header, params=params)
         
         if resp.status_code == 404:

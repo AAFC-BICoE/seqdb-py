@@ -13,7 +13,7 @@ python pull_seqdb_its_seqs.py --seqdb_api_key <SeqDB API key>
 import sys
 import os
 import getopt
-import logging
+import logging.config
 import tools_helper
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
 
@@ -27,20 +27,20 @@ Other arguments:
 user_config_file = "user_config.yaml"
 
 
-class seqdbConfigMaker:
+class SeqdbConfigMaker:
     """ Creates a user-specific yaml config file to be used in SeqDB Web Services calls. 
         Config file name, seqdb api url and other setup parameters are retrieved from config.yaml
     """
     
-    def __init__(self, api_url='', config_file_name=''):
+    def __init__(self, api_url, config_file_name=''):
 
-        if api_url and config_file_name:
-            self.apiUrl = api_url
+        self.apiUrl = api_url
+        
+        if config_file_name:
             self.configFileName = config_file_name
         else:
-            main_config = tools_helper.load_config('../config.yaml')
-            self.apiUrl = main_config['seqdb']['url']
             self.configFileName = user_config_file
+            
             
             
 
@@ -54,10 +54,14 @@ class seqdbConfigMaker:
         config_file = open(self.configFileName, 'w')
         config_file.write("seqdb:\n")
         config_file.write('    api_key: "%s"\n' % api_key)
-        config_file.write('    api_url:"%s"\n' % self.apiUrl)
+        config_file.write('    api_url: "%s"\n' % self.apiUrl)
         config_file.close()
         
-        return os.path.abspath(self.configFileName)
+        config_file_abs = os.path.abspath(self.configFileName)
+        
+        logging.info("Created a seqdb api user config file: %s" % config_file_abs)
+        
+        return config_file_abs
 
 ''' Class End '''
 
@@ -91,8 +95,8 @@ def parse_input_args(argv):
     
 
 def main():
-    # Start a log file. filemode='w' overwrites the log for each program run
-    logging.basicConfig(filename=log_file_name, filemode='w', level=logging.DEBUG)
+    main_conf = tools_helper.load_config('../config.yaml')
+    logging.config.dictConfig(main_conf['logging'])
     
     logging.info("Script executed with the following command and arguments: %s" % sys.argv)
     
@@ -100,10 +104,11 @@ def main():
     api_key = parse_input_args(sys.argv[1:])
     
     #logging.info("Base URL for web services is: '%s'" % base_url)
-   
-    config_file = seqdbConfigMaker().createConfigFile(api_key)
     
-    print("Configuration is written to a file: '%s'" % config_file)
+    configMaker = SeqdbConfigMaker(api_url=main_conf['seqdb']['url'])
+    config_file = configMaker.createConfigFile(api_key)
+    
+    print("Configuration is written to a file: '%s'" % os.path.basename(config_file))
     #print "Execution log is written to a file: '%s'" % log_file_name
 
 
