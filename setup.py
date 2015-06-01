@@ -16,7 +16,7 @@ setup(name='seqdb-py',
     author_email='oksana.korol@agr.gc.ca',
     url='https://bitbucket.org/aafc-mbb/seqdb-py',
     packages=['api', 'tools'],
-    data_files= [('', ['config.yaml.sample',]),],
+    data_files= [('tools', ['config.yaml.sample',]),],
     install_requires = [
         'biopython==1.65',
         'PyYAML==3.11',

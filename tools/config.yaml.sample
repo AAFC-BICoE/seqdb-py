@@ -1,4 +1,4 @@
-# root config.yaml
+# tools config.yaml
 seqdb:
     url: "***REMOVED***"       # e.g. "***REMOVED***/api/v1/"
 
