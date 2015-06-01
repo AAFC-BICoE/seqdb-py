@@ -119,6 +119,6 @@ def main():
     #print "Execution log is written to a file: '%s'" % log_file_name
 
 
-
+### TEST ###
 if __name__ == '__main__':
     main()
