@@ -23,6 +23,9 @@ def load_config(config_file):
         return config
     except yaml.YAMLError, exc:
         print("Error in configuration file:", exc)
+    except Exception, msg:
+        print("Could not load configuration file: %s" % os.path.abspath(config_file))
+        print("Current working script is: %s" % os.path.abspath(__file__))
 
 
 

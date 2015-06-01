@@ -1,0 +1,9 @@
+include README
+include config.cfg
+include *.py
+include config.yaml.sample
+recursive-include api *.py
+recursive-include tools *.py
+global-exclude *.pyc *.yaml
+prune dist/
+prune api/dist/

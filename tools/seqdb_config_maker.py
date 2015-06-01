@@ -15,6 +15,7 @@ import os
 import getopt
 import logging.config
 import tools_helper
+import project_root
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
 
 
@@ -95,7 +96,13 @@ def parse_input_args(argv):
     
 
 def main():
-    main_conf = tools_helper.load_config('../config.yaml')
+    print project_root.path()
+    main_conf = tools_helper.load_config(project_root.path() + '/config.yaml')
+    
+    if not main_conf:
+        logging.error("Could not load configuration file. Exiting...")
+        sys.exit("Configuration not loaded.")
+        
     logging.config.dictConfig(main_conf['logging'])
     
     logging.info("Script executed with the following command and arguments: %s" % sys.argv)
