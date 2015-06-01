@@ -5,8 +5,8 @@ venv:
 	# somehow check python version
 	# somehow permit python interpretter to be provided as a parameter to Makefile
 	#virtualenv -p ${PYTHON} venv
-	virtualenv -p /usr/bin/python venv
-	#virtualenv venv
+	#virtualenv -p /usr/bin/python venv
+	virtualenv venv
 	venv/bin/pip install -r requirements.txt
 	echo "Run 'source venv/bin/activate' before executing"
 
@@ -20,8 +20,8 @@ clean:
 
 .PHONY: install
 install:
-	#virtualenv ve
-	virtualenv -p /usr/bin/python ve
+	virtualenv ve
+	#virtualenv -p /usr/bin/python ve
 	ve/bin/python setup.py install
 	
 clean_install:
