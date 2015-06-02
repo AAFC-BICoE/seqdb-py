@@ -97,7 +97,7 @@ def parse_input_args(argv):
 
 def main():
     print project_root.path()
-    main_conf = tools_helper.load_config(project_root.path() + '/config.yaml')
+    main_conf = tools_helper.load_config(project_root.path() + '/config/config.yaml')
     
     if not main_conf:
         logging.error("Could not load configuration file. Exiting...")
