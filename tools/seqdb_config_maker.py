@@ -15,7 +15,6 @@ import os
 import getopt
 import logging.config
 import tools_helper
-import config.config_root
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
 
@@ -97,7 +96,6 @@ def parse_input_args(argv):
     
 
 def main():
-    print config_root.path()
     main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
     
     if not main_conf:

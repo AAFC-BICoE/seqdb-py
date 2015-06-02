@@ -17,6 +17,7 @@ import requests.exceptions
 import logging.config
 import tools_helper
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
+from config import config_root
 
 
 usage_help_line = """Usage of the script: \npull_seqdb_its_seqs -c <Path to yaml config with SeqDB API info>
@@ -200,7 +201,12 @@ def pull_its_seqs(api_key,base_url):
     
 
 def main():
-    main_conf = tools_helper.load_config('../config.yaml')
+    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
+
+    if not main_conf:
+        logging.error("Could not load configuration file. Exiting...")
+        sys.exit("Configuration not loaded.")
+    
     logging.config.dictConfig(main_conf['logging'])
     
     logging.info("Script executed with the following command and arguments: %s" % sys.argv)
