@@ -30,12 +30,17 @@ Running
 
 1. Source distribution:
 
-   > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@module_distribution#egg=seqdb-py
+   > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git#egg=seqdb-py
 
 2. Installing a particular version (i.e. Version 1.0 in the example below):
 
    > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@1.0#egg=seqdb-py
 
+* Modify config files for your environment:
+
+Initial distribution will contain <file_name>.yaml.sample files, which need to be renamed to <file_name>.yaml and modified according to instructions inside the files.
+
+There is a main config file for the package, config/config.yaml, which specifies logging information, SeqDB API url, etc. Inaddition, some tools may have specific yaml config files, containing parameters that only those tools require. These configuration files will be located alongside the tool.  
 
 * Run desired tool (below are available as entry points):
 
@@ -54,16 +59,12 @@ Running
 Example: Running seqdb_gb_insert.py 
   This example assumes you've activated a virtual environment and installed seqdb-py in it.
   
-* Create config.yaml file
+* Create config/config.yaml and tools/seqdb_gb_insert_config.yaml
 
-   > cp config.yaml.sample config.yaml
+   > cp config/config.yaml.sample config.yaml
+   > cp tools/seqdb_gb_insert_config.yaml.sample seqdb_gb_insert_config.yaml
 
-* Initialize config.yaml file
-
-  * Update entrez email address entry
-  * Update seqdb url
-  * Update seqdb apikey
-
+* Initialize above files according to instructions inside each .yaml file
 
 * Run script
 
