@@ -193,8 +193,8 @@ def push_its_features(api_key, features_file_name, base_url):
                 sys.exit(tools_helper.log_msg_sysExit)
             except:
                 warning_msg = "File token '%s' is not in the expected format of <feature name>:<position>. Ignoring." % itsx_feature_token
-                user_log.warn(warning_msg)
-                logging.warning(warning_msg)
+                user_log.info(warning_msg)
+                logging.info(warning_msg)
 
 
     # Write ids of the inserted features into a file
