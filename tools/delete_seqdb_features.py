@@ -5,42 +5,51 @@ Deletes features
 
 @author: korolo
 '''
-import sys, getopt, logging
+import sys
+import getopt
+import logging.config
+import tools_helper
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
+from config import config_root
 
-
-usage_help_line = """Usage of the script: \ndelete_seqdb_feature.py -k <SeqDB API key> -f <feature ids file name>
+usage_help_line = """Usage of the script: \ndelete_seqdb_feature -c <Path to yaml config with SeqDB API info> -f <feature ids file name>
+or
+delete_seqdb_feature -k <SeqDB API key> -u <SeqDB API URL> -f <feature ids file name>
 Other arguments:
-   -h       help (prints this message)
-   -p       use production url for web service requests
-   -u <url> specify base url for web services requests"""
+   -h   help (prints this message)
+"""
 
 
-prod_url = "***REMOVED***/api/v1"
-local_url = "http://localhost:8181/seqdb.web-2.5/api/v1"
 output_file_name = "delete_failed_feature_ids.txt"
 log_file_name = "seqdb_delete.log"
+user_log = tools_helper.SimpleLog(log_file_name)
+log_fail_msg = "%s '%s'" %(tools_helper.log_msg_errorSeeLog, log_file_name)
 
 
 
-# Parses command line arguments 
-# Returns:
-#    seqdb api_key
-#    name of the ITSx poisitons file (containing feature to import)
-#    base url to use for web services requests
 def parse_input_args(argv):
-    seqdb_api_key = ''
-    base_url=''
+    ''' Parses command line arguments
+    Returns:
+        features_file_name: name of the file that contains ITS features to be pushed to SeqDB
+        config_file: path to a config file with has api information, 
+            or empty string if no such usage 
+        seqdb api_key to use for web services requests
+        seqdb api_url to use for web services requests
+    '''
+    config_file=''
+    api_url=''
+    api_key = ''
     features_file_name = ''
     
-    prod=False
-    user_url=''
     
     try:
-        opts, args = getopt.getopt(argv,"hpk:f:u:",["seqdb_api_key=", "feature_ids_file="])
+        opts, args = getopt.getopt(argv,"hc:f:k:u:",["config_file=", "seqdb_api_key=", "seqdb_api_url=", "feature_ids_file="])
     except getopt.GetoptError:
         print usage_help_line
-        sys.exit(2)
+        logging.error(tools_helper.log_msg_argError)
+        user_log.error(tools_helper.log_msg_argError)
+        sys.exit(tools_helper.log_msg_sysExit)
+        
         
     if len(opts)==0:
         print usage_help_line
@@ -50,24 +59,33 @@ def parse_input_args(argv):
         if opt == '-h':
             print usage_help_line
             sys.exit()
-        elif opt in ("-k", "--seqdb_api_key"):
-            seqdb_api_key = arg
-        elif opt in ("-f", "--feature_ids_file"):
+        elif opt in ("-f", "--features_file"):
             features_file_name = arg
-        elif opt == "-p":
-            prod=True
-        elif opt == "-u":
-            user_url = arg
+        elif opt in ("-c", "--config_file="):
+            config_file = arg
+        elif opt in ("-k", "--seqdb_api_key"):
+            api_key = arg
+        elif opt in ("-u", "--seqdb_api_url="):
+            api_url = arg
             
-    if user_url:
-        base_url = user_url
-    elif prod:
-        base_url = prod_url
-    else:
-        base_url = local_url
+            
+    if config_file and api_key and api_url:
+        print(tools_helper.log_msg_argErrorConfigFileUrl)
+        print(usage_help_line)
+        logging.error(tools_helper.log_msg_argError)
+        user_log.error(tools_helper.log_msg_argError)
+        sys.exit(2)
     
-    return (seqdb_api_key, features_file_name, base_url)
-
+    if bool(api_key) != bool(api_url):
+        print(tools_helper.log_msg_argErrorKeyUrl)
+        print(usage_help_line)
+        logging.error(tools_helper.log_msg_argError)
+        user_log.error(tools_helper.log_msg_argError)
+        sys.exit(2)
+    
+            
+            
+    return (features_file_name, config_file, api_url, api_key)
 
 
 
@@ -145,25 +163,49 @@ def delete_features(api_key, feature_ids_file_name, base_url):
 def main():
     ''' Deletes features from SeqDB with the feature ids, specified in the input file. '''
     
-    # Start a log file. filemode='w' overwrites the log for each program run
-    logging.basicConfig(filename=log_file_name, filemode='w', level=logging.DEBUG)
-    
-    logging.info("Script executed with the following command and arguments: %s" % sys.argv)
-    
-    seqdb_api_key, features_file_name, base_url = parse_input_args(sys.argv[1:])
-    
-    logging.info("Base URL for web services is: '%s'" % base_url)
-    logging.info("File name with feature ids to delete: %s" % features_file_name)
-    
-    success_ids,fail_ids = delete_features(seqdb_api_key, features_file_name, base_url)
-    
-    
-    print "Execution complete."
-    print "Number of features deleted from Sequence Dababase:   %i " % len(success_ids)  
-    print "Number of features which failed to be deleted:   %i " % len(fail_ids)  
-    print "Feature ids, which failed to be deleted are written to a file: '%s'" % output_file_name
-    print "Execution log is written to a file: '%s'" % log_file_name
+    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
 
+    if not main_conf:
+        logging.error(tools_helper.log_msg_noConfig)
+        sys.exit(tools_helper.log_msg_sysExit)
+    
+    logging.config.dictConfig(main_conf['logging'])
+
+    logging.info("Script executed with the following command and arguments: %s" % sys.argv)
+    user_log.info(tools_helper.log_msg_execStarted_simple)
+    
+    features_file_name, config_file, api_url, api_key = parse_input_args(sys.argv[1:])
+    
+    if config_file:
+        tool_config = tools_helper.load_config(config_file)
+        api_url = tool_config['seqdb']['api_url'] 
+        api_key = tool_config['seqdb']['api_key'] 
+    
+    
+    logging.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
+    user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
+
+    log_msg = "File name with feature ids: %s" % features_file_name
+    logging.info(log_msg)    
+    user_log.info(log_msg)
+    
+    
+    success_ids,fail_ids = delete_features(api_key, features_file_name, api_url)
+
+    
+    print(tools_helper.log_msg_execEnded)
+    print("Number of features deleted from Sequence Dababase:   %i " % len(success_ids))  
+    print("Number of features which failed to be deleted:   %i " % len(fail_ids))
+    print("Feature ids, which failed to be deleted are written to a file: '%s'" % output_file_name)
+    print("Execution log is written to a file: '%s'" % log_file_name)
+    
+    user_log.info(tools_helper.log_msg_execEnded)
+    user_log.close()
+    
+    logging.info(tools_helper.log_msg_execEnded)
+
+    
+    
 
 if __name__ == '__main__':
     main()
