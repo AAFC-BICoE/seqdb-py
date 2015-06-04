@@ -7,7 +7,7 @@ import unittest, os
 from tools.seqdb_config_maker import SeqdbConfigMaker
 
 
-class Test(unittest.TestCase):
+class TestSeqdbConfigMaker(unittest.TestCase):
 
 
     def setUp(self):

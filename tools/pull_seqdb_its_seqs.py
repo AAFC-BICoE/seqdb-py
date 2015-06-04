@@ -13,10 +13,11 @@ Other arguments:
 import sys 
 import os
 import getopt
-import requests.exceptions
 import logging.config
+import requests.exceptions
 import tools_helper
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
+from config import config_root
 
 
 usage_help_line = """Usage of the script: \npull_seqdb_its_seqs -c <Path to yaml config with SeqDB API info>
@@ -42,18 +43,19 @@ def parse_input_args(argv):
         config_file: path to a config file with has api information, 
             or empty string if no such usage 
         seqdb api_key to use for web services requests
+        seqdb api_url to use for web services requests
     '''
     config_file=''
     api_url=''
     api_key = ''
     
     try:
-        opts, args = getopt.getopt(argv,"hc:k:u:",["config_file=", "seqdb_api_key=", "seqdb_ws_url="])
+        opts, args = getopt.getopt(argv,"hc:k:u:",["config_file=", "seqdb_api_key=", "seqdb_api_url="])
     except getopt.GetoptError:
         print usage_help_line
-        logging.error("Invalid script arguments. Aborting.")
-        user_log.error("Invalid script arguments. Aborting.")
-        sys.exit(2)
+        logging.error(tools_helper.log_msg_argError)
+        user_log.error(tools_helper.log_msg_argError)
+        sys.exit(tools_helper.log_msg_sysExit)
         
     if len(opts)==0:
         print(usage_help_line)
@@ -67,21 +69,21 @@ def parse_input_args(argv):
             config_file = arg
         elif opt in ("-k", "--seqdb_api_key"):
             api_key = arg
-        elif opt in ("-u", "--seqdb_ws_url"):
+        elif opt in ("-u", "--seqdb_api_url"):
             api_url = arg
     
     if config_file and api_key and api_url:
-        print("Supply either a configuration file or API url with key.")
+        print(tools_helper.log_msg_argErrorConfigFileUrl)
         print(usage_help_line)
-        logging.error("Invalid script arguments. Aborting.")
-        user_log.error("Invalid script arguments. Aborting.")
+        logging.error(tools_helper.log_msg_argError)
+        user_log.error(tools_helper.log_msg_argError)
         sys.exit(2)
     
     if bool(api_key) != bool(api_url):
-        print("Both API url and API key have to be supplied.")
+        print(tools_helper.log_msg_argErrorKeyUrl)
         print(usage_help_line)
-        logging.error("Invalid script arguments. Aborting.")
-        user_log.error("Invalid script arguments. Aborting.")
+        logging.error(tools_helper.log_msg_argError)
+        user_log.error(tools_helper.log_msg_argError)
         sys.exit(2)
         
     return (config_file, api_url, api_key)
@@ -98,29 +100,29 @@ def pull_its_seqs(api_key,base_url):
     try:
         its_region_ids = seqdbWS.getItsRegionIds()
     except requests.exceptions.ConnectionError as e:
-        user_log.error("Could not connect to Sequence DB. Contact your sysadmin for more details.\n")
-        logging.error("Could not connect to Sequence DB. ")
+        user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
+        logging.error(tools_helper.log_msg_noDbConnection)
         logging.error(e.message)
-        sys.exit("Script error.")
+        sys.exit(tools_helper.log_msg_sysExit)
     except requests.exceptions.ReadTimeout as e:
-        user_log.error("Connection too slow for getting data from Sequence DB. \Contact your sysadmin for more details.")
-        logging.error("Connection too slow for getting data from Sequence DB. ")
+        user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
+        logging.error(tools_helper.log_msg_slowConnection)
         logging.error(e.message)
-        sys.exit("Script error.")
+        sys.exit(tools_helper.log_msg_sysExit)
     except requests.exceptions.HTTPError as e:
-        user_log.error("HTTP error when getting region ids from Sequence DB. Contact your sysadmin for more details.")
-        logging.error("HTTP error when getting region ids from Sequence DB. ")
+        user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
+        logging.error(tools_helper.log_msg_httpError)
         logging.error(e.message)
-        sys.exit("Script error.")
+        sys.exit(tools_helper.log_msg_sysExit)
     except UnexpectedContent as e:
-        user_log.error("Sequence DB API response did not match expected format. Contact your sysadmin for more details.")
-        logging.error("Sequence DB API response did not match expected format.")
+        user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
+        logging.error(tools_helper.log_msg_apiResponseFormat)
         logging.error(e.message)
-        sys.exit("Script error.")
+        sys.exit(tools_helper.log_msg_sysExit)
     except Exception as e:
-        user_log.error("Script encountered an error. See your sysadmin for details.")
+        user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
         logging.error(e.message)
-        sys.exit("Script error.")
+        sys.exit(tools_helper.log_msg_sysExit)
         
     logging.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
     user_log.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
@@ -133,25 +135,29 @@ def pull_its_seqs(api_key,base_url):
             curr_seq_ids = seqdbWS.getSeqIds(region_id)
             its_seq_ids.extend(curr_seq_ids)
         except requests.exceptions.ConnectionError as e:
-            user_log.error("Could not connect to Sequence DB. Contact your sysadmin for more details.\n")
-            logging.error("Could not connect to Sequence DB. ")
+            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
-            sys.exit("Script error.")
+            sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
-            user_log.error("Connection too slow for getting data from Sequence DB. Contact your sysadmin for more details.")
-            logging.error("Connection too slow for getting data from Sequence DB. ")
+            user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_slowConnection)
             logging.error(e.message)
-            sys.exit("Script error.")
+            sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
-            user_log.error("HTTP error when getting region ids from Sequence DB. Contact your sysadmin for more details.")
-            logging.error("HTTP error when getting region ids from Sequence DB.")
+            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_httpError)
             logging.error(e.message)
-            sys.exit("Script error.")
+            sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
-            user_log.error("Sequence DB API response did not match expected format. Contact your sysadmin for more details.")
-            logging.error("Sequence DB API response did not match expected format.")
+            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_apiResponseFormat)
             logging.error(e.message)
-            sys.exit("Script error.")
+            sys.exit(tools_helper.log_msg_sysExit)
+        except Exception as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
                         
 
     logging.info("Number of ITS sequences retrieved: %i " % len(its_seq_ids))
@@ -200,13 +206,18 @@ def pull_its_seqs(api_key,base_url):
     
 
 def main():
-    main_conf = tools_helper.load_config('../config.yaml')
+    ''' Retrieves ITS sequenes from SeqDB '''
+    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
+
+    if not main_conf:
+        logging.error(tools_helper.log_msg_noConfig)
+        sys.exit(tools_helper.log_msg_sysExit)
+    
     logging.config.dictConfig(main_conf['logging'])
     
     logging.info("Script executed with the following command and arguments: %s" % sys.argv)
-    user_log.info("Script execution started")
+    user_log.info(tools_helper.log_msg_execStarted_simple)
     
-    # Parse command line to get seqdb api key (necessary to request seqDB web services) and base url for web services requests
     config_file, api_url, api_key = parse_input_args(sys.argv[1:])
     
     if config_file:
@@ -214,8 +225,8 @@ def main():
         api_url = tool_config['seqdb']['api_url'] 
         api_key = tool_config['seqdb']['api_key'] 
     
-    logging.info("Base URL for web services is: '%s'" % api_url)
-    user_log.info("Base URL for web services is: '%s'" % api_url)
+    logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
+    user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
    
     success_seq_ids = pull_its_seqs(api_key, api_url)
     
@@ -225,10 +236,10 @@ def main():
     print("Execution log is written to a file: '%s'" % user_log.getFileName())
     print("Execution complete.")
 
-    user_log.info("Execution complete.")
+    user_log.info(tools_helper.log_msg_execEnded)
     user_log.close()
     
-    logging.info("Script execution ended.")
+    logging.info(tools_helper.log_msg_execEnded)
 
 
 if __name__ == '__main__':

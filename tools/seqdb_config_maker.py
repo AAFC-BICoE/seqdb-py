@@ -15,8 +15,8 @@ import os
 import getopt
 import logging.config
 import tools_helper
-import project_root
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
+from config import config_root
 
 
 usage_help_line = """Usage of the script: \nseqdb_config_maker -k <SeqDB API key>
@@ -96,8 +96,7 @@ def parse_input_args(argv):
     
 
 def main():
-    print project_root.path()
-    main_conf = tools_helper.load_config(project_root.path() + '/config.yaml')
+    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
     
     if not main_conf:
         logging.error("Could not load configuration file. Exiting...")
@@ -119,6 +118,6 @@ def main():
     #print "Execution log is written to a file: '%s'" % log_file_name
 
 
-
+### TEST ###
 if __name__ == '__main__':
     main()

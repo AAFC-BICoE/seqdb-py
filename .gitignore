@@ -6,4 +6,5 @@ venv
 *.log
 *.err
 dist
+build
 *.egg-info

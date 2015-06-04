@@ -1,6 +1,6 @@
-# tools config.yaml
+# root config.yaml
 seqdb:
-    url: "***REMOVED***"       # e.g. "***REMOVED***/api/v1/"
+    url: "***REMOVED***:2002/seqdb/api/v1"       # e.g. "***REMOVED***/api/v1/"
 
 http_connect:
     debug_level: 0 # 0 - No output, 1 - Output to stderr

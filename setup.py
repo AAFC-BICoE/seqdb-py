@@ -7,21 +7,27 @@ Created on Apr 27, 2015
 '''
 
 #from distutils.core import setup
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='seqdb-py',
-    version='1.1-SNAPSHOT',
+    version='1.1',
     description='SeqDB Python Extensions: API and tools',
     author='Oksana Korol',
     author_email='oksana.korol@agr.gc.ca',
     url='https://bitbucket.org/aafc-mbb/seqdb-py',
-    packages=['api', 'tools'],
-    data_files= [('', ['config.yaml.sample',]),],
+    
+    packages = find_packages(exclude=['test','*.test', '*.test.*']),
+    #packages=['', 'api', 'tools'],
+    #data_files= [('tools', ['config.yaml.sample',]),('', ['config.yaml.sample',]),],
+    include_package_data = True,
+    package_data = {
+                    '': ['*.yaml.sample', 'README'],
+                    },
     install_requires = [
         'biopython==1.65',
         'PyYAML==3.11',
         'requests==2.6.0', 
-     ],
+    ],
     entry_points={
     'console_scripts': [
         'seqdb_config_maker = tools.seqdb_config_maker:main',
