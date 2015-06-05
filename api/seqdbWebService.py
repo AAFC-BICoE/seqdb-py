@@ -49,13 +49,15 @@ class seqdbWebService:
         req_header = { 'apikey': self.api_key }
         
         resp = requests.get(request_url, headers=req_header, params=params)
+        #resp.content: str {"count":288,"limit":20,"message":"Query completed successfully","offset":0,"result":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"sortColumn":"regionId","sortOrder":1,"statusCode":200}
         
         if resp.status_code == 404:
             resp = ''
         else:
             # Will raise HTTPError exception if response status was not ok
             resp.raise_for_status()
-              
+        
+        
         return resp
     
     
@@ -67,13 +69,45 @@ class seqdbWebService:
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout
-            requests.exceptions.HTTPError  
+            requests.exceptions.HTTPError
+            UnexpectedContent  
         '''
         resp = self.retrieve(request_url, params=params)
         if resp:
-            return json.loads(resp.text)
-        else:
-            return resp
+            # See if results were paginated, and if yes - retrieve the rest of the results
+            jsn_resp =  json.loads(resp.text)
+            
+            #if 'count' and 'sortColum' and 'limit' and 'offset' and 'message' and 'statusCode' and 'sortOrder' not in jsn_resp:
+            if 'result' not in jsn_resp.keys():
+                raise UnexpectedContent(response=jsn_resp)
+            
+            # If these values are present, there is a chance that we can get paginated result
+            if 'count' in jsn_resp.keys() and 'limit' in jsn_resp.keys():
+
+                result_num = int(jsn_resp['count'])
+                result_per_page =  int(jsn_resp['limit'])
+                
+                if (result_num > result_per_page):
+                    
+                    for curr_offset in xrange(result_per_page, result_num, result_per_page):
+                        if params:
+                            params['offset'] = curr_offset
+                        else:
+                            params={'offset': curr_offset}
+                            
+                        resp2 = self.retrieve(request_url, params)
+                        jsn_resp2 =  json.loads(resp2.text)
+                
+                        if 'count' and 'limit' and 'result' not in jsn_resp2.keys():
+                            raise UnexpectedContent(response=jsn_resp)
+                        
+                        jsn_resp['result'] = jsn_resp['result'] + jsn_resp2['result'] 
+                        
+                    jsn_resp['limit'] = jsn_resp['count']
+        
+            resp = jsn_resp
+        
+        return resp
     
 
     
@@ -134,10 +168,8 @@ class seqdbWebService:
         '''
         jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
 
-        if 'count' and 'sortColum' and 'limit' and 'offset' and 'message' and 'statusCode' and 'sortOrder' not in jsn_resp:
-            raise UnexpectedContent(response=jsn_resp)
-
-        if jsn_resp['count'] > 0 and ('result' not in jsn_resp.keys() or not jsn_resp['result']):
+        
+        if jsn_resp['count'] > 0 and not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -331,7 +363,7 @@ class seqdbWebService:
 
     def getJsonSeq(self, seq_id):
         jsn_resp = self.retrieveJson(self.base_url + "/sequence/" + str(seq_id))
-        if 'result' not in jsn_resp.keys() or not jsn_resp['result']:
+        if not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
         
         jsn_seq = jsn_resp['result']
@@ -375,6 +407,7 @@ class seqdbWebService:
             UnexpectedContent
         '''  
         return self.getRegionIdsByName("ITS")
+        #self.getRegionIds()
 
 
 
@@ -389,7 +422,7 @@ class seqdbWebService:
 
 
 
-    def getRegionIds(self, params):
+    def getRegionIds(self, params=None):
         ''' Get region IDs
         Raises:
             requests.exceptions.ConnectionError
@@ -399,9 +432,6 @@ class seqdbWebService:
         '''  
         jsn_resp = self.retrieveJson(self.base_url + "/region", params)
         if jsn_resp:
-            if 'result' not in jsn_resp.keys():
-                raise UnexpectedContent(response=jsn_resp)
-           
             return jsn_resp['result']
         else:
             return ''
@@ -465,9 +495,6 @@ class seqdbWebService:
         jsn_resp = self.retrieveJson(self.base_url + request_url)
         
         if jsn_resp:
-            if not jsn_resp or 'result' not in jsn_resp.keys():
-                raise UnexpectedContent(response=jsn_resp)
-            
             return jsn_resp['result']
         else:
             return ''
@@ -488,8 +515,6 @@ class seqdbWebService:
         jsn_resp = self.retrieveJson(self.base_url + "/featureType")
         
         if jsn_resp:
-            if 'result' not in jsn_resp.keys():
-                raise UnexpectedContent(response=jsn_resp)
             
             feature_type_ids = jsn_resp['result']
             feature_types = {}
@@ -498,8 +523,6 @@ class seqdbWebService:
                 jsn_resp = self.retrieveJson(self.base_url + "/featureType/" + str(feat_type_id))
                 
                 if jsn_resp:
-                    if 'result' not in jsn_resp.keys():
-                        raise UnexpectedContent(response=jsn_resp)
                 
                     feature_name = jsn_resp['result']['name']
                     feature_types[feature_name] = feat_type_id 
@@ -569,11 +592,7 @@ class seqdbWebService:
         jsn_resp = self.retrieveJson(self.base_url + "/feature/" + str(featureId))
         
         if jsn_resp:
-            if 'result' not in jsn_resp.keys():
-                raise UnexpectedContent(response=jsn_resp)
-            
             return jsn_resp['result']
-    
         else:
             return ''
 

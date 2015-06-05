@@ -186,7 +186,14 @@ class TestSeqdbWebService_Region_Existing(unittest.TestCase):
             self.seqdbWS.deleteRegion(rgId)
 
 
-
+    
+    def testGetRegionIds_valid(self):
+        """Test retrieval of an ITS region ids - expected to pass"""
+        actual = self.seqdbWS.getRegionIds()
+        self.assertTrue(actual, "No region ids returned.")
+        self.assertIn(self.regionIds[0], actual, "Region id is not in the results.")
+    
+    
     def testGetItsRegionIds_valid(self):
         """Test retrieval of an ITS region ids - expected to pass"""
         actual = self.seqdbWS.getItsRegionIds()
