@@ -2,6 +2,7 @@
 """Script to use Entrez and SeqDB-WS APIs to load GenBank sequences into SeqDB
 """
 
+import os
 import sys
 import json
 import shelve
@@ -11,6 +12,7 @@ import httplib as http_client
 import tools_helper
 
 from api.seqdbWebService import seqdbWebService
+from config import config_root
 from Bio import Entrez
 
 
@@ -773,8 +775,16 @@ def main():
     Raises:
         None
     """
-    main_conf = tools_helper.load_config('../config.yaml')
-    tool_config = tools_helper.load_config('seqdb_gb_insert_config.yaml')
+    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
+    if not main_conf:
+        logging.error(tools_helper.log_msg_noConfig)
+        sys.exit(tools_helper.log_msg_sysExit)
+
+    tool_config = tools_helper.load_config(os.path.dirname(__file__) + '/seqdb_gb_insert_config.yaml')
+    if not tool_config:
+        logging.error(tools_helper.log_msg_noConfig)
+        sys.exit(tools_helper.log_msg_sysExit)
+
     logging.config.dictConfig(main_conf['logging'])
     http_client.HTTPConnection.debuglevel = main_conf[
         'http_connect']['debug_level']
@@ -804,7 +814,7 @@ def main():
             sys.argv))
 
     seqdb_ws = seqdbWebService(
-        tool_config['seqdb']['apikey'], main_conf['seqdb']['url'])
+        main_conf['seqdb']['apikey'], main_conf['seqdb']['url'])
 
     Entrez.email = tool_config['entrez']['email']
     query = tool_config['entrez']['query']
