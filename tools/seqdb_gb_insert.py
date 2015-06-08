@@ -2,14 +2,17 @@
 """Script to use Entrez and SeqDB-WS APIs to load GenBank sequences into SeqDB
 """
 
+import os
 import sys
 import json
+import shelve
 import urllib
 import logging.config
 import httplib as http_client
-
 import tools_helper
+
 from api.seqdbWebService import seqdbWebService
+from config import config_root
 from Bio import Entrez
 
 
@@ -93,11 +96,57 @@ def extract_gene_names(record):
     for feature in record["GBSeq_feature-table"]:
         if feature["GBFeature_key"] == "gene":
             for qualifier in feature["GBFeature_quals"]:
-                genes[qualifier["GBQualifier_value"]] = 1
-                logging.debug("Gene name: %s" %
-                              (qualifier["GBQualifier_value"]))
+                # TODO: Should only be looking at GBQualifier_name == "gene"
+                if qualifier["GBQualifier_name"] == "gene":
+                    genes[qualifier["GBQualifier_value"]] = 1
+                    logging.debug("Gene name: %s" %
+                                  (qualifier["GBQualifier_value"]))
     logging.info("Found %i gene names" % (len(genes.keys())))
     return genes.keys()
+
+
+def check_feature_type(seqdb_ws, ftn, create=False, lookup=None):
+    """Check to see if SeqDB contains a Feature Type with desired name
+
+    Args:
+        seqdb_ws (obj): reference to instance of api.seqdbWebService
+        ftn (str): name of feature type to lookup
+
+    Kargs:
+        create (bool): If True, create feature types which are not found
+
+    Returns:
+        int or None. SeqDB feature type id if found/created. None if not
+                     found/created or there are multiple gene regions
+                     with the same name.
+
+    Raises:
+        None
+    """
+    logging.info("Checking SeqDB for feature type: %s.  Create == %r" %
+                 (ftn, create))
+
+    feature_type_id = None
+
+    if lookup is not None and ftn in lookup:
+        feature_type_id = lookup[ftn]
+
+    if feature_type_id is None:
+        feature_types = seqdb_ws.getFeatureTypesWithIds()
+        if ftn in feature_types:
+            feature_type_id = feature_types[ftn]
+        elif create is True:
+            feature_type_id = seqdb_ws.createFeatureType(
+                ftn, "Genbank Feature Type: %s" % (ftn))
+
+    if lookup is not None:
+        lookup[ftn] = feature_type_id
+
+    logging.info("Returning feature type id: %r" % (feature_type_id))
+
+    return feature_type_id
+
+# TODO filter by group
 
 
 def check_region(seqdb_ws, gene, create=False):
@@ -162,7 +211,8 @@ def entrez_search(query, retmax=1, retstart=0, database="nucleotide"):
 
 
 def entrez_fetch(
-        genbank_id, rettype="gb", retmode="xml", database="nucleotide"):
+        genbank_id, rettype="gb", retmode="xml",
+        database="nucleotide", cache=None):
     """Retrieve record retrieved via an Entrez fetch.
 
     Args:
@@ -180,16 +230,40 @@ def entrez_fetch(
         None
     """
     logging.info("Retrieving record for gi:%s from GenBank" % (genbank_id))
-    handle = Entrez.efetch(
-        db=database, id=genbank_id, rettype=rettype, retmode=retmode)
-    record = Entrez.read(handle)
-    handle.close()
+
+    add_to_cache = False
+    record = None
+
+    if cache is not None:
+        if genbank_id in cache:
+            logging.debug("Using cached record for gi:%s" % (genbank_id))
+            record = cache[genbank_id]
+        else:
+            add_to_cache = True
+
+    if record is None:
+        handle = Entrez.efetch(
+            db=database, id=genbank_id, rettype=rettype, retmode=retmode)
+
+        try:
+            record = Entrez.read(handle)
+        except Entrez.Parser.ValidationError:
+            logging.error(
+                "Failed to parse genbank record for gi:%s" % (genbank_id))
+            add_to_cache = False
+
+        handle.close()
+
+    if add_to_cache:
+        logging.debug("Adding record for gi:%s to cache" % (genbank_id))
+        cache[genbank_id] = record
+
     tools_helper.pretty_log_json(
         record[0], level="debug", message="Retrieved Genbank Record: ")
     return record
 
 
-def seqdb_ret_entrez_gene_region_id(seqdb_ws, genbank_id, record):
+def seqdb_ret_entrez_gene_region_id(seqdb_ws, record, products=None):
     """Retrieve the seqdb gene region id corresponding to the gene name on this
     entrez sequence.
 
@@ -216,15 +290,27 @@ def seqdb_ret_entrez_gene_region_id(seqdb_ws, genbank_id, record):
     seqdb_gene_region_id = None
     genes = extract_gene_names(record[0])
     if len(genes) > 1:
-        logging.warn(
-            "GenBank sequence 'gi:%s' contains multiple gene regions. "
-            "Currently we only assign sequences to a single gene region. "
-            "This sequence will not be assigned to a gene region." % (
-                genbank_id))
+        seqdb_gene_region_id = check_region(
+            seqdb_ws, "Multigene Region", create=True)
+        logging.debug(
+            "Adding multigene sequence, SeqDB region id: %i" %
+            (seqdb_gene_region_id))
+
     elif len(genes) == 1:
         seqdb_gene_region_id = check_region(seqdb_ws, genes[0], create=True)
-        logging.debug("Found gene: %s, SeqDB region id: %i" %
+        logging.debug("Found gene: %s, SeqDB region id: %s" %
                       (genes[0], seqdb_gene_region_id))
+
+    elif len(genes) == 0 and products is not None:
+        if "18S ribosomal RNA" or "internal transcribed spacer 1" or "5.8S ribosomal RNA" or "internal transcribed spacer 2" or "28S ribosomal RNA" in products:
+            seqdb_gene_region_id = check_region(
+                seqdb_ws, "Ribosomal Cistron", create=True)
+            logging.debug("Identified Ribosomal Cistron based on features in "
+                          "0 gene region, SeqDB region id: %i" %
+                          (seqdb_gene_region_id))
+        else:
+            logging.debug("No gene region for 0 gene region, SeqDB region "
+                          "id: %i" % (seqdb_gene_region_id))
 
     return seqdb_gene_region_id
 
@@ -249,6 +335,7 @@ def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
     logging.info("Adding sequence for gi:%s to SeqDB" % (genbank_id))
     seq_name = format_sequence_name(genbank_id, record)
     sequence = record[0]["GBSeq_sequence"]
+    sequence = sequence.upper()
     tracefile_dir = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi'
     tracefile_name = format_tracefile_name(
         db="nucleotide", id=genbank_id, rettype="gb", retmode="xml")
@@ -277,6 +364,47 @@ def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
             code, message))
 
     return seqdb_id
+
+
+def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
+    """Associate the sequence with a Specimen in SeqDB based on
+       supported GBQualifier values.  Currently supported values include:
+
+        * culture collection
+        * strain
+        * specimen voucher
+        * isolate
+
+        Currently looks for entries beginning with "DAOM" or "CBS" in the
+        above, or with the prefix "personal:". May need to look for additional
+        prefixes and check values for additional qualifer keys.
+    """
+    for supported in [
+            'culture_collection', 'strain', 'specimen voucer', 'isolate']:
+        if supported in feature['qualifiers']:
+            for value in feature['qualifiers'][supported]:
+                if value.startswith("DAOM"):
+                    logging.warn(
+                        "Found apparent DAOM identifer (%s), but Specimen "
+                        "linking not yet implemented" %
+                        (value))
+                if value.startswith("CBS"):
+                    logging.warn(
+                        "Found apparent CBS identifer (%s), but Specimen "
+                        "linking not yet implemented" %
+                        (value))
+                if value.startswith("personal:"):
+                    logging.warn(
+                        "Found candidate personal identifer (%s), but "
+                        "Specimen linking not yet implemented" %
+                        (value))
+
+
+def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature):
+    """Associate the sequence with a Taxa in the SeqDB Taxonomy based on the
+       GBQualifier "organism" value"""
+
+    logging.warn("Taxonomy linking not yet implemented")
 
 
 def seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_region_id):
@@ -316,7 +444,254 @@ def seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_region_id):
     return region_id
 
 
-def process_entrez_entry(seqdb_ws, genbank_id):
+def parse_locations(gb_feature):
+    """Parse the GBFeature_intervals block and create an array of locations in
+       the local dictionary representation.
+
+    Args:
+        gb_feature: Reference to GBFeature block from Entrez XML
+
+    Kargs:
+        None
+
+    Returns:
+        Array of locations extracted from the Entrez GBFeature block.
+
+    Raises:
+        None
+    """
+    locations = []
+    for interval in gb_feature['GBFeature_intervals']:
+        # TODO determined frame and strand, don't just default to 1
+        locations.append(
+            {
+                "start": interval['GBInterval_from'],
+                "end": interval['GBInterval_to'], "frame": 1, "strand": 1
+            })
+    return locations
+
+
+def parse_qualifiers(gb_feature):
+    """Parse the GBFeature_quals block of the GBFeature entry and create a
+       dictionary of qualifiers using the GBQualifier_name as a key.
+
+    Args:
+        gb_feature: Reference to GBFeature block from Entrez XML
+
+    Kargs:
+        None
+
+    Raises:
+        None
+    """
+    qualifiers = {}
+    for qual in gb_feature['GBFeature_quals']:
+        if qual['GBQualifier_name'] not in qualifiers:
+            qualifiers[qual['GBQualifier_name']] = []
+        qualifiers[qual['GBQualifier_name']].append(qual['GBQualifier_value'])
+    return qualifiers
+
+
+def parse_feature(gb_feature, seqdb_ws, lookup=None):
+    """Parse the GBFeature to create a dict from the record.
+
+    Args:
+        gb_feature: Reference to GBFeature block from Entrez XML
+        seqdb_ws (obj): Reference to instance of api.seqdbWebService
+
+    Kargs:
+        lookup (obj):   Reference to a dict to locally cache feature type
+                        entries
+
+    Returns:
+        Array of locations extracted from the Entrez GBFeature block.
+
+    Raises:
+        None
+    """
+    logging.info("\tParsing feature: \"%s\"" % (gb_feature['GBFeature_key']))
+    gb_feature_record = {}
+    gb_feature_record['location_description'] = gb_feature[
+        'GBFeature_location']
+    gb_feature_record['feature_key'] = gb_feature['GBFeature_key']
+    gb_feature_record['feature_type_id'] = check_feature_type(
+        seqdb_ws, gb_feature['GBFeature_key'], create=True, lookup=lookup)
+    gb_feature_record['locations'] = parse_locations(gb_feature)
+    gb_feature_record['qualifiers'] = parse_qualifiers(gb_feature)
+    return gb_feature_record
+
+
+def adjust_feature_for_codon_start(feature):
+    """Adjust feature start if feature contains a "codon_start" annotation.
+
+    Args:
+        feature (dict): Feature entry from internal representation
+
+    Kargs:
+        None
+
+    Returns:
+        The (possibly updated) feature.
+
+    Raises:
+        None
+    """
+    # adjust frame for feature based on codon_start qualifer
+    if 'codon_start' in feature['qualifiers']:
+        # doesn't make sense to me that there would be more than one
+        # codon_start value
+        if len(feature['qualifiers']['codon_start']) > 1:
+            logging.warn(
+                "Multiple codon_start feature qualifiers found.  Using first.")
+        feature['locations'][0]['frame'] = feature[
+            'qualifiers']['codon_start'][0]
+    return feature
+
+
+def process_features(seqdb_ws, seqdb_id, record, lookup=None):
+    """Process features contained in Entrez GBSeq_feature-table and add them to
+       the sequence in seqdb.
+
+    Args:
+        seqdb_ws (obj): reference to instance of api.seqdbWebService
+        seqdb_id (int): SeqDB id of the sequence
+        record (obj):   reference to the GBSeq block of the Entrez record
+
+    Kargs:
+        lookup (obj):   Reference to a dict to locally cache feature type
+                        entries
+
+    Returns:
+        dict containing all unique "product" GBFeature_quals  observed on this
+        record.
+
+    Raises:
+        None
+    """
+    logging.info("Adding features from Entry: %s to Sequence seqdbid:%i" % (
+        record['GBSeq_accession-version'], seqdb_id))
+
+    features = []
+    for gb_feature in record['GBSeq_feature-table']:
+        features.append(parse_feature(gb_feature, seqdb_ws, lookup=lookup))
+
+    products = {}
+    gene_id = None
+    mrna_id = None
+    cds_id = None
+    for feature in features:
+        # create hash of unique product names for future use (returned from
+        # function)
+        if 'product' in feature['qualifiers']:
+            for product in feature['qualifiers']['product']:
+                products[product] = 1
+
+        # default / initial name and description
+        name = "unnamed " + feature['feature_key']
+        description = feature['location_description']
+
+        # update name, based on one of the following keys in order of
+        # preference don't expect gene will ever have a 'product', but it
+        # doesn't hurt anything
+        name_keys = ['product', 'protein_id', 'gene', 'locus_tag']
+        for key in name_keys:
+            if key in feature['qualifiers']:
+                # if the feature appeared multiple times, use the first entry
+                # value for the name
+                name = feature['qualifiers'][key][0]
+                break
+
+        # supplement description (prepend key value pairs to base description)
+        description_keys = [
+            'db_xref', 'protein_id', 'locus_tag', 'note',
+            'rpt_type', 'gene', 'product']
+        for key in description_keys:
+            if key in feature['qualifiers']:
+                for value in feature['qualifiers'][key]:
+                    description = key + ": " + value + "; " + description
+
+        # currently unsupported features that I've encountered
+        #    1  STS
+        #  276  assembly_gap
+        #   46  exon
+        #    1  gap
+        #   39  intron
+        #    1  mRNA
+        #    4  misc_RNA
+        #   98  misc_difference
+        #    2  misc_feature
+        # 2650  mobile_element
+        #    1  source
+        #   20  stem_loop
+        #   39  tmRNA
+
+        # Assumes I will encounter another gene before a feature that is not a
+        # child of these gene.
+        # TODO check range of parent and null gene/cds/mrna ids once we are
+        # outside the range
+        if feature['feature_key'] == 'gene':
+            gene_id = seqdb_ws.insertFeature(
+                name,
+                feature['feature_type_id'],
+                feature['locations'],
+                seqdb_id,
+                description=description)
+
+        elif feature['feature_key'] == 'mRNA':
+            feature = adjust_feature_for_codon_start(feature)
+            mrna_id = seqdb_ws.insertFeature(
+                name,
+                feature['feature_type_id'],
+                feature['locations'],
+                seqdb_id,
+                description=description,
+                parentId=gene_id)
+
+        elif feature['feature_key'] == 'CDS':
+            parent_id = mrna_id
+            if parent_id is None:
+                parent_id = gene_id
+
+            feature = adjust_feature_for_codon_start(feature)
+            cds_id = seqdb_ws.insertFeature(
+                name,
+                feature['feature_type_id'],
+                feature['locations'],
+                seqdb_id,
+                description=description,
+                parentId=parent_id)
+
+        # TODO do these necessarily have a parent gene?
+        elif feature['feature_key'] in ['tRNA', 'rRNA', 'misc_RNA']:
+            seqdb_ws.insertFeature(
+                name,
+                feature['feature_type_id'],
+                feature['locations'],
+                seqdb_id,
+                description=description,
+                parentId=gene_id)
+
+        elif feature['feature_key'] in [
+                'repeat_region', 'misc_feature', 'misc_difference']:
+            seqdb_ws.insertFeature(
+                name,
+                feature['feature_type_id'],
+                feature['locations'],
+                seqdb_id,
+                description=description)
+
+        elif feature['feature_key'] == 'source':
+            seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature)
+            seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature)
+
+        else:
+            logging.warn("Unsupported feature type: %s" %
+                         (feature['feature_key']))
+
+    return products
+
+
+def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
     """Process an entrez entry.
 
     Args:
@@ -339,6 +714,8 @@ def process_entrez_entry(seqdb_ws, genbank_id):
             * If this Genbank entry contains a single gene region, and it is
               present in SeqDB (or we have created the correponding gene
               region), associate the Sequence with the Gene Region.
+            * If this Genbank entry contains feature annotations, add them
+              to SeqDB
     """
     logging.info("Processing gi:%s" % (genbank_id))
 
@@ -350,22 +727,32 @@ def process_entrez_entry(seqdb_ws, genbank_id):
 
     if result['count'] == 0:
         # retrieve genbank record
-        record = entrez_fetch(genbank_id)
+        record = entrez_fetch(genbank_id, cache=cache)
 
-        seqdb_id = seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record)
+        if "GBSeq_sequence" in record[0]:
+            seqdb_id = seqdb_insert_entrez_sequence(
+                seqdb_ws, genbank_id, record)
 
-        seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(
-            seqdb_ws, genbank_id, record)
+            features = process_features(
+                seqdb_ws, seqdb_id, record[0], lookup=lookup)
 
-        if seqdb_gene_region_id is not None:
-            seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_gene_region_id)
+            seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(
+                seqdb_ws, record, features)
 
-        if logging.getLogger().isEnabledFor(logging.DEBUG):
-            # retrieve inserted record and display to users for validation
-            # purposes
-            result = seqdb_ws.getJsonSeq(seqdb_id)
-            tools_helper.pretty_log_json(
-                result, level="debug", message="Record as inserted:")
+            if seqdb_gene_region_id is not None:
+                seqdb_update_seqsource(
+                    seqdb_ws, seqdb_id, seqdb_gene_region_id)
+
+            if logging.getLogger().isEnabledFor(logging.DEBUG):
+                # retrieve inserted record and display to users for validation
+                # purposes
+                result = seqdb_ws.getJsonSeq(seqdb_id)
+                tools_helper.pretty_log_json(
+                    result, level="debug", message="Record as inserted:")
+        else:
+            logging.info(
+                "Skipping gi:%s, which does not contain a sequence." % (
+                    genbank_id))
 
     elif result['count'] == 1:
         logging.info(
@@ -388,18 +775,46 @@ def main():
     Raises:
         None
     """
-    main_conf = tools_helper.load_config('../config.yaml')
-    tool_config = tools_helper.load_config('seqdb_gb_insert_config.yaml')
+    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
+    if not main_conf:
+        logging.error(tools_helper.log_msg_noConfig)
+        sys.exit(tools_helper.log_msg_sysExit)
+
+    tool_config = tools_helper.load_config(os.path.dirname(__file__) + '/seqdb_gb_insert_config.yaml')
+    if not tool_config:
+        logging.error(tools_helper.log_msg_noConfig)
+        sys.exit(tools_helper.log_msg_sysExit)
+
     logging.config.dictConfig(main_conf['logging'])
     http_client.HTTPConnection.debuglevel = main_conf[
         'http_connect']['debug_level']
+
+
+    # caching the entrez records shaved 2 minutes off the time to load
+    # ~740 sequences from query: "(*DAOM*[source] and levesque and not
+    # 'unplaced genomics scaffold')"
+    # real    11m40.754s
+    # user    1m31.726s
+    # sys     0m14.760s
+    # - vs -
+    # real    9m21.112s
+    # user    1m27.726s
+    # sys     0m13.619s
+    entrez_cache = shelve.open(tool_config['entrez']['cache'])
+
+    # however, caching the lookup shaved an additional ~7 minutes off the total
+    # time to load above query
+    # real    2m35.773s
+    # user    0m16.539s
+    # sys     0m2.486s
+    feature_type_lookup = {}
 
     logging.info(
         "Script executed with the following command and arguments: %s" % (
             sys.argv))
 
     seqdb_ws = seqdbWebService(
-        tool_config['seqdb']['apikey'], main_conf['seqdb']['url'])
+        main_conf['seqdb']['apikey'], main_conf['seqdb']['url'])
 
     Entrez.email = tool_config['entrez']['email']
     query = tool_config['entrez']['query']
@@ -426,7 +841,11 @@ def main():
 
         # process each returned id in the batch
         for genbank_id in record["IdList"]:
-            process_entrez_entry(seqdb_ws, genbank_id)
+            process_entrez_entry(
+                seqdb_ws,
+                genbank_id,
+                cache=entrez_cache,
+                lookup=feature_type_lookup)
 
         start += retrieve
 

@@ -4,6 +4,7 @@ seqdb:
 entrez:
     email: "your-name@your-institution.org"          # e.g. christopher.lewis@agr.gc.ca
     query: "(*DAOM*[source] and levesque and btub) and not shotgun"
+    cache: "entrez_cache"                            # file to hold cache of retrived entrez records
 
 # TODO permit a list of queries?
     #query: "(*DAOM*[source] and levesque and btub) and not shotgun"
