@@ -12,7 +12,7 @@ venv:
 
 .PHONY: clean-log
 clean-log:
-	rm *.log *.err
+	rm -f *.log *.err
 
 .PHONY: clean
 clean:
@@ -32,7 +32,7 @@ clean_install:
 
 pep8.log:
 	pep8 --show-source --show-pep8 tools/ > pep8.log || true
-	pep8 --show-source --show-pep8 api/ > pep8.log || true
+	pep8 --show-source --show-pep8 api/ >> pep8.log || true
 
 pylint.log:
 	pylint tools/ > pylint.log || true

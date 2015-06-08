@@ -450,6 +450,7 @@ class seqdbWebService:
             UnexpectedContent
         '''
         # TODO Question requirement for gene region to be associated with a group
+        # TODO Don't hard code group
         post_data = {"region":{"description":description, "group":{"id":1}, "name":name }}
  
         resp = self.create(self.base_url + '/region', json.dumps(post_data))
@@ -533,6 +534,8 @@ class seqdbWebService:
         else:
             return ''
 
+
+
     def createFeatureType(self, featureTypeName, featureTypeDescription = ''):
         ''' Creates a FeatureType 
         Returns:
@@ -552,6 +555,7 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
         
         return jsn_resp['result']
+
 
         
     def deleteFeatureType(self, featureTypeId):
@@ -595,7 +599,7 @@ class seqdbWebService:
 
 
 
-    def insertFeature(self, name, featureTypeId, featureLocations, sequenceId, description='', featureDefault=False):
+    def insertFeature(self, name, featureTypeId, featureLocations, sequenceId, description='', featureDefault=False, parentId=None):
         ''' Creates a Feature 
         Args:
             name: name of the feature
@@ -615,6 +619,8 @@ class seqdbWebService:
                 "featureDefault":featureDefault
             }
         }
+        if parentId is not None:
+            post_data["feature"]["parentFeature"] = {"id":parentId}
         
         resp = self.create(self.base_url + "/sequence/" + str(sequenceId) + "/feature", json.dumps(post_data))
                      
