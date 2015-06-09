@@ -226,7 +226,7 @@ class seqdbWebService:
 
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
 
-    # TODO Not tested
+
     def deleteConsensusSequence(self, consensus_id):
         request_url = "/consensus/" + str(consensus_id)
         jsn_resp = self.delete(self.base_url + request_url).json()
@@ -653,3 +653,117 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
+
+           
+    # TODO Not tested
+    # TODO create/insert - review for consistency
+    def createSpecimen(self):
+        ''' Create a Specimen
+        Args:
+            TBD
+        Kargs:
+            TBD
+        Returns:
+            'result' from the json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        # TODO Not yet implemented
+        logging.warn("createSpecimen not yet implemented")
+
+
+    # TODO Not tested
+    # TODO get/retrieve - review for consistency
+    def getSpecimen(self, specimenId):
+        ''' Retrieves a Specimen
+        Args:
+            specimenId: id of a specimen to be retrieved
+        Kargs:
+            None
+        Returns:
+            'result' from the json response OR nothing if specimen was not found
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        jsn_resp = self.retrieveJson(
+            self.base_url + "/specimen/" + str(specimenId))
+
+        if jsn_resp:
+            return jsn_resp['result']
+        else:
+            return ''
+
+
+    # TODO Not tested
+    def updateSpecimen(self, specimenId, params):
+        resp = self.update(
+            self.base_url + "/specimen/" + str(specimenId),
+            json.dumps(params))
+        jsn_resp = resp.json()
+
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+
+
+    def deleteSpecimen(self, specimenId):
+        ''' Deletes a Feature
+        Args:
+            specimenId: id of the specimen to be deleted
+        Returns:
+            json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        request_url = "/specimen/" + str(specimenId)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp
+
+
+    def getJsonSpecimenIds(self, params=None):
+        ''' Gets ids of all specimens
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        jsn_resp = self.retrieveJson(
+            self.base_url + "/specimen", params=params)
+
+        
+        if jsn_resp['count'] > 0 and not jsn_resp['result']:
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp
+
+
+    def getJsonSpecimenIdsByOtherIds(self, code, identifier):
+        params = {'filterName': 'otherIds',
+                  'filterValue': code + identifier,
+                  'filterOperator': 'and',
+                  'filterWildcard': 'true'}
+
+        return self.getJsonSpecimenIds(params)
+
+    def getJsonSpecimenIdsBySpecimenId(self, code, identifier):
+        params = {'filterName': 'biologicalCollection.name',
+                  'filterValue': code,
+                  'filterOperator': 'and',
+                  'filterWildcard': 'true'}
+
+        # TODO Add second filter for identifer (need docs)
+
+        return self.getJsonSpecimenIds(params)

@@ -381,23 +381,31 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
     """
     for supported in [
             'culture_collection', 'strain', 'specimen voucer', 'isolate']:
+
         if supported in feature['qualifiers']:
+
             for value in feature['qualifiers'][supported]:
-                if value.startswith("DAOM"):
-                    logging.warn(
-                        "Found apparent DAOM identifer (%s), but Specimen "
-                        "linking not yet implemented" %
-                        (value))
-                if value.startswith("CBS"):
-                    logging.warn(
-                        "Found apparent CBS identifer (%s), but Specimen "
-                        "linking not yet implemented" %
-                        (value))
+
+                if value.startswith("DAOM") or value.startswith("CBS"):
+                    code, identifier = value.split(":")
+
+                    logging.info(
+                        "Checking SeqDB for Specimen with OtherIds containing "
+                        "Code: %s, Identifier: %s" % (code, identifier))
+
+                    json_rsp = seqdb_ws.getJsonSpecimenIdsByOtherIds(
+                                    code, identifier)
+                    logger.info(
+                        "Found %s specimen based on code: %s and id: %s" % 
+                        (json_rsp['count'], code, identifier))
+
                 if value.startswith("personal:"):
+                    prefix, code, identifier = value.split(":")
                     logging.warn(
                         "Found candidate personal identifer (%s), but "
-                        "Specimen linking not yet implemented" %
-                        (value))
+                        "Specimen linking including BiologicalCollection "
+                        "not yet implemented. Code: %s, Id: %s" %
+                        (value, code, identifier))
 
 
 def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature):
@@ -437,7 +445,7 @@ def seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_region_id):
     }
     region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, seqsource)
     logging.info(
-        "Updated SeqSource for consensus sequence"
+        "Updated SeqSource for consensus sequence "
         "seqdbid:%i, Status: %i, Message: %s" % (
             seqdb_id, code, message))
 
@@ -691,7 +699,9 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
     return products
 
 
-def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
+def process_entrez_entry(
+        seqdb_ws, genbank_id, cache=None, lookup=None, 
+        delete=False, update=False):
     """Process an entrez entry.
 
     Args:
@@ -699,7 +709,11 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
         genbank_id (str): The genbank id of the record being processed
 
     Kargs:
-        None
+        cache (obj):    a "stash" in which to cache Entrez results returned
+                        from Genbank.
+        lookup (dict):  a dict to hold SeqDB Features and save queries.
+        delete (bool):  Default False. Delete existing SeqDB records and
+                        recreate them.
 
     Returns:
         None
@@ -725,40 +739,54 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
 
     result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
 
-    if result['count'] == 0:
+    if result['count'] == 1 and delete:
+        logging.info("Deleting existing sequence, seqdbid:%s", (result['result'][0]))
+        seqdb_ws.deleteConsensusSequence(result['result'][0])
+
+    record = None
+    if result['count'] == 0 or update:
         # retrieve genbank record
         record = entrez_fetch(genbank_id, cache=cache)
 
-        if "GBSeq_sequence" in record[0]:
-            seqdb_id = seqdb_insert_entrez_sequence(
-                seqdb_ws, genbank_id, record)
-
-            features = process_features(
-                seqdb_ws, seqdb_id, record[0], lookup=lookup)
-
-            seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(
-                seqdb_ws, record, features)
-
-            if seqdb_gene_region_id is not None:
-                seqdb_update_seqsource(
-                    seqdb_ws, seqdb_id, seqdb_gene_region_id)
-
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                # retrieve inserted record and display to users for validation
-                # purposes
-                result = seqdb_ws.getJsonSeq(seqdb_id)
-                tools_helper.pretty_log_json(
-                    result, level="debug", message="Record as inserted:")
-        else:
-            logging.info(
-                "Skipping gi:%s, which does not contain a sequence." % (
-                    genbank_id))
+    seqdb_id = None
+    if result['count'] == 1 and update:
+        seqdb_id = result['result'][0]
 
     elif result['count'] == 1:
         logging.info(
             "Sequence for gi:%s already exists in SeqDB. Skipping." % (
                 genbank_id))
 
+
+    if result['count'] == 0:
+
+        if "GBSeq_sequence" in record[0]:
+            seqdb_id = seqdb_insert_entrez_sequence(
+                seqdb_ws, genbank_id, record)
+
+        else:
+            logging.info(
+                "Skipping gi:%s, which does not contain a sequence." % (
+                    genbank_id))
+
+
+    if record is not None and seqdb_id is not None:
+        features = process_features(
+            seqdb_ws, seqdb_id, record[0], lookup=lookup)
+
+        seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(
+            seqdb_ws, record, features)
+
+        if seqdb_gene_region_id is not None:
+            seqdb_update_seqsource(
+                seqdb_ws, seqdb_id, seqdb_gene_region_id)
+
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            # retrieve inserted record and display to users for validation
+            # purposes
+            result = seqdb_ws.getJsonSeq(seqdb_id)
+            tools_helper.pretty_log_json(
+                result, level="debug", message="Final Consensus Sequence:")
 
 def main():
     """Load sequences matching Entrez query into SeqDB.
@@ -845,7 +873,9 @@ def main():
                 seqdb_ws,
                 genbank_id,
                 cache=entrez_cache,
-                lookup=feature_type_lookup)
+                lookup=feature_type_lookup,
+                delete=tool_config['gb_insert']['delete'],
+                update=tool_config['gb_insert']['update'])
 
         start += retrieve
 
