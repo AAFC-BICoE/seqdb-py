@@ -14,6 +14,7 @@ import os
 import urlparse
 import gzip
 import mimetypes
+from tools import tools_helper
 
 
 class UnexpectedContent(requests.exceptions.RequestException):
@@ -406,6 +407,28 @@ class seqdbWebService:
         response = self.retrieve(url)
         return response.content
 
+
+    def isIts(self, region_name):
+        ''' Check if the keyword can be considered an ITS 
+        Returns:
+            True if the keyword contains any of the ITS names
+            False otherwise
+        '''
+    
+        ''' ITS keywords. 
+        ITS in bacteria is between the 16S and 23S rRNA genes
+        ITS in eukaryotes is: SSU (18S) ITS1 5.8S ITS2 LSU (25S in plants, 28S in animals)
+        '''
+        its_region_names = ["ssu", "16s", "18s", "its", "5.8s", "lsu", "23s", "25s", "28s", "internal transcribed spacer"]
+        
+        regionName_lc = region_name.lower()
+        for its_name in its_region_names:
+            if regionName_lc.find(its_name) >= 0:
+                return True
+            
+        return False
+
+
     def getItsRegionIds(self):
         ''' Get region IDs of ITS sequences
         Raises:
@@ -414,8 +437,20 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        return self.getRegionIdsByName("ITS")
-        #self.getRegionIds()
+        #return self.getRegionIdsByName("ITS")
+        
+        region_ids = self.getRegionIds()
+        
+        its_region_ids = []
+        
+        for region_id in region_ids:
+            region_name = self.getRegionName(region_id)
+            
+            if self.isIts(region_name):
+                its_region_ids.append(region_id) 
+        
+        return its_region_ids
+
 
     def getRegionIdsByName(self, name):
         params = {
@@ -426,8 +461,20 @@ class seqdbWebService:
         }
         return self.getRegionIds(params)
 
-
-
+    def getRegionName(self, region_id):
+        ''' Given a region id, returns region name or empty string if no response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        jsn_resp = self.retrieveJson(self.base_url + "/region/" + str(region_id))
+        if jsn_resp:
+            return jsn_resp['result']['name']
+        else:
+            return ''
+        
     def getRegionIds(self, params=None):
         ''' Get region IDs
         Raises:
