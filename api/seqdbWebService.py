@@ -212,6 +212,7 @@ class seqdbWebService:
                 'seq': sequence,
                 'seqType': seqType,
                 'readNum': readNum,
+                'qualities': qualities,
             },
         }
 
@@ -355,9 +356,9 @@ class seqdbWebService:
         for seq_id in seq_ids:
             self.deleteSequence(seq_id)
 
-    def updateSeqSource(self, seqdb_id, params):
+    def updateSeqSource(self, sequenceId, params):
         resp = self.update(
-            self.base_url + "/sequence/" + str(seqdb_id) + "/seqSource",
+            self.base_url + "/sequence/" + str(sequenceId) + "/seqSource",
             json.dumps(params))
         jsn_resp = resp.json()
 
@@ -365,6 +366,14 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+
+
+    def getJsonSeqSource(self, sequenceId):
+        jsn_resp = self.retrieveJson(
+            self.base_url + "/sequence/" + str(sequenceId) + "/seqSource")
+
+        return jsn_resp
+
 
     def getJsonSeq(self, seq_id):
         jsn_resp = self.retrieveJson(
@@ -759,11 +768,15 @@ class seqdbWebService:
         return self.getJsonSpecimenIds(params)
 
     def getJsonSpecimenIdsBySpecimenId(self, code, identifier):
-        params = {'filterName': 'biologicalCollection.name',
-                  'filterValue': code,
-                  'filterOperator': 'and',
-                  'filterWildcard': 'true'}
+        params = {'filterName': ['biologicalCollection.name', 'number'],
+                  'filterValue': [code, identifier],
+                  'filterOperator': ['and', 'and'],
+                  'filterWildcard': ['false', 'false']}
 
-        # TODO Add second filter for identifer (need docs)
+        jsn_resp = self.getJsonSpecimenIds(params)
 
-        return self.getJsonSpecimenIds(params)
+        # Collection Name + Specimen Number should be unique
+        if jsn_resp['count'] > 1:
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp
