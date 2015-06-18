@@ -126,7 +126,7 @@ def pull_its_seqs(api_key,base_url):
         
     logging.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
     user_log.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
-
+    logging.info("ITS region ids retrieved: %s " % its_region_ids)
    
     #Get sequence IDs for the ITS regions
     its_seq_ids = []

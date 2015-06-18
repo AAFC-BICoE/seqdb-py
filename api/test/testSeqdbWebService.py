@@ -53,13 +53,6 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
         for sId in self.sequenceIds:
             self.seqdbWS.deleteSequence(sId)
 
-    def testIsIts(self):
-        self.assertTrue(self.seqdbWS.isIts("mitSSU"), "Expected to pass 'mitSSU'")
-        self.assertTrue(self.seqdbWS.isIts("iTs"), "Expected to pass 'iTs'")
-        self.assertTrue(self.seqdbWS.isIts("5.8S"), "Expected to pass '5.8S'")
-        self.assertTrue(self.seqdbWS.isIts("18S"), "Expected to pass '5.8S'")
-        self.assertTrue(self.seqdbWS.isIts("28S"), "Expected to pass '5.8S'")
-
     def testConnection(self):
         self.assertRaises(requests.exceptions.ConnectionError, self.seqdbWS.retrieve, "http://jibberish")
         # TODO: test wrong api key

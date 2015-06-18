@@ -408,26 +408,6 @@ class seqdbWebService:
         return response.content
 
 
-    def isIts(self, region_name):
-        ''' Check if the keyword can be considered an ITS 
-        Returns:
-            True if the keyword contains any of the ITS names
-            False otherwise
-        '''
-    
-        ''' ITS keywords. 
-        ITS in bacteria is between the 16S and 23S rRNA genes
-        ITS in eukaryotes is: SSU (18S) ITS1 5.8S ITS2 LSU (25S in plants, 28S in animals)
-        '''
-        its_region_names = ["ssu", "16s", "18s", "its", "5.8s", "lsu", "23s", "25s", "28s", "internal transcribed spacer"]
-        
-        regionName_lc = region_name.lower()
-        for its_name in its_region_names:
-            if regionName_lc.find(its_name) >= 0:
-                return True
-            
-        return False
-
 
     def getItsRegionIds(self):
         ''' Get region IDs of ITS sequences
@@ -437,27 +417,22 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        #return self.getRegionIdsByName("ITS")
         
-        region_ids = self.getRegionIds()
+        its_region_names = ["ssu", "16s", "18s", "its", "5.8s", "lsu", "23s", "25s", "28s", "internal transcribed spacer"]
+        its_region_ids = set()
         
-        its_region_ids = []
-        
-        for region_id in region_ids:
-            region_name = self.getRegionName(region_id)
+        for its_name in its_region_names:
+            its_region_ids.update(self.getRegionIdsByName(its_name))
             
-            if self.isIts(region_name):
-                its_region_ids.append(region_id) 
+        return list(its_region_ids)
         
-        return its_region_ids
-
 
     def getRegionIdsByName(self, name):
         params = {
             'filterName': 'name',
             'filterValue': name,
             'filterOperator': 'and',
-            'filterWildcard': 'false'
+            'filterWildcard': 'true'
         }
         return self.getRegionIds(params)
 
