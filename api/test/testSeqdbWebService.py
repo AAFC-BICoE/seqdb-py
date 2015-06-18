@@ -176,7 +176,7 @@ class TestSeqdbWebService_Region_Existing(unittest.TestCase):
 
     
     def setUp(self):
-        regionId = self.seqdbWS.createRegion("ITS", "Test")
+        regionId = self.seqdbWS.createRegion("ITS", "Test", 168)
         self.regionIds = [regionId]
 
     

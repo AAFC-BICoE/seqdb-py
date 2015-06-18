@@ -11,10 +11,8 @@ import json
 import logging
 import base64
 import os
-import urlparse
 import gzip
 import mimetypes
-from tools import tools_helper
 
 
 class UnexpectedContent(requests.exceptions.RequestException):
@@ -464,7 +462,7 @@ class seqdbWebService:
         else:
             return ''
 
-    def createRegion(self, name, description):
+    def createRegion(self, name, description, group_id=1):
         ''' Creates a region
         Args:
             name: region name
@@ -481,7 +479,7 @@ class seqdbWebService:
         post_data = {
             "region": {
                 "description": description,
-                "group": {"id": 1},
+                "group": {"id": group_id},
                 "name": name}
             }
 
