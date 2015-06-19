@@ -20,15 +20,16 @@ from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
 
 
-usage_help_line = """Usage of the script: \npull_seqdb_its_seqs -c <Path to yaml config with SeqDB API info>
+usage_help_line = """Usage of the script: \npull_raw_seqs -c <Path to yaml config with SeqDB API info> -s <specimen>
 or
-pull_seqdb_its_seqs -k <SeqDB API key> -u <SeqDB API URL> 
+pull_seqdb_its_seqs -k <SeqDB API key> -u <SeqDB API URL> -s <specimen>
 Other arguments:
    -h   help (prints this message)
 """
 
 # File name where the pulled sequences will be stored
-output_file_name = "seqdb_ITS_seqs.fasta"
+output_file_name_prefix = "seqdb_raw_seqs_"
+output_file_name_suffix = ".fasta"
 # This log will provide users of Galaxy with extra information on the tool execution
 # sysem statements should not go here, since full log is configured in yaml
 user_log = tools_helper.SimpleLog("seqdb_pull.log")
@@ -46,11 +47,12 @@ def parse_input_args(argv):
         seqdb api_url to use for web services requests
     '''
     config_file=''
+    specimen=''
     api_url=''
     api_key = ''
     
     try:
-        opts, args = getopt.getopt(argv,"hc:k:u:",["config_file=", "seqdb_api_key=", "seqdb_api_url="])
+        opts, args = getopt.getopt(argv,"hc:s:k:u:",["config_file=", "specimen=", "seqdb_api_key=", "seqdb_api_url="])
     except getopt.GetoptError:
         print usage_help_line
         logging.error(tools_helper.log_msg_argError)
@@ -67,6 +69,8 @@ def parse_input_args(argv):
             sys.exit(2)
         elif opt in ("-c", "--config_file"):
             config_file = arg
+        elif opt in ("-s", "--specimen"):
+            specimen = arg
         elif opt in ("-k", "--seqdb_api_key"):
             api_key = arg
         elif opt in ("-u", "--seqdb_api_url"):
@@ -86,19 +90,19 @@ def parse_input_args(argv):
         user_log.error(tools_helper.log_msg_argError)
         sys.exit(2)
         
-    return (config_file, api_url, api_key)
+    return (config_file, specimen, api_url, api_key)
 
 
 
 
-def pull_its_seqs(api_key,base_url):
+def pull_raw_seqs(api_key,base_url,specimen, output_file_name):
     ''' Downloads all ITS sequences from SeqDB and writes them to a file '''
     
     
     seqdbWS = seqdbWebService(api_key, base_url)
     
     try:
-        its_region_ids = seqdbWS.getItsRegionIds()
+        seq_ids = seqdbWS.getSequenceIdsBySpecimen(specimen)
     except requests.exceptions.ConnectionError as e:
         user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
         logging.error(tools_helper.log_msg_noDbConnection)
@@ -124,50 +128,16 @@ def pull_its_seqs(api_key,base_url):
         logging.error(e.message)
         sys.exit(tools_helper.log_msg_sysExit)
         
-    logging.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
-    user_log.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
-    logging.info("ITS region ids retrieved: %s " % its_region_ids)
+    logging.info("Number of raw sequences retrieved for specimen '%s': %i " % (specimen, len(seq_ids)))
+    user_log.info("Number of raw sequences retrieved for specimen '%s': %i " % (specimen, len(seq_ids)))
    
-    #Get sequence IDs for the ITS regions
-    its_seq_ids = []
-    for region_id in its_region_ids:
-        try:
-            curr_seq_ids = seqdbWS.getSequenceIdsByRegion(region_id)
-            its_seq_ids.extend(curr_seq_ids)
-        except requests.exceptions.ConnectionError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
-            logging.error(tools_helper.log_msg_noDbConnection)
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        except requests.exceptions.ReadTimeout as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
-            logging.error(tools_helper.log_msg_slowConnection)
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        except requests.exceptions.HTTPError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
-            logging.error(tools_helper.log_msg_httpError)
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        except UnexpectedContent as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
-            logging.error(tools_helper.log_msg_apiResponseFormat)
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        except Exception as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-                        
-
-    logging.info("Number of ITS sequences retrieved: %i " % len(its_seq_ids))
-    user_log.info("Number of ITS sequences retrieved: %i " % len(its_seq_ids))
-     
-    # Get fasta sequences based on ids and write to a file 
+  
+    
     output_file = open(output_file_name, 'w')
     
+    
     success_ids = []
-    for seq_id in its_seq_ids:
+    for seq_id in seq_ids:
         try:
             # Request sequence in fasto format from SeqDB:
             fastaSequence = seqdbWS.getFastaSeq(seq_id)
@@ -206,7 +176,8 @@ def pull_its_seqs(api_key,base_url):
     
 
 def main():
-    ''' Retrieves ITS sequenes from SeqDB '''
+    ''' Retrieves raw sequenes for a specified specimen '''
+    
     main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
 
     if not main_conf:
@@ -218,7 +189,7 @@ def main():
     logging.info("Script executed with the following command and arguments: %s" % sys.argv)
     user_log.info(tools_helper.log_msg_execStarted_simple)
     
-    config_file, api_url, api_key = parse_input_args(sys.argv[1:])
+    config_file, specimen, api_url, api_key = parse_input_args(sys.argv[1:])
     
     if config_file:
         tool_config = tools_helper.load_config(config_file)
@@ -227,8 +198,10 @@ def main():
     
     logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
     user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
+    
+    output_file_name = "%s%s%s" % (output_file_name_prefix, specimen, output_file_name_suffix)
    
-    success_seq_ids = pull_its_seqs(api_key, api_url)
+    success_seq_ids = pull_raw_seqs(api_key, api_url, specimen, output_file_name)
     
 
     print("Number of sequences retrieved from Sequence Dababase:  %s" % len(success_seq_ids)) 

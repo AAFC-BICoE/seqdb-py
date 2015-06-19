@@ -243,7 +243,7 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
     # TODO: this test requires sequence to be associated with region. The ability to do this via API is not yet implemented,
     #       therefore we can not do a test setup for this test. 
     def testGetSeqIds(self):
-        actual = self.seqdbWS.getSeqIds(regionId)
+        actual = self.seqdbWS.getSequenceIdsByRegion(regionId)
         self.assertTrue(actual, "No Sequence ids returned.")
         self.assertIn(self.sequenceIds[0], actual, "Expected sequence id is not in the results.")
     '''

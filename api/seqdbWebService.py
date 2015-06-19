@@ -365,9 +365,9 @@ class seqdbWebService:
 
         return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
 
-    def getJsonSeq(self, seq_id):
+    def getJsonSeq(self, seq_id, params=None):
         jsn_resp = self.retrieveJson(
-            self.base_url + "/sequence/" + str(seq_id))
+            self.base_url + "/sequence/" + str(seq_id), params)
         if not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
 
@@ -509,7 +509,7 @@ class seqdbWebService:
 
         return jsn_resp
 
-    def getSeqIds(self, region_id):
+    def getSequenceIdsByRegion(self, region_id):
         ''' Given a region id, return sequence ids, belonging to this region
         Returns:
             a list of seqdb sequence ids for the created sequences OR empty
@@ -527,6 +527,34 @@ class seqdbWebService:
             return jsn_resp['result']
         else:
             return ''
+
+    def getSequenceIds(self, params=None):
+        ''' Given a region id, return sequence ids, belonging to this region
+        Agrs:
+            params: api sequence params (could be filters, etc.)
+        Returns:
+            a list of seqdb sequence ids 
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        request_url = "/sequence"
+        jsn_resp = self.retrieveJson(self.base_url + request_url, params)
+
+        if jsn_resp:
+            return jsn_resp['result']
+        else:
+            return ''
+
+    def getSequenceIdsBySpecimen(self, specimen_number):
+        params = {'filterName': 'specimen.number',
+                  'filterValue': specimen_number,
+                  'filterOperator': 'and',
+                  'filterWildcard': 'true'}
+
+        return self.getSequenceIds(params)
 
     def getFeatureTypesWithIds(self):
         '''
