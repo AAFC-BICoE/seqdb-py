@@ -101,6 +101,10 @@ def pull_raw_seqs(api_key,base_url,specimen, output_file_name):
     
     seqdbWS = seqdbWebService(api_key, base_url)
     
+    '''
+    
+    '''
+    
     try:
         seq_ids = seqdbWS.getSequenceIdsBySpecimen(specimen)
     except requests.exceptions.ConnectionError as e:
@@ -176,7 +180,7 @@ def pull_raw_seqs(api_key,base_url,specimen, output_file_name):
     
 
 def main():
-    ''' Retrieves raw sequenes for a specified specimen '''
+    ''' Retrieves raw sequences for a specified specimen '''
     
     main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
 

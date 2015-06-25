@@ -175,6 +175,13 @@ class seqdbWebService:
 
         return jsn_resp
 
+    def getConsensusSequenceIds(self, params=None):
+        jsn_resp = self.getJsonConsensusSequenceIds(params)
+
+        if jsn_resp:
+            return jsn_resp['result']
+        else:
+            return ''
 
 
     def getJsonConsensusSequenceIdsByName(self, name):
@@ -552,7 +559,7 @@ class seqdbWebService:
         params = {'filterName': 'specimen.number',
                   'filterValue': specimen_number,
                   'filterOperator': 'and',
-                  'filterWildcard': 'true'}
+                  'filterWildcard': 'false'}
 
         return self.getSequenceIds(params)
 

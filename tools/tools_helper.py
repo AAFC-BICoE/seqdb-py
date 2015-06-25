@@ -23,10 +23,15 @@ log_msg_argError = "Invalid script arguments. Aborting."
 log_msg_argErrorKeyUrl = "Both API url and API key have to be supplied."
 log_msg_argErrorConfigFileUrl = "Supply either a configuration file or API url with key."
 log_msg_noConfig = "Could not load configuration file. Exiting..."
+log_msg_scriptExecutionWithParams = "Script executed with the following command and arguments:"
 log_msg_execStarted_simple = "Script execution started."
 log_msg_execEnded = "Execution complete."
 log_msg_apiUrl = "Base URL for web services is:"
 log_msg_errorSeeLog = "Execution was not successful. See log for details."
+
+log_msg_ITSLoad="Loading ITS sequences."
+log_msg_ConsensusLoad="Loading consensus sequences."
+log_msg_RawLoad="Loading raw sequences for specimen: "
 
 
 def load_config(config_file):
