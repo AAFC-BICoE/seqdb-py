@@ -32,6 +32,7 @@ setup(name='seqdb-py',
     'console_scripts': [
         'seqdb_config_maker = tools.seqdb_config_maker:main',
         'pull_seqdb_its_seqs = tools.pull_seqdb_its_seqs:main',
+        'pull_seqdb_seqs = tools.pull_seqdb_seqs:main',
         'push_seqdb_its_feat = tools.push_seqdb_its_feat:main',
         'delete_seqdb_features = tools.delete_seqdb_features:main',
         'seqdb_gb_insert = tools.seqdb_gb_insert:main',
