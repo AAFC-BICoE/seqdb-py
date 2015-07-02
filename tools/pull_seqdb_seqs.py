@@ -48,7 +48,7 @@ output_file_name = "seqdb_sequences.fasta"
 user_log = tools_helper.SimpleLog("seqdb_pull.log")
 # Values for the types of sequences this script downloads. I.e. "its" loads 
 # ITS sequences.
-pull_types_dict = {"its":"its", "consensus":"consensus", "raw":"raw"}
+pull_types_dict = {"its":"its", "consensus":"consensus", "raw":"raw", "all":"all"}
 
 ###
 
@@ -65,7 +65,8 @@ def parse_input_args(argv):
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
-    parser.add_argument('-s', help="Specimen name", dest="specimen_id", required=False)    
+    parser.add_argument('-specNum', help="Specimen number (identifier)", dest="specimen_num", required=False)    
+    parser.add_argument('-seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)    
     #parser.add_argument('-t', help="Type of sequences to load", dest="load_type", type=str, choices=set(("its","consensus")), required=True)
     
     args = parser.parse_args(argv)
@@ -73,8 +74,8 @@ def parse_input_args(argv):
     if not (args.config_file or (args.api_url and args.api_key)):
         parser.error('Either -c <configuration file>, or -u <api_url> -k <api_key> have to be specified')
     
-    if args.seq_type == pull_types_dict["raw"] and not args.specimen_id:
-        parser.error('To load raw sequences, please specify specimen id: -s <specimen_id>')
+    if args.seq_type == pull_types_dict["its"] and (args.specimen_num or args.sequence_name):
+        parser.error('ITS sequences can not be restricted by filters at the moment. Please do not use -specNum, -seqName or any other additional options.')
         
     return args
     
@@ -193,39 +194,60 @@ def get_consensus_seq_ids(seqdbWS):
     return consensus_seq_ids
     
     
-def get_raw_seq_ids(seqdbWS, specimen_id):
-    ''' Returns raw sequence ids for a specimen '''
+def get_seq_ids(seqdbWS, pull_type, specimen_num=None):
+    ''' Gets sequence ids based on specified parameters 
+    Agrs:
+        pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
+        specimen_num: if specified, specimen number for which the sequence ids will be retrieved
+    '''
     
-    try:
-        seq_ids = seqdbWS.getSequenceIdsBySpecimen(specimen_id)
-    except requests.exceptions.ConnectionError as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_noDbConnection)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except requests.exceptions.ReadTimeout as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_slowConnection)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except requests.exceptions.HTTPError as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_httpError)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except UnexpectedContent as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_apiResponseFormat)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except Exception as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
+    if pull_type not in pull_types_dict.values():
+        msg = "Value for pull_type should be one of the following: %s" %pull_types_dict.values()
+        logging.error(msg)
+        sys.exit(tools_helper.log_msg_sysExit + msg)
+    
+    if pull_type == pull_types_dict["its"]:
+        seq_ids = get_ITS_seq_ids(seqdbWS)
+    else:
+        try:
+            if pull_type == pull_types_dict["consensus"]:
+                seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num)
+                log_msg = "Number of consensus sequences retrieved:"
+            elif pull_type == pull_types_dict["all"]:
+                seq_ids = seqdbWS.getSequenceIds(specimenNum=specimen_num)
+                log_msg = "Number of sequences retrieved:"
+            elif pull_type == pull_types_dict["raw"]:
+                sys.exit("Raw sequence retrieval is not implemented yet.")
+                seq_ids = seqdbWS.getRawSequenceIds()
+                log_msg = "Number of raw sequences retrieved:"
+        except requests.exceptions.ConnectionError as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_noDbConnection)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except requests.exceptions.ReadTimeout as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_slowConnection)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except requests.exceptions.HTTPError as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_httpError)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except UnexpectedContent as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_apiResponseFormat)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except Exception as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
         
-    logging.info("Number of raw sequences retrieved for specimen '%s': %i " % (specimen_id, len(seq_ids)))
-    user_log.info("Number of raw sequences retrieved for specimen '%s': %i " % (specimen_id, len(seq_ids)))
-    
+        logging.info("%s %i " % (log_msg, len(seq_ids)))
+        user_log.info("%s %i " % (log_msg, len(seq_ids)))
+        
     return seq_ids
     
          
@@ -317,19 +339,34 @@ def main():
         user_log.info(tools_helper.log_msg_ITSLoad)
         
         seq_ids = get_ITS_seq_ids(seqdbWS)
-        
+    else:
+        log_msg = "Loading %s sequences." %parsed_args.seq_type
+        logging.info(log_msg)
+        user_log.info(log_msg)
+
+        seq_ids = get_seq_ids(seqdbWS=seqdbWS, 
+                              pull_type=parsed_args.seq_type, 
+                              specimen_num=parsed_args.specimen_num)
+    
+    '''
     elif pull_types_dict["consensus"] == parsed_args.seq_type:
         logging.info(tools_helper.log_msg_ConsensusLoad)
         user_log.info(tools_helper.log_msg_ConsensusLoad)
         
-        seq_ids = get_consensus_seq_ids(seqdbWS)
+        #seq_ids = get_consensus_seq_ids(seqdbWS)
         
     elif pull_types_dict["raw"] == parsed_args.seq_type:
-        logging.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_id))
-        user_log.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_id))
+        logging.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_num))
+        user_log.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_num))
         
-        seq_ids = get_raw_seq_ids(seqdbWS, parsed_args.specimen_id)
+        seq_ids = get_raw_seq_ids(seqdbWS, parsed_args.specimen_num)
+
+    elif pull_types_dict["all"] == parsed_args.seq_type:
+        logging.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_num))
+        user_log.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_num))
         
+        seq_ids = get_seq_ids(seqdbWS, parsed_args.specimen_num)
+    '''    
     success_seq_ids = write_fasta_file(seqdbWS, seq_ids, output_file_name)
 
     

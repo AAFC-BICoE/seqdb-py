@@ -214,7 +214,7 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
 
     
     def setUp(self):
-        seqId, errCod, msg = self.seqdbWS.createConsensusSequence("Test", "ACGTCTGATCGATC")
+        seqId, errCod, msg = self.seqdbWS.createConsensusSequence(name="Test", sequence="ACGTCTGATCGATC")
         self.sequenceIds = [seqId]
 
     
@@ -237,16 +237,14 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
         self.assertTrue(actual, "Fasta sequence is empty.")
         self.assertIn(">", actual, "Fasta does not contain >.")
         self.assertIn("seqdbId:", actual, "Fasta does not contain seqdbId.")
-         
 
-    '''
-    # TODO: this test requires sequence to be associated with region. The ability to do this via API is not yet implemented,
-    #       therefore we can not do a test setup for this test. 
+    
+    # TODO: takes a long time to run: re-design to be more targeted 
     def testGetSeqIds(self):
-        actual = self.seqdbWS.getSequenceIdsByRegion(regionId)
+        actual = self.seqdbWS.getSequenceIds(sequenceName="Test")
         self.assertTrue(actual, "No Sequence ids returned.")
         self.assertIn(self.sequenceIds[0], actual, "Expected sequence id is not in the results.")
-    '''
+    
 
 
 
