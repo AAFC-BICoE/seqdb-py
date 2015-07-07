@@ -194,7 +194,7 @@ def get_consensus_seq_ids(seqdbWS):
     return consensus_seq_ids
     
     
-def get_seq_ids(seqdbWS, pull_type, specimen_num=None):
+def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None):
     ''' Gets sequence ids based on specified parameters 
     Agrs:
         pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
@@ -211,10 +211,10 @@ def get_seq_ids(seqdbWS, pull_type, specimen_num=None):
     else:
         try:
             if pull_type == pull_types_dict["consensus"]:
-                seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num)
+                seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, sequenceName=sequence_name)
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
-                seq_ids = seqdbWS.getSequenceIds(specimenNum=specimen_num)
+                seq_ids = seqdbWS.getSequenceIds(specimenNum=specimen_num, sequenceName=sequence_name)
                 log_msg = "Number of sequences retrieved:"
             elif pull_type == pull_types_dict["raw"]:
                 sys.exit("Raw sequence retrieval is not implemented yet.")
@@ -346,7 +346,8 @@ def main():
 
         seq_ids = get_seq_ids(seqdbWS=seqdbWS, 
                               pull_type=parsed_args.seq_type, 
-                              specimen_num=parsed_args.specimen_num)
+                              specimen_num=parsed_args.specimen_num,
+                              sequence_name=parsed_args.sequence_name)
     
     '''
     elif pull_types_dict["consensus"] == parsed_args.seq_type:
