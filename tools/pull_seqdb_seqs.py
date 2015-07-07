@@ -47,8 +47,8 @@ output_file_name = "seqdb_sequences.fasta"
 # in yaml
 user_log = tools_helper.SimpleLog("seqdb_pull.log")
 # Values for the types of sequences this script downloads. I.e. "its" loads 
-# ITS sequences.
-pull_types_dict = {"its":"its", "consensus":"consensus", "raw":"raw", "all":"all"}
+# ITS sequences. Note that raw sequences are not implemented in SeqDB yet. "raw":"raw",
+pull_types_dict = {"its":"its", "consensus":"consensus", "all":"all"}
 
 ###
 
@@ -218,8 +218,8 @@ def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None):
                 log_msg = "Number of sequences retrieved:"
             elif pull_type == pull_types_dict["raw"]:
                 sys.exit("Raw sequence retrieval is not implemented yet.")
-                seq_ids = seqdbWS.getRawSequenceIds()
-                log_msg = "Number of raw sequences retrieved:"
+                #seq_ids = seqdbWS.getRawSequenceIds()
+                #log_msg = "Number of raw sequences retrieved:"
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
