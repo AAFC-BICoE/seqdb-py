@@ -326,7 +326,10 @@ def main():
         tool_config = tools_helper.load_config(parsed_args.config_file)
         api_url = tool_config['seqdb']['api_url'] 
         api_key = tool_config['seqdb']['api_key'] 
-    
+    else:
+        api_url = parsed_args.api_url 
+        api_key = parsed_args.api_key 
+        
     logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
     user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
     

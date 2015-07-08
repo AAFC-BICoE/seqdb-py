@@ -14,6 +14,7 @@ import logging
 
 log_msg_sysAdmin = "Contact your sysadmin for more details."
 log_msg_sysExit = "Script error."
+log_msg_sysExitFile = "Input file error."
 log_msg_noDbConnection = "Could not connect to Sequence DB."
 log_msg_slowConnection = "Connection too slow for getting data from Sequence DB."
 log_msg_httpError = "HTTP error when connecting to Sequence DB."
@@ -32,6 +33,8 @@ log_msg_errorSeeLog = "Execution was not successful. See log for details."
 log_msg_ITSLoad="Loading ITS sequences."
 log_msg_ConsensusLoad="Loading consensus sequences."
 log_msg_RawLoad="Loading raw sequences for specimen: "
+
+log_msg_wrongFileFormat="Supplied file is not in the required format. "
 
 
 def load_config(config_file):
