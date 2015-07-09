@@ -101,7 +101,64 @@ def report_log_error(error_msg):
     ''' Logs the message to user and developer logs and prints the message to stdout'''
     log_error(error_msg)
     print error_msg
+
+
+def get_lieage_taxids(tax_parent_ids, taxon_id, lineage=None):
+    ''' Finds a taxonomic lineage for taxon_id.
+    Return: list of taxid in lineage order, from given tax id up. 
+    '''
     
+    
+
+def find_lineage(taxonomy_location, taxon_id):
+    ''' Given a taxon id, traverses through 2 ncbi taxonomy files (nodes.dmp, names.dmp)
+        to retrieve taxonomic lineage
+    Args:
+        taxonomy_location: absolute path to a folder where ncbi taxonomy files are 
+        taxon_id: id for which to retrieve the lineage
+    '''
+    
+    # Read in first two columns (tax_id, parent tax_id) of the nodes.dmp file
+    
+    nodes_file_path = taxonomy_location + "nodes.dmp"
+    tax_parent_ids = {}
+    with open(nodes_file_path, "r") as nodes_file:
+        for line in nodes_file:
+            line_tokens = line.split('\t')
+            tax_id = int(line_tokens[0])
+            parent_tax_id = int(line_tokens[2])
+            tax_parent_ids[tax_id] = parent_tax_id
+            if tax_id == 129355:
+                print "Got 129355"
+            
+    print "Number of taxonomy records: %s" % len(tax_parent_ids)
+    
+    #get_lieage_taxids(tax_parent_ids, taxon_id)
+    
+    lineage_ids = list()
+    curr_id = taxon_id
+    while curr_id != 1:
+        lineage_ids.append(curr_id)
+        curr_id = tax_parent_ids[curr_id]
+        
+    print lineage_ids
+    
+    names_file_path = taxonomy_location + "names.dmp"
+    taxonomy_names = {}
+    with open(names_file_path, "r") as names_file:
+        for line in names_file:
+            line_tokens = line.split('\t')
+            tax_id = int(line_tokens[0])
+            taxonomy_names[tax_id] = line_tokens[2]
+    
+    lineage_names = list()
+    for tax_id in lineage_ids:
+        lineage_names.append(taxonomy_names[tax_id])
+        
+    print lineage_names
+    return lineage_names
+    
+
 def push_taxonomy_data(seqdbWS, info_file_handler):
     ''' Extracts taxon id from the findLCA output file, finds lineage for the taxon id
         and pushes taxonomic identification to SeqDB
@@ -158,6 +215,7 @@ def push_taxonomy_data(seqdbWS, info_file_handler):
     print seqdb_sequence_taxon
         
     # Find lineage for each seqdb id
+    find_lineage("./data/ncbi_taxonomy/", 129355)
     
     # Write each lineage to SeqDB
     
