@@ -5,12 +5,14 @@ Deletes features
 
 @author: korolo
 '''
-import sys
-import getopt
+import argparse
 import logging.config
-import tools_helper
+import sys
+
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
+import tools_helper
+
 
 usage_help_line = """Usage of the script: \ndelete_seqdb_feature -c <Path to yaml config with SeqDB API info> -f <feature ids file name>
 or
@@ -36,57 +38,21 @@ def parse_input_args(argv):
         seqdb api_key to use for web services requests
         seqdb api_url to use for web services requests
     '''
-    config_file=''
-    api_url=''
-    api_key = ''
-    features_file_name = ''
+    ''' Parses command line arguments '''
     
     
-    try:
-        opts, args = getopt.getopt(argv,"hc:f:k:u:",["config_file=", "seqdb_api_key=", "seqdb_api_url=", "feature_ids_file="])
-    except getopt.GetoptError:
-        print usage_help_line
-        logging.error(tools_helper.log_msg_argError)
-        user_log.error(tools_helper.log_msg_argError)
-        sys.exit(tools_helper.log_msg_sysExit)
-        
-        
-    if len(opts)==0:
-        print usage_help_line
-        sys.exit(2)
+    parser = argparse.ArgumentParser(description="Delete features from SeqDB")
+    parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
+    parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
+    parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
+    parser.add_argument('-f', help="File with feature ids to be deleted from SeqDB", dest="features_file_name", required=True)    
     
-    for opt, arg in opts:
-        if opt == '-h':
-            print usage_help_line
-            sys.exit()
-        elif opt in ("-f", "--features_file"):
-            features_file_name = arg
-        elif opt in ("-c", "--config_file="):
-            config_file = arg
-        elif opt in ("-k", "--seqdb_api_key"):
-            api_key = arg
-        elif opt in ("-u", "--seqdb_api_url="):
-            api_url = arg
-            
-            
-    if config_file and api_key and api_url:
-        print(tools_helper.log_msg_argErrorConfigFileUrl)
-        print(usage_help_line)
-        logging.error(tools_helper.log_msg_argError)
-        user_log.error(tools_helper.log_msg_argError)
-        sys.exit(2)
-    
-    if bool(api_key) != bool(api_url):
-        print(tools_helper.log_msg_argErrorKeyUrl)
-        print(usage_help_line)
-        logging.error(tools_helper.log_msg_argError)
-        user_log.error(tools_helper.log_msg_argError)
-        sys.exit(2)
-    
-            
-            
-    return (features_file_name, config_file, api_url, api_key)
+    args = parser.parse_args(argv)
 
+    if not (args.config_file or (args.api_url and args.api_key)):
+        parser.error('Either -c <configuration file>, or -u <api_url> -k <api_key> have to be specified')
+        
+    return args
 
 
 def delete_features(api_key, feature_ids_file_name, base_url):
@@ -174,23 +140,25 @@ def main():
     logging.info("Script executed with the following command and arguments: %s" % sys.argv)
     user_log.info(tools_helper.log_msg_execStarted_simple)
     
-    features_file_name, config_file, api_url, api_key = parse_input_args(sys.argv[1:])
+    parsed_args = parse_input_args(sys.argv[1:])
     
-    if config_file:
-        tool_config = tools_helper.load_config(config_file)
+    if parsed_args.config_file:
+        tool_config = tools_helper.load_config(parsed_args.config_file)
         api_url = tool_config['seqdb']['api_url'] 
         api_key = tool_config['seqdb']['api_key'] 
-    
+    else:
+        api_url = parsed_args.api_url 
+        api_key = parsed_args.api_key 
     
     logging.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
     user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
 
-    log_msg = "File name with feature ids: %s" % features_file_name
+    log_msg = "File name with feature ids: %s" % parsed_args.features_file_name
     logging.info(log_msg)    
     user_log.info(log_msg)
     
     
-    success_ids,fail_ids = delete_features(api_key, features_file_name, api_url)
+    success_ids,fail_ids = delete_features(api_key, parsed_args.features_file_name, api_url)
 
     
     print(tools_helper.log_msg_execEnded)
