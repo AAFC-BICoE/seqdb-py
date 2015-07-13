@@ -16,7 +16,6 @@ Other arguments:
 '''
 import sys 
 import os
-import getopt
 import logging.config
 import requests.exceptions
 import tools_helper
