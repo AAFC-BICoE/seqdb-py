@@ -3,7 +3,7 @@ Created on July 8, 2015
 
 @author: korolo
 
-Usage:
+Usage (for the most updated usage, run "python push_to_seqdb.py -h"):
 push_stuff_to_seqdb -c <Path to yaml config with SeqDB API info> 
 or
 pull_seqdb_its_seqs -k <SeqDB API key> -u <SeqDB API URL> 
@@ -13,33 +13,21 @@ with one of the following options:
 Other arguments:
    -h   help (prints this message)
 '''
-import sys 
-import os
-import logging.config
-import requests.exceptions
-import tools_helper
-from api.seqdbWebService import seqdbWebService, UnexpectedContent
-from config import config_root
-from TaxonomyLineage import TaxonomyLineage
-
 import argparse
+import logging.config
+import sys 
 import time
 
-usage_help_line = """Usage of the script: \npush_stuff_to_seqdb -c <Path to yaml config with SeqDB API info> 
-or
-pull_seqdb_its_seqs -k <SeqDB API key> -u <SeqDB API URL> 
+import requests.exceptions
 
-with one of the following options:
- -itsx_features
- -findLCA_taxonomy
+from TaxonomyLineage import TaxonomyLineage
+from api.seqdbWebService import seqdbWebService, UnexpectedContent
+from config import config_root
+import tools_helper
 
-Other arguments:
-   -h   help (prints this message)
-"""
 
 ### Values below are used in Galaxy wrappers, so make sure you know what 
 ### you're doing if you're changing any of them 
-
 # This log will provide users of Galaxy with extra information on the tool 
 # execution sysem statements should not go here, since full log is configured
 # in yaml
