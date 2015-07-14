@@ -137,7 +137,7 @@ def push_taxonomy_data(seqdbWS, info_file_handler):
         
         # Do basic file format verification:
         if len(line_tokens) != 10 and len(line_tokens) != 2:
-            report_log_error(tools_helper.log_msg_wrongFileFormat)
+            report_log_error("%s Example of an expected line:\n%s" % (tools_helper.log_msg_wrongFileFormat, input_file_line_example))
             sys.exit(tools_helper.log_msg_sysExitFile)
 
         try:
