@@ -45,17 +45,29 @@ def parse_input_args(argv):
     
     push_types_set = frozenset(push_types_dict.values())
     
-    parser = argparse.ArgumentParser(description="Push information to SeqDB")
+    parser = argparse.ArgumentParser(description="Write information to SeqDB")
     parser.add_argument('push_type', help="Type of information to write", type=str, choices=push_types_set)
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
-    parser.add_argument('-ifile', help="File with information to write to SeqDB", dest="info_file", required=True)    
+    parser.add_argument('--lca_results_file', help="FindLCA results file", dest="lca_results_file", required=False)    
+    parser.add_argument('--itsx_positions_file', help="ITSx feature positions file (.positions.txt)", dest="itsx_positions_file", required=False)    
+    parser.add_argument('--itsx_extraction_file', help="ITSx extraction results file (.extraction.results)", dest="itsx_extraction_file", required=False)    
     
     args = parser.parse_args(argv)
 
     if not (args.config_file or (args.api_url and args.api_key)):
         parser.error('Either -c <configuration file>, or -u <api_url> -k <api_key> have to be specified')
+    
+    if args.push_type == push_types_dict["its"] and not (args.itsx_positions_file and args.itsx_extraction_file):
+        parser.error('To write its features to SeqDB, ITSx positions (.positions.txt) \
+        and extraction results (extraction.results) files need to be supplied. \
+        Use --itsx_positions_file and --itsx_extraction_file options respectively.')
+        
+    if args.push_type == push_types_dict["taxonomy"] and not args.lca_results_file:
+        parser.error('To write taxonomy information to SeqDB, FindLCA results file \
+        needs to be supplied. Use --lca_results_file option.')
+        
         
     return args
     
@@ -107,7 +119,7 @@ def get_lieage_taxids(tax_parent_ids, taxon_id, lineage=None):
     '''
     
 
-def push_taxonomy_data(seqdbWS, info_file_handler):
+def push_taxonomy_data(seqdbWS, info_file_name):
     ''' Extracts taxon id from the findLCA output file, finds lineage for the taxon id
         and pushes taxonomic identification to SeqDB
     '''
@@ -130,38 +142,55 @@ def push_taxonomy_data(seqdbWS, info_file_handler):
     """
     # parse the file and extract seqdb sequence ID - ncbi taxon id pairs
     seqdb_sequence_taxon = {}
-    for line in info_file_handler:
-        error_msg = "%s Found line: \n%s\n Example of an expected line: \n%s" %(tools_helper.log_msg_wrongFileFormat, line, input_file_line_example)
-        
-        line_tokens = line.split('\t')
-        
-        # Do basic file format verification:
-        if len(line_tokens) != 10 and len(line_tokens) != 2:
-            report_log_error("%s Example of an expected line:\n%s" % (tools_helper.log_msg_wrongFileFormat, input_file_line_example))
-            sys.exit(tools_helper.log_msg_sysExitFile)
-
-        try:
-            token1 = line_tokens[0].split(': ')
-            if token1[0] != "Query":
-                report_log_error(error_msg)
-                sys.exit(tools_helper.log_msg_sysExitFile)
-
-            sequenceId = token1[1].split("|")[1]
-            sequenceId = int(sequenceId)
-
-            if ": " in line_tokens[1]:
-                lca = line_tokens[1].split(": ")[1]
-                lca = int(lca)
-                seqdb_sequence_taxon[sequenceId] = lca
-            else:
-                # There were no matched found for this sequence id, so save the message from a file
-                seqdb_sequence_taxon[sequenceId] = line_tokens[1].rstrip()
-                
+    try:
+        with open(info_file_name, "r") as info_file_handler:
             
-        except:
-            report_log_error(error_msg)
-            sys.exit(tools_helper.log_msg_sysExitFile)
+            msg_inputFile = "Find LCA results file: %s" % info_file_name
+            log_info(msg_inputFile)
+    
+            for line in info_file_handler:
+                error_msg = "%s Found line: \n%s\n Example of an expected line: \n%s" %(
+                            tools_helper.log_msg_wrongFileFormat, line, input_file_line_example)
+                
+                line_tokens = line.split('\t')
+                
+                # Do basic file format verification:
+                if len(line_tokens) != 10 and len(line_tokens) != 2:
+                    report_log_error("%s Example of an expected line:\n%s" % (
+                            tools_helper.log_msg_wrongFileFormat, input_file_line_example))
+                    sys.exit(tools_helper.log_msg_sysExitFile)
         
+                try:
+                    token1 = line_tokens[0].split(': ')
+                    if token1[0] != "Query":
+                        report_log_error(error_msg)
+                        sys.exit(tools_helper.log_msg_sysExitFile)
+        
+                    sequenceId = token1[1].split("|")[1]
+                    sequenceId = int(sequenceId)
+        
+                    if ": " in line_tokens[1]:
+                        lca = line_tokens[1].split(": ")[1]
+                        lca = int(lca)
+                        seqdb_sequence_taxon[sequenceId] = lca
+                    else:
+                        # There were no matched found for this sequence id, so save the message from a file
+                        seqdb_sequence_taxon[sequenceId] = line_tokens[1].rstrip()
+                        
+                    
+                except:
+                    report_log_error(error_msg)
+                    sys.exit(tools_helper.log_msg_sysExitFile)
+        
+    except IOError as e:
+        if e.errno == 2:
+            error_msg = "Could not open input file '%s'." % info_file_name
+            log_error(error_msg)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        else:
+            raise
+
     
     print seqdb_sequence_taxon
     
@@ -181,13 +210,15 @@ def push_taxonomy_data(seqdbWS, info_file_handler):
 
 
 # B15_17_SH817_ITS_ITS5    622 bp.    SSU: Not found    ITS1: 1-241    5.8S: 242-399    ITS2: 400-557    LSU: 558-622
-def push_its_features(seqdbWS, features_file):
+def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=None):
     ''' Extracts found ITS features from ITSx tools results .positions.txt file
         and writes these features to SeqDB
         
     Args:
         seqdbWS: api.seqdbWebService object with accessor methods to Seq
         features_file: file handler with opened .positions.txt file
+        extraction_results_file_name: file name of the .extraction.results file from ITSx 
+                        execution with a "--detailed_results T" option
         
     Return:
         list of SeqDB feature_ids for those features that were successfully written to SeqDB
@@ -221,11 +252,50 @@ def push_its_features(seqdbWS, features_file):
         rRna_feature_type_id = seqdb_feat_types[rRna_feature_type_name]
     
             
-    ### TODO: Finalize what to use for the frame: and strand:
-    ###        (using default 1 and 1 for now)
     
-    # parse the file and insert each found feature to SeqDB
-    for line in features_file:
+    ## Read strand information from the .extraction.results file
+    match_strand = {}
+    if extraction_results_file_name:
+        msg_inputFile = "ITSx extraction results file (.extraction.results): %s" % extraction_results_file_name
+        log_info(msg_inputFile)
+    
+        try:
+            with open(extraction_results_file_name, "r") as detailed_results_file:
+                for line in detailed_results_file:
+                    line = line.strip()
+                    if line:
+                        line_tokens = line.split('\t')
+                        sequenceId = int(line_tokens[0].split('|')[1])
+                        strand = int(line_tokens[3])
+                        match_strand[sequenceId] = strand
+        except IOError as e:
+            if e.errno == 2:
+                error_msg = "Could not open input file '%s'." % extraction_results_file_name
+                log_error(error_msg)
+                logging.error(e.message)
+                sys.exit(tools_helper.log_msg_sysExit)
+            else:
+                raise
+    
+    ## Parse the .positions.txt file and insert each found feature to SeqDB
+    
+    msg_inputFile = "ITSx feature positions file (.positions.txt): %s" % features_file_name
+    log_info(msg_inputFile)
+    
+    
+    info_file_handler = ''
+    try:
+        info_file_handler = open(features_file_name,"r")
+    except IOError as e:
+        if e.errno == 2:
+            error_msg = "Could not open input file '%s'." % features_file_name
+            log_error(error_msg)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        else:
+            raise
+        
+    for line in info_file_handler:
         line_tokens = line.split('\t')
 
         try:
@@ -248,13 +318,23 @@ def push_its_features(seqdbWS, features_file):
             report_log_error(error_msg)
             sys.exit(tools_helper.log_msg_sysExit)
             
+        ## Strand information is read from .extraction.results file (above)
+        ## 0 is main strand, 1 is complementary (same convention as in ITSx tool)
+        if match_strand and sequenceId in match_strand:
+            strand = match_strand[sequenceId]
+        else:
+            strand = 0  
+            
                 
         for itsx_feature_token in itsx_features:
             feature_location_pair = itsx_feature_token.split(": ")
             try:
                 location = feature_location_pair[1].split("-")
                 location = map(int, location)
-                location = [{"start":location[0],"end":location[1],"frame":1,"strand":1}]
+                
+                ### TODO: Finalize what to use for the frame: 
+                
+                location = [{"start":location[0],"end":location[1],"frame":1,"strand":strand}]
                 feature_type_id = its_feature_type_id
                 if feature_location_pair[0] in {"SSU", "5.8S", "LSU"}:
                     feature_type_id = rRna_feature_type_id
@@ -280,6 +360,7 @@ def push_its_features(seqdbWS, features_file):
                 user_log.info(warning_msg)
                 logging.info(warning_msg)
 
+    info_file_handler.close()
 
     # Write ids of the inserted features into a file
     output_file = open(output_file_name, 'w')
@@ -326,38 +407,25 @@ def main():
     
     log_info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
     
-    msg_inputFile = "File with information to write to SeqDB: %s" % parsed_args.info_file
-    log_info(msg_inputFile)
-    
     ### Script execution
     
     seqdbWS = seqdbWebService(api_key, api_url)
     
     # Open input file
-    info_file_handler = ''
-    try:
-        info_file_handler = open(parsed_args.info_file,"r")
-    except IOError as e:
-        if e.errno == 2:
-            error_msg = "Could not open input positions file '%s'." % parsed_args.info_file
-            log_error(error_msg)
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        else:
-            raise
+    
              
     if push_types_dict["its"] == parsed_args.push_type:
         #sys.exit("Not yet implemented")
         log_msg = "Writing ITS features to SeqDB."
         log_info(log_msg) 
-        success_feat_ids = push_its_features(seqdbWS, info_file_handler)
+        success_feat_ids = push_its_features(seqdbWS, parsed_args.itsx_positions_file, parsed_args.itsx_extraction_file)
             
         
     elif push_types_dict["taxonomy"] == parsed_args.push_type:
         log_msg = "Writing taxonomy lineage information to SeqDB."
         log_info(log_msg) 
         
-        push_taxonomy_data(seqdbWS, info_file_handler)
+        push_taxonomy_data(seqdbWS, parsed_args.lca_results_file)
 
 
     
