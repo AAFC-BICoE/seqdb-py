@@ -3,8 +3,8 @@ Created on Feb 12, 2015
 
 @author: korolo
 
-Usage:
-pull_seqdb_its_seqs -c <Path to yaml config with SeqDB API info> 
+Usage (for most current usage run this script with no options: >python pull_seqdb_seqs.py):
+pull_seqdb_seqs -c <Path to yaml config with SeqDB API info> 
 or
 pull_seqdb_its_seqs -k <SeqDB API key> -u <SeqDB API URL> 
 with one of the following options:
@@ -14,31 +14,20 @@ with one of the following options:
 Other arguments:
    -h   help (prints this message)
 '''
-import sys 
-import os
+import argparse
 import logging.config
+import os
+import sys 
+
 import requests.exceptions
-import tools_helper
+
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
+import tools_helper
 
-import argparse
-
-usage_help_line = """Usage of the script: \npull_seqdb_seqs -c <Path to yaml config with SeqDB API info>
-or
-pull_seqdb_its_seqs -k <SeqDB API key> -u <SeqDB API URL> 
-  with one of the following options:
-  --its
-  --consensus
-  --raw
-
-Other arguments:
-   -h   help (prints this message)
-"""
 
 ### Values below are used in Galaxy wrappers, so make sure you know what 
 ### you're doing if you're changing any of them 
-
 # File name where the pulled sequences will be stored. 
 output_file_name = "seqdb_sequences.fasta"
 # This log will provide users of Galaxy with extra information on the tool 
@@ -64,8 +53,9 @@ def parse_input_args(argv):
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
-    parser.add_argument('-specNum', help="Specimen number (identifier)", dest="specimen_num", required=False)    
-    parser.add_argument('-seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)    
+    parser.add_argument('--specNum', help="Specimen number (identifier)", dest="specimen_num", required=False)    
+    parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)    
+    parser.add_argument('--pubRefSeqs', help="Public reference sequences", dest="pub_ref_seqs", action='store_true', required=False)    
     #parser.add_argument('-t', help="Type of sequences to load", dest="load_type", type=str, choices=set(("its","consensus")), required=True)
     
     args = parser.parse_args(argv)
@@ -73,8 +63,8 @@ def parse_input_args(argv):
     if not (args.config_file or (args.api_url and args.api_key)):
         parser.error('Either -c <configuration file>, or -u <api_url> -k <api_key> have to be specified')
     
-    if args.seq_type == pull_types_dict["its"] and (args.specimen_num or args.sequence_name):
-        parser.error('ITS sequences can not be restricted by filters at the moment. Please do not use -specNum, -seqName or any other additional options.')
+    if args.seq_type == pull_types_dict["its"] and (args.specimen_num or args.sequence_name or args.pub_ref_seqs):
+        parser.error('ITS sequences can not be restricted by filters at the moment. Please do not use --specNum, --seqName or any other additional options.')
         
     return args
     
@@ -193,7 +183,7 @@ def get_consensus_seq_ids(seqdbWS):
     return consensus_seq_ids
     
     
-def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None):
+def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None, pub_ref_seqs=None):
     ''' Gets sequence ids based on specified parameters 
     Agrs:
         pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
@@ -210,10 +200,14 @@ def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None):
     else:
         try:
             if pull_type == pull_types_dict["consensus"]:
-                seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, sequenceName=sequence_name)
+                seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, 
+                                                          sequenceName=sequence_name, 
+                                                          pubRefSeq=pub_ref_seqs)
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
-                seq_ids = seqdbWS.getSequenceIds(specimenNum=specimen_num, sequenceName=sequence_name)
+                seq_ids = seqdbWS.getSequenceIds(specimenNum=specimen_num, 
+                                                 sequenceName=sequence_name,
+                                                 pubRefSeq=pub_ref_seqs)
                 log_msg = "Number of sequences retrieved:"
             elif pull_type == pull_types_dict["raw"]:
                 sys.exit("Raw sequence retrieval is not implemented yet.")
@@ -349,7 +343,8 @@ def main():
         seq_ids = get_seq_ids(seqdbWS=seqdbWS, 
                               pull_type=parsed_args.seq_type, 
                               specimen_num=parsed_args.specimen_num,
-                              sequence_name=parsed_args.sequence_name)
+                              sequence_name=parsed_args.sequence_name,
+                              pub_ref_seqs=parsed_args.pub_ref_seqs)
     
     '''
     elif pull_types_dict["consensus"] == parsed_args.seq_type:

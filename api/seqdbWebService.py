@@ -166,7 +166,7 @@ class seqdbWebService:
         return resp
 
 
-    def getSequenceIds(self, specimenNum=None, sequenceName=None):
+    def getSequenceIds(self, specimenNum=None, sequenceName=None, pubRefSeq=None):
         ''' Returns sequence id. limited by the specified filter parameters
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
@@ -187,7 +187,10 @@ class seqdbWebService:
     
         if sequenceName:
             params = "%sfilterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %(params,sequenceName)
-    
+            
+        if pubRefSeq:
+            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=true"
+        
         request_url = "/sequence"
         jsn_resp = self.retrieveJson(self.base_url + request_url, params)
 
@@ -236,7 +239,7 @@ class seqdbWebService:
         return jsn_resp
 
 
-    def getConsensusSequenceIds(self, specimenNum=None, sequenceName=None):
+    def getConsensusSequenceIds(self, specimenNum=None, sequenceName=None, pubRefSeq=None):
         
         params = ''
         if specimenNum:
@@ -245,6 +248,8 @@ class seqdbWebService:
         if sequenceName:
             params = params + "filterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %sequenceName
         
+        if pubRefSeq:
+            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=true"
             
         jsn_resp = self.getJsonConsensusSequenceIds(params)
 
