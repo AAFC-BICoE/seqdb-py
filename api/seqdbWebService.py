@@ -76,11 +76,13 @@ class seqdbWebService:
         if resp:
             # See if results were paginated, and if yes - retrieve the rest of the results
             jsn_resp =  json.loads(resp.text)
+            resp = jsn_resp
             
             #if 'count' and 'sortColum' and 'limit' and 'offset' and 'message' and 'statusCode' and 'sortOrder' not in jsn_resp:
             if 'result' not in jsn_resp.keys():
                 raise UnexpectedContent(response=jsn_resp)
             
+            '''
             # If these values are present, there is a chance that we can get paginated result
             if 'count' in jsn_resp.keys() and 'limit' in jsn_resp.keys():
 
@@ -112,6 +114,7 @@ class seqdbWebService:
                     jsn_resp['limit'] = jsn_resp['count']
         
             resp = jsn_resp
+            '''
         
         return resp
     
@@ -166,13 +169,15 @@ class seqdbWebService:
         return resp
 
 
-    def getSequenceIds(self, specimenNum=None, sequenceName=None, pubRefSeq=None):
+    def getSequenceIds(self, specimenNum=None, sequenceName=None, pubRefSeq=None, offset=0):
         ''' Returns sequence id. limited by the specified filter parameters
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
         Returns:
             a list of seqdb sequence ids 
+            offset of results. If 0 then all/last set of results have been retrieved, if > 0,
+                then the function has to be called again with this offset to retrieve more results
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout
@@ -182,6 +187,9 @@ class seqdbWebService:
         
         params = ""
         
+        if offset:
+            params ="%s&offset=%s&" %(params,offset)
+            
         if specimenNum:
             params = "%sfilterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %(params,specimenNum)
     
@@ -193,11 +201,26 @@ class seqdbWebService:
         
         request_url = "/sequence"
         jsn_resp = self.retrieveJson(self.base_url + request_url, params)
-
+        
+        result_offset = 0
+        sequence_ids = ""
+        
         if jsn_resp:
-            return jsn_resp['result']
-        else:
-            return ''
+            if 'count' not in jsn_resp and 'limit' not in jsn_resp:
+                raise UnexpectedContent(response=jsn_resp)
+            
+            sequence_ids = jsn_resp['result']
+
+            # Checking for paginated results
+            result_total_num = int(jsn_resp['count'])
+            # TODO change below offset to int(jsn_resp['offset']) when the SeqDB bug is fixed 
+            result_returned_so_far =  int(jsn_resp['limit']) + int(jsn_resp['offset'])
+            if (result_total_num > result_returned_so_far):    
+                result_offset = result_returned_so_far
+            
+        
+        return sequence_ids, result_offset
+       
 
    
     def getSequenceIdsByRegion(self, region_id):

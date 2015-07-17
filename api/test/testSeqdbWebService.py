@@ -241,7 +241,13 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
     
     # TODO: takes a long time to run: re-design to be more targeted 
     def testGetSeqIds(self):
-        actual = self.seqdbWS.getSequenceIds(sequenceName="Test")
+        actual = []
+        current_ids, offset = self.seqdbWS.getSequenceIds(sequenceName="Test")
+        actual.extend(current_ids)
+        while offset:
+            current_ids, offset = self.seqdbWS.getSequenceIds(sequenceName="Test", offset=offset)
+            actual.extend(current_ids)
+            
         self.assertTrue(actual, "No Sequence ids returned.")
         self.assertIn(self.sequenceIds[0], actual, "Expected sequence id is not in the results.")
     

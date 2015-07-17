@@ -205,7 +205,7 @@ def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None, pub_r
                                                           pubRefSeq=pub_ref_seqs)
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
-                seq_ids = seqdbWS.getSequenceIds(specimenNum=specimen_num, 
+                seq_ids, offset = seqdbWS.getSequenceIds(specimenNum=specimen_num, 
                                                  sequenceName=sequence_name,
                                                  pubRefSeq=pub_ref_seqs)
                 log_msg = "Number of sequences retrieved:"
