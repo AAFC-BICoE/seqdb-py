@@ -113,8 +113,12 @@ def get_ITS_seq_ids(seqdbWS):
     its_seq_ids = []
     for region_id in its_region_ids:
         try:
-            curr_seq_ids = seqdbWS.getSequenceIdsByRegion(region_id)
+            curr_seq_ids, offset = seqdbWS.getSequenceIdsByRegionWithOffset(region_id)
             its_seq_ids.extend(curr_seq_ids)
+            while offset:
+                curr_seq_ids, offset = seqdbWS.getSequenceIdsByRegionWithOffset(region_id, offset)
+                its_seq_ids.extend(curr_seq_ids)
+                
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
@@ -150,7 +154,7 @@ def get_ITS_seq_ids(seqdbWS):
 def get_consensus_seq_ids(seqdbWS):
     ''' Get all SeqDB consensus sequence ids (accessible with this API key) '''
     try:
-        consensus_seq_ids = seqdbWS.getConsensusSequenceIds()
+        consensus_seq_ids = seqdbWS.getConsensusSequenceIdsWithOffset()
     except requests.exceptions.ConnectionError as e:
         user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
         logging.error(tools_helper.log_msg_noDbConnection)
@@ -200,12 +204,12 @@ def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None, pub_r
     else:
         try:
             if pull_type == pull_types_dict["consensus"]:
-                seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, 
+                seq_ids = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs)
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
-                seq_ids, offset = seqdbWS.getSequenceIds(specimenNum=specimen_num, 
+                seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
                                                  sequenceName=sequence_name,
                                                  pubRefSeq=pub_ref_seqs)
                 log_msg = "Number of sequences retrieved:"

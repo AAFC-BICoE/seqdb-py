@@ -170,7 +170,7 @@ def check_region(seqdb_ws, gene, create=False):
     logging.info("Checking SeqDB for region: %s.  Create == %r" %
                  (gene, create))
     region_id = None
-    region_ids = seqdb_ws.getRegionIdsByName(gene)
+    region_ids = seqdb_ws.getRegionIdsWithOffset(regionName=gene)
     if len(region_ids) == 0 and create is True:
         region_id = seqdb_ws.createRegion(gene, "GenBank Gene: %s" % (gene))
         logging.debug("Created region: %i in seqdb for %s" % (region_id, gene))
@@ -723,9 +723,9 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
     # If it does, continue with the next record
     logging.debug("Checking for gi:%s in SeqDB" % (genbank_id))
 
-    result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
+    seq_ids, offset = seqdb_ws.getConsensusSequenceIdsWithOffset(genBankGI=genbank_id)
 
-    if result['count'] == 0:
+    if not seq_ids:
         # retrieve genbank record
         record = entrez_fetch(genbank_id, cache=cache)
 
@@ -746,7 +746,7 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
             if logging.getLogger().isEnabledFor(logging.DEBUG):
                 # retrieve inserted record and display to users for validation
                 # purposes
-                result = seqdb_ws.getJsonSeq(seqdb_id)
+                result = seqdb_ws.getJsonSequence(seqdb_id)
                 tools_helper.pretty_log_json(
                     result, level="debug", message="Record as inserted:")
         else:
@@ -754,7 +754,7 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
                 "Skipping gi:%s, which does not contain a sequence." % (
                     genbank_id))
 
-    elif result['count'] == 1:
+    else:
         logging.info(
             "Sequence for gi:%s already exists in SeqDB. Skipping." % (
                 genbank_id))

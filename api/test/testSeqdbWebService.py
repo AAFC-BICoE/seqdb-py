@@ -188,10 +188,19 @@ class TestSeqdbWebService_Region_Existing(unittest.TestCase):
     
     def testGetRegionIds_valid(self):
         """Test retrieval of an ITS region ids - expected to pass"""
-        actual = self.seqdbWS.getRegionIds()
-        self.assertTrue(actual, "No region ids returned.")
-        self.assertIn(self.regionIds[0], actual, "Region id is not in the results.")
-    
+        
+        current_ids, offset = self.seqdbWS.getRegionIdsWithOffset()
+        self.assertTrue(current_ids, "No region ids returned.")
+
+        id_found = False
+        while offset:
+            current_ids, offset = self.seqdbWS.getRegionIdsWithOffset(offset=offset)
+            if self.regionIds[0] in current_ids:
+                id_found = True
+                break
+            
+        self.assertTrue(id_found, "Region id is not in the results.")
+ 
     
     def testGetItsRegionIds_valid(self):
         """Test retrieval of an ITS region ids - expected to pass"""
@@ -241,15 +250,17 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
     
     # TODO: takes a long time to run: re-design to be more targeted 
     def testGetSeqIds(self):
-        actual = []
-        current_ids, offset = self.seqdbWS.getSequenceIds(sequenceName="Test")
-        actual.extend(current_ids)
+        current_ids, offset = self.seqdbWS.getSequenceIdsWithOffset(sequenceName="Test")
+        self.assertTrue(current_ids, "No Sequence ids returned.")
+
+        id_found = False
         while offset:
-            current_ids, offset = self.seqdbWS.getSequenceIds(sequenceName="Test", offset=offset)
-            actual.extend(current_ids)
+            current_ids, offset = self.seqdbWS.getSequenceIdsWithOffset(sequenceName="Test", offset=offset)
+            if self.sequenceIds[0] in current_ids:
+                id_found = True
+                break
             
-        self.assertTrue(actual, "No Sequence ids returned.")
-        self.assertIn(self.sequenceIds[0], actual, "Expected sequence id is not in the results.")
+        self.assertTrue(id_found, "Expected sequence id is not in the results.")
     
 
 
