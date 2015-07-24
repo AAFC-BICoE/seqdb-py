@@ -814,7 +814,7 @@ def main():
             sys.argv))
 
     seqdb_ws = seqdbWebService(
-        main_conf['seqdb']['apikey'], main_conf['seqdb']['url'])
+        tool_config['seqdb']['apikey'], main_conf['seqdb']['url'])
 
     Entrez.email = tool_config['entrez']['email']
     query = tool_config['entrez']['query']
