@@ -3,6 +3,7 @@
 """
 
 import os
+import re
 import sys
 import json
 import shelve
@@ -11,15 +12,26 @@ import logging.config
 import httplib as http_client
 import tools_helper
 
-from api.seqdbWebService import seqdbWebService
+from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
 from Bio import Entrez
 
 
-
-# Note: Not logging method call as method is a logging helper
-
-
+def merge(a, b, path=None):
+    "merges b into a"
+    if path is None:
+        path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                merge(a[key], b[key], path + [str(key)])
+            elif a[key] == b[key]:
+                pass  # same leaf value
+            else:
+                raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+        else:
+            a[key] = b[key]
+    return a
 
 
 def format_sequence_name(genbank_id, record):
@@ -101,7 +113,7 @@ def extract_gene_names(record):
                     genes[qualifier["GBQualifier_value"]] = 1
                     logging.debug("Gene name: %s" %
                                   (qualifier["GBQualifier_value"]))
-    logging.info("Found %i gene names" % (len(genes.keys())))
+    logging.debug("Found %i gene names" % (len(genes.keys())))
     return genes.keys()
 
 
@@ -123,8 +135,9 @@ def check_feature_type(seqdb_ws, ftn, create=False, lookup=None):
     Raises:
         None
     """
-    logging.info("Checking SeqDB for feature type: %s.  Create == %r" %
-                 (ftn, create))
+    logging.debug(
+        "Checking SeqDB for feature type: %s.  Create == %r" %
+        (ftn, create))
 
     feature_type_id = None
 
@@ -142,13 +155,12 @@ def check_feature_type(seqdb_ws, ftn, create=False, lookup=None):
     if lookup is not None:
         lookup[ftn] = feature_type_id
 
-    logging.info("Returning feature type id: %r" % (feature_type_id))
+    logging.debug("Returning feature type id: %r" % (feature_type_id))
 
     return feature_type_id
 
+
 # TODO filter by group
-
-
 def check_region(seqdb_ws, gene, create=False):
     """Check to see if SeqDB contains a region with a name as per gene.
 
@@ -167,10 +179,11 @@ def check_region(seqdb_ws, gene, create=False):
     Raises:
         None
     """
-    logging.info("Checking SeqDB for region: %s.  Create == %r" %
-                 (gene, create))
+    logging.debug(
+        "Checking SeqDB for region: %s.  Create == %r" %
+        (gene, create))
     region_id = None
-    region_ids = seqdb_ws.getRegionIdsWithOffset(regionName=gene)
+    region_ids = seqdb_ws.getRegionIdsByName(gene)
     if len(region_ids) == 0 and create is True:
         region_id = seqdb_ws.createRegion(gene, "GenBank Gene: %s" % (gene))
         logging.debug("Created region: %i in seqdb for %s" % (region_id, gene))
@@ -182,7 +195,7 @@ def check_region(seqdb_ws, gene, create=False):
                      "Currently unable to assign sequences to regions "
                      "with non-unique names." % (gene))
 
-    logging.info("Returning region id: %r" % (region_id))
+    logging.debug("Returning region id: %r" % (region_id))
     return region_id
 
 
@@ -302,7 +315,9 @@ def seqdb_ret_entrez_gene_region_id(seqdb_ws, record, products=None):
                       (genes[0], seqdb_gene_region_id))
 
     elif len(genes) == 0 and products is not None:
-        if "18S ribosomal RNA" or "internal transcribed spacer 1" or "5.8S ribosomal RNA" or "internal transcribed spacer 2" or "28S ribosomal RNA" in products:
+        if "18S ribosomal RNA" or "internal transcribed spacer 1" or \
+                "5.8S ribosomal RNA" or "internal transcribed spacer 2" or \
+                "28S ribosomal RNA" in products:
             seqdb_gene_region_id = check_region(
                 seqdb_ws, "Ribosomal Cistron", create=True)
             logging.debug("Identified Ribosomal Cistron based on features in "
@@ -337,8 +352,10 @@ def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
     sequence = record[0]["GBSeq_sequence"]
     sequence = sequence.upper()
     tracefile_dir = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi'
+
     tracefile_name = format_tracefile_name(
         db="nucleotide", id=genbank_id, rettype="gb", retmode="xml")
+
     additional = {
         'chromatDir': tracefile_dir,
         'chromatName': tracefile_name,
@@ -350,14 +367,15 @@ def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
 
     dict_for_logging = {'name': seq_name, 'sequence': sequence}
     dict_for_logging.update(additional)
-    tools_helper.pretty_log_json(dict_for_logging, level="debug",
-                    message="Creating consensus (non-default values): ")
+    tools_helper.pretty_log_json(
+        dict_for_logging, level="debug",
+        message="Creating consensus (non-default values): ")
 
     seqdb_id, code, message = seqdb_ws.createConsensusSequence(
         seq_name, sequence, additional=additional)
 
     logging.info(
-        "Created consensus seqdbid:%i "
+        "Created Consensus Sequence (seqdbid:%i) "
         "for gi:%s (%s), Status: %i, Message: %s" % (
             seqdb_id, genbank_id,
             record[0]["GBSeq_accession-version"],
@@ -379,25 +397,159 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
         above, or with the prefix "personal:". May need to look for additional
         prefixes and check values for additional qualifer keys.
     """
+
+    logging.info("Linking sequence to available source Specimen")
     for supported in [
             'culture_collection', 'strain', 'specimen voucer', 'isolate']:
+
         if supported in feature['qualifiers']:
-            for value in feature['qualifiers'][supported]:
-                if value.startswith("DAOM"):
-                    logging.warn(
-                        "Found apparent DAOM identifer (%s), but Specimen "
-                        "linking not yet implemented" %
-                        (value))
-                if value.startswith("CBS"):
-                    logging.warn(
-                        "Found apparent CBS identifer (%s), but Specimen "
-                        "linking not yet implemented" %
-                        (value))
-                if value.startswith("personal:"):
-                    logging.warn(
-                        "Found candidate personal identifer (%s), but "
-                        "Specimen linking not yet implemented" %
-                        (value))
+
+            for source_entry in feature['qualifiers'][supported]:
+
+                code = None
+                identifier = None
+                jsn_resp = None
+
+                # some source entries are a list split with a semi-colon
+                sources = source_entry.split(";")
+                for source in sources:
+
+                    source = source.strip()
+
+                    if source.startswith("DAOM") or \
+                            source.startswith("CCFC") or \
+                            source.startswith("CBS") or \
+                            source.startswith("ATCC") or \
+                            source.startswith("INVAM") or \
+                            source.startswith("NISK") or \
+                            source.startswith("BR"):
+
+                        logging.info("\tPossible known source %s." % (source))
+
+                        matched = None
+
+                        if source.startswith("DAOM"):
+
+                            # TODO Also search / instead based on DAOM field in
+                            # FungalInfo
+                            matched = re.search(
+                                r"(?P<collection>\w+)[: ]?(?P<identifier>[\d.]+)",
+                                source)
+
+                            if matched.groupdict()['identifier'].startswith("BR"):
+
+                                matched = re.search(
+                                    r"(?P<collection>BR)(?P<identifier>[\d-]+)",
+                                    matched.groupdict()['identifier'])
+
+                        elif source.startswith("CCFC"):
+
+                            # TODO Also search / instead based on CCFC field in
+                            # FungalInfo
+                            matched = re.search(
+                                r"CCFC:DAOM (?P<collection>BR) (?P<identifier>[\d.]+)",
+                                source)
+
+                        elif source.startswith("BR"):
+
+                            matched = re.search(
+                                r"(?P<collection>\w+)[: ]?(?P<identifier>[\d.]+) \(DAOM\)",
+                                source)
+
+                        elif source.startswith("INVAM"):
+
+                            matched = re.search(
+                                r"(?P<collection>\w+)[ ]?(?P<identifier>[\w\d]+)",
+                                source)
+
+                        elif source.startswith("CBS") or \
+                                source.startswith("ATCC"):
+
+                            matched = re.search(
+                                r"(?P<collection>\w+)[: ]?(?P<identifier>[\d.]+)",
+                                source)
+
+                        elif source.startswith("NISK"):
+
+                            matched = re.search(
+                                r"(?P<collection>NISK) (?P<identifier>\d+-\d+/\d+)",
+                                source)
+
+                        if matched:
+
+                            code = matched.groupdict()['collection']
+                            identifier = matched.groupdict()['identifier']
+
+                            logging.debug(
+                                "\tChecking SeqDB for Specimen with OtherIds containing "
+                                "Code: %s, Identifier: %s" % (code, identifier))
+
+                            try:
+                                jsn_resp = seqdb_ws.getJsonSpecimenIdsByOtherIds(
+                                                code, identifier)
+
+                            except UnexpectedContent, e:
+                                logging.error(
+                                    "Exception querying Specimen using "
+                                    "Code: %s, Identifier: %s.  %s" %
+                                    (code, identifier, e))
+
+                    elif source.startswith("personal:"):
+
+                        logging.info(
+                            "\tUnevaluated personal identifier %s." %
+                            (source))
+
+                        prefix, code, identifier = source.split(":")
+
+                        if isinstance(identifier, int):
+
+                            logging.debug(
+                                "\tChecking SeqDB for Specimen "
+                                "Code: %s, Identifier: %s" %
+                                (code, identifier))
+
+                            jsn_resp = seqdb_ws.getJsonSpecimenIdsBySpecimenId(
+                                            code, identifier)
+
+                        else:
+
+                            logging.warn(
+                                "\tReview non-numeric identifier: %s" %
+                                (source))
+
+                    # the following prefixes don't appear in our otherIds
+                    # column could change in the future, but ignoring for now
+                    elif source.startswith("RGR"):
+
+                        logging.debug(
+                            "\tSkiping unused source %s" % (source))
+
+                    else:
+
+                        logging.error(
+                            "\tUnevaluated source %s" % (source))
+
+                        continue
+
+                    if jsn_resp is None or jsn_resp['count'] <= 0:
+
+                        logging.info(
+                            "\tNo specimen found for code: %s and id: %s" %
+                            (code, identifier))
+
+                    elif jsn_resp['count'] > 1:
+
+                        logging.warn(
+                            "\tUnable to link Sequence to Specimen using "
+                            "Code: %s, Identifier: %s. "
+                            "Found multiple Specimen with OtherIds containing "
+                            % (code, identifier))
+
+                    else:  # jsn_resp['count'] == 1:
+
+                        seqdb_update_seqsource_specimen(
+                            seqdb_ws, seqdb_id, jsn_resp['result'][0])
 
 
 def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature):
@@ -407,7 +559,7 @@ def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature):
     logging.warn("Taxonomy linking not yet implemented")
 
 
-def seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_region_id):
+def seqdb_update_seqsource_region(seqdb_ws, seqdb_id, seqdb_region_id):
     """Associate the sequence with a gene region.
 
     Args:
@@ -427,7 +579,9 @@ def seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_region_id):
         None
     """
     logging.info(
-        "Updating SeqSource for consensus sequence seqdbid:%i" % (seqdb_id))
+        "Linking Sequence (seqdbid:%i) to Region (seqdbid:%s)" %
+        (seqdb_id, seqdb_region_id))
+
     seqsource = {
         "seqSource": {
             "region": {
@@ -435,11 +589,92 @@ def seqdb_update_seqsource(seqdb_ws, seqdb_id, seqdb_region_id):
             }
         }
     }
-    region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, seqsource)
+    existing = seqdb_ws.getJsonSeqSource(seqdb_id)
+    region_id = None
+    if 'result' in existing:
+        # drop headers from response returned above by creating a new dict
+        # containing only response 'result' portion and then add additional
+        # properties to it
+        existing = {'seqSource': existing['result']}
+
+        tools_helper.pretty_log_json(
+            seqsource, level="debug", message="Merging")
+
+        tools_helper.pretty_log_json(
+            existing, level="debug", message="Into")
+
+        merge(existing, seqsource)
+
+        region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, existing)
+
+        logging.debug(
+            "Updated SeqSource for sequence region linking "
+            "seqdbid:%i, Status: %i, Message: %s" % (
+                seqdb_id, code, message))
+
+    else:
+
+        tools_helper.pretty_log_json(
+            existing, level="error",
+            message="Failed to retrieve seqSource for Sequence (seqdbid:%s):" %
+            seqdb_id)
+
+    return region_id
+
+
+def seqdb_update_seqsource_specimen(seqdb_ws, seqdb_id, seqdb_specimen_id):
+    """Associate the sequence with a specimen.
+
+    Args:
+        seqdb_ws (obj): reference to instance of api.seqdbWebService
+
+        seqdb_id (int): SeqDB id of the sequence to associate with the Region
+
+        seqdb_specimen_id (int):
+                        SeqDB id of the Specimen to associate with the Sequence
+
+
+    Kargs:
+        None
+
+    Returns:
+        int. SeqDB id of updated Sequence (Strikes me as odd, but this
+             is the result of the SeqDB WS API)
+
+    Raises:
+        None
+    """
     logging.info(
-        "Updated SeqSource for consensus sequence"
-        "seqdbid:%i, Status: %i, Message: %s" % (
-            seqdb_id, code, message))
+        "Linking Sequence (seqdbid:%i) to Specimen (seqdbid:%s)" %
+        (seqdb_id, seqdb_specimen_id))
+
+    seqsource = {
+        "seqSource": {
+            "specimen": {
+                "id": seqdb_specimen_id,
+            },
+        }
+    }
+
+    existing = seqdb_ws.getJsonSeqSource(seqdb_id)
+    region_id = None
+    if 'result' in existing:
+        # drop headers from response returned above by
+        # creating a new dict containing only response 'result' portion
+        existing = {'seqSource': existing['result']}
+        merge(existing, seqsource)
+        region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, existing)
+
+        logging.debug(
+            "Updated SeqSource for sequence specimen linking "
+            "seqdbid:%i, Status: %i, Message: %s" % (
+                seqdb_id, code, message))
+
+    else:
+        tools_helper.pretty_log_json(
+            existing, level="error",
+            message="Failed to retrieve seqSource for Sequence (seqdbid:%s):" %
+            seqdb_id)
 
     return region_id
 
@@ -463,6 +698,7 @@ def parse_locations(gb_feature):
     locations = []
     for interval in gb_feature['GBFeature_intervals']:
         # TODO determined frame and strand, don't just default to 1
+        # There is another spot where I adjust the frame
         locations.append(
             {
                 "start": interval['GBInterval_from'],
@@ -509,7 +745,7 @@ def parse_feature(gb_feature, seqdb_ws, lookup=None):
     Raises:
         None
     """
-    logging.info("\tParsing feature: \"%s\"" % (gb_feature['GBFeature_key']))
+    logging.debug("Parsing feature: \"%s\"" % (gb_feature['GBFeature_key']))
     gb_feature_record = {}
     gb_feature_record['location_description'] = gb_feature[
         'GBFeature_location']
@@ -568,7 +804,7 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
     Raises:
         None
     """
-    logging.info("Adding features from Entry: %s to Sequence seqdbid:%i" % (
+    logging.info("Adding features from Entry: %s to Sequence (seqdbid:%i)" % (
         record['GBSeq_accession-version'], seqdb_id))
 
     features = []
@@ -681,7 +917,7 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
                 description=description)
 
         elif feature['feature_key'] == 'source':
-            seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature)
+            # seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature)
             seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature)
 
         else:
@@ -691,7 +927,9 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
     return products
 
 
-def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
+def process_entrez_entry(
+        seqdb_ws, genbank_id, cache=None, lookup=None,
+        delete=False, update=False):
     """Process an entrez entry.
 
     Args:
@@ -699,7 +937,11 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
         genbank_id (str): The genbank id of the record being processed
 
     Kargs:
-        None
+        cache (obj):    a "stash" in which to cache Entrez results returned
+                        from Genbank.
+        lookup (dict):  a dict to hold SeqDB Features and save queries.
+        delete (bool):  Default False. Delete existing SeqDB records and
+                        recreate them.
 
     Returns:
         None
@@ -723,41 +965,58 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None):
     # If it does, continue with the next record
     logging.debug("Checking for gi:%s in SeqDB" % (genbank_id))
 
+    #result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
     seq_ids, offset = seqdb_ws.getConsensusSequenceIdsWithOffset(genBankGI=genbank_id)
 
-    if not seq_ids:
+
+    if seq_ids and delete:
+        logging.info(
+            "Deleting existing Sequence (seqdbid:%s)", 
+            (seq_ids[0]))
+        seqdb_ws.deleteConsensusSequence(seq_ids[0])
+
+    record = None
+    if not seq_ids or update:
         # retrieve genbank record
         record = entrez_fetch(genbank_id, cache=cache)
+
+    seqdb_id = None
+    if seq_ids and update:
+        seqdb_id = seq_ids[0]
+
+    elif seq_ids:
+        logging.info(
+            "Sequence for gi:%s already exists in SeqDB. Skipping." % (
+                genbank_id))
+
+    if not seq_ids:
 
         if "GBSeq_sequence" in record[0]:
             seqdb_id = seqdb_insert_entrez_sequence(
                 seqdb_ws, genbank_id, record)
 
-            features = process_features(
-                seqdb_ws, seqdb_id, record[0], lookup=lookup)
-
-            seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(
-                seqdb_ws, record, features)
-
-            if seqdb_gene_region_id is not None:
-                seqdb_update_seqsource(
-                    seqdb_ws, seqdb_id, seqdb_gene_region_id)
-
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                # retrieve inserted record and display to users for validation
-                # purposes
-                result = seqdb_ws.getJsonSequence(seqdb_id)
-                tools_helper.pretty_log_json(
-                    result, level="debug", message="Record as inserted:")
         else:
             logging.info(
                 "Skipping gi:%s, which does not contain a sequence." % (
                     genbank_id))
 
-    else:
-        logging.info(
-            "Sequence for gi:%s already exists in SeqDB. Skipping." % (
-                genbank_id))
+    if record is not None and seqdb_id is not None:
+        features = process_features(
+            seqdb_ws, seqdb_id, record[0], lookup=lookup)
+
+        seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(
+            seqdb_ws, record, features)
+
+        if seqdb_gene_region_id is not None:
+            seqdb_update_seqsource_region(
+                seqdb_ws, seqdb_id, seqdb_gene_region_id)
+
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            # retrieve inserted record and display to users for validation
+            # purposes
+            result = seqdb_ws.getJsonSequence(seqdb_id)
+            tools_helper.pretty_log_json(
+                result, level="debug", message="Final Consensus Sequence:")
 
 
 def main():
@@ -780,7 +1039,9 @@ def main():
         logging.error(tools_helper.log_msg_noConfig)
         sys.exit(tools_helper.log_msg_sysExit)
 
-    tool_config = tools_helper.load_config(os.path.dirname(__file__) + '/seqdb_gb_insert_config.yaml')
+    tool_config = tools_helper.load_config(
+        os.path.dirname(__file__) + '/seqdb_gb_insert_config.yaml')
+
     if not tool_config:
         logging.error(tools_helper.log_msg_noConfig)
         sys.exit(tools_helper.log_msg_sysExit)
@@ -788,7 +1049,6 @@ def main():
     logging.config.dictConfig(main_conf['logging'])
     http_client.HTTPConnection.debuglevel = main_conf[
         'http_connect']['debug_level']
-
 
     # caching the entrez records shaved 2 minutes off the time to load
     # ~740 sequences from query: "(*DAOM*[source] and levesque and not
@@ -807,6 +1067,8 @@ def main():
     # real    2m35.773s
     # user    0m16.539s
     # sys     0m2.486s
+    # TODO May not be necessary any longer; instead use API lookup by feature
+    # type name
     feature_type_lookup = {}
 
     logging.info(
@@ -845,7 +1107,9 @@ def main():
                 seqdb_ws,
                 genbank_id,
                 cache=entrez_cache,
-                lookup=feature_type_lookup)
+                lookup=feature_type_lookup,
+                delete=tool_config['gb_insert']['delete'],
+                update=tool_config['gb_insert']['update'])
 
         start += retrieve
 

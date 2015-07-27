@@ -9,3 +9,6 @@ entrez:
 # TODO permit a list of queries?
     #query: "(*DAOM*[source] and levesque and btub) and not shotgun"
 
+gb_insert:
+    delete: False   # if True, delete existing records and recreate them (experimental)
+    update: False   # if True, update existing sequence records (experimental)
