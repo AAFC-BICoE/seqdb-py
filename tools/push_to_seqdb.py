@@ -441,4 +441,11 @@ def main():
     
 
 if __name__ == '__main__':
+# Usage exmaple for ITS features:
+#-c user_config.yaml itsx_features --itsx_positions_file ./test/data/test.positions.txt --itsx_extraction_file ./test/data/test.extraction.results
+
+# Usage exmaple for LCA:
+#-c user_config.yaml findLCA_taxonomy --lca_results_file ./test/data/LCA_Results.tabular
+
+
     main()

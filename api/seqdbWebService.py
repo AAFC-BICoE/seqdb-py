@@ -250,6 +250,9 @@ class seqdbWebService:
 
         return resp
 
+    ###########################################################################
+    # Sequence
+    ###########################################################################
 
     def getSequenceIdsWithOffset(self, specimenNum=None, sequenceName=None, pubRefSeq=None, genBankGI=None, offset=0):
         ''' Returns sequence ids, limited by the specified filter parameters
@@ -321,116 +324,7 @@ class seqdbWebService:
         return sequence_ids, result_offset
 
 
-
-    def getJsonConsensusSequenceIds(self, params=None):
-        ''' Gets Json api response object with sequence ids of all consensus sequences.
-            Note: be sure to handle pagination, since first api query may not return all 
-            possible results.
-        Args:
-            sequenceName: A name to identify the sequence
-            genBankGI: GenBankGI if the sequence is public reference
-        Returns:
-            Json object with the sequence ids
-        Raises:
-            requests.exceptions.ConnectionError
-            requests.exceptions.ReadTimeout
-            requests.exceptions.HTTPError
-            UnexpectedContent
-        '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/consensus", params=params)
-
-        
-        if jsn_resp['count'] > 0 and not jsn_resp['result']:
-            raise UnexpectedContent(response=jsn_resp)
-
-        return jsn_resp
-
-
-    def getConsensusSequenceIdsWithOffset(self, specimenNum=None, sequenceName=None, pubRefSeq=None, genBankGI=None, offset=0):
-        ''' Returns sequence ids, limited by the specified filter parameters
-        Agrs:
-            specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
-            sequenceName: keyword in the sequence name (i.e. not a direct match)
-            pubRefSeq: whether the sequence is a public reference sequence
-            genBankGI: genBank GI (identifier) for those sequences that are in genBank
-            offset: nothing if it is a first query, then number of records from which to load the next set of ids
-        Returns:
-            a list of seqdb sequence ids 
-            offset of results. If 0 then all/last set of results have been retrieved, if > 0,
-                then the function has to be called again with this offset to retrieve more results
-        Raises:
-            requests.exceptions.ConnectionError
-            requests.exceptions.ReadTimeout
-            requests.exceptions.HTTPError
-            UnexpectedContent
-        '''
-        params = ''
-        if specimenNum:
-            params = params + "filterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %specimenNum
-            
-        if sequenceName:
-            params = params + "filterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %sequenceName
-        
-        if pubRefSeq:
-            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=true"
-            
-        if genBankGI:
-            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterOperator=and&filterWildcard=false&" %genBankGI
-        
-        #jsn_resp = self.getJsonConsensusSequenceIds(params)
-        #jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
-        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/consensus", params=params, offset=offset)
-        
-        
-        sequence_ids = ""
-        
-        if jsn_resp:  
-            sequence_ids = jsn_resp['result']
-            
-        if genBankGI and len(sequence_ids) > 1:
-            raise SystemError(
-                "More than one record associated with GenBank GI, which should be unique.")
-            
-        
-        return sequence_ids, result_offset
-
-
-    # TODO verify which payload values are required by the SeqDB WS API
-    def createConsensusSequence(
-            self, name, sequence, qualities=None,
-            seqType="N", readNum=0, additional=None):
-        post_data = {
-            'consensus': {
-                'name': name,
-                'seq': sequence,
-                'seqType': seqType,
-                'readNum': readNum,
-                'qualities': qualities,
-            },
-        }
-
-        if additional is not None:
-            post_data['consensus'].update(additional)
-
-        resp = self.create(self.base_url + "/consensus", json.dumps(post_data))
-        jsn_resp = resp.json()
-
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
-            raise UnexpectedContent(response=jsn_resp)
-
-        return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
-
-
-    def deleteConsensusSequence(self, consensus_id):
-        request_url = "/consensus/" + str(consensus_id)
-        jsn_resp = self.delete(self.base_url + request_url).json()
-
-        if 'statusCode' and 'message' not in jsn_resp.keys():
-            raise UnexpectedContent(response=jsn_resp)
-
-        return jsn_resp
-
+    
     def importChromatSequences(
             self, blob, dest_file_name,
             notes="", trace_file_path=""):
@@ -610,6 +504,171 @@ class seqdbWebService:
         return response.content
 
 
+    ###########################################################################
+    # Consensus Sequence
+    ###########################################################################
+
+    def getJsonConsensusSequenceIds(self, params=None):
+        ''' Gets Json api response object with sequence ids of all consensus sequences.
+            Note: be sure to handle pagination, since first api query may not return all 
+            possible results.
+        Args:
+            sequenceName: A name to identify the sequence
+            genBankGI: GenBankGI if the sequence is public reference
+        Returns:
+            Json object with the sequence ids
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        jsn_resp = self.retrieveJson(
+            self.base_url + "/consensus", params=params)
+
+        
+        if jsn_resp['count'] > 0 and not jsn_resp['result']:
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp
+
+
+    def getConsensusSequenceIdsWithOffset(self, specimenNum=None, sequenceName=None, pubRefSeq=None, genBankGI=None, offset=0):
+        ''' Returns sequence ids, limited by the specified filter parameters
+        Agrs:
+            specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
+            sequenceName: keyword in the sequence name (i.e. not a direct match)
+            pubRefSeq: whether the sequence is a public reference sequence
+            genBankGI: genBank GI (identifier) for those sequences that are in genBank
+            offset: nothing if it is a first query, then number of records from which to load the next set of ids
+        Returns:
+            a list of seqdb sequence ids 
+            offset of results. If 0 then all/last set of results have been retrieved, if > 0,
+                then the function has to be called again with this offset to retrieve more results
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        params = ''
+        if specimenNum:
+            params = params + "filterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %specimenNum
+            
+        if sequenceName:
+            params = params + "filterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %sequenceName
+        
+        if pubRefSeq:
+            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=true"
+            
+        if genBankGI:
+            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterOperator=and&filterWildcard=false&" %genBankGI
+        
+        #jsn_resp = self.getJsonConsensusSequenceIds(params)
+        #jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
+        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/consensus", params=params, offset=offset)
+        
+        
+        sequence_ids = ""
+        
+        if jsn_resp:  
+            sequence_ids = jsn_resp['result']
+            
+        if genBankGI and len(sequence_ids) > 1:
+            raise SystemError(
+                "More than one record associated with GenBank GI, which should be unique.")
+            
+        
+        return sequence_ids, result_offset
+
+
+    # TODO verify which payload values are required by the SeqDB WS API
+    def createConsensusSequence(
+            self, name, sequence, qualities=None,
+            seqType="N", readNum=0, additional=None):
+        post_data = {
+            'consensus': {
+                'name': name,
+                'seq': sequence,
+                'seqType': seqType,
+                'readNum': readNum,
+                'qualities': qualities,
+            },
+        }
+
+        if additional is not None:
+            post_data['consensus'].update(additional)
+
+        resp = self.create(self.base_url + "/consensus", json.dumps(post_data))
+        jsn_resp = resp.json()
+
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+
+
+    def deleteConsensusSequence(self, consensus_id):
+        request_url = "/consensus/" + str(consensus_id)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp
+
+
+    ###########################################################################
+    # Determination
+    ###########################################################################
+    def getDetermination(self, determinationId):
+        ''' Retrieves a Determination (taxonomic)
+        Args:
+            determinationId: id of a taxonomic determination to be retrieved
+        Returns:
+            'result' from the json response OR nothing if determination was not found
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        jsn_resp = self.retrieveJson(
+            self.base_url + "/determination/" + str(determinationId))
+
+        if jsn_resp:
+            return jsn_resp['result']
+        else:
+            return ''
+
+    
+    def insertDetermination(self, sequenceId, specimenId):
+        pass
+    
+    def deleteDetermination(self, determinationId):
+        ''' Deletes a Determination
+        Args:
+            determinationId: id of the determination to be deleted
+        Returns:
+            json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        request_url = "/determination/" + str(determinationId)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp
+
+    
+    
+    ###########################################################################
+    # Gene Region
+    ###########################################################################
 
     def getItsRegionIds(self, offset=0):
         ''' Get region IDs of ITS sequences
@@ -741,7 +800,91 @@ class seqdbWebService:
 
         return jsn_resp
 
-        
+    
+    ###########################################################################
+    # Feature
+    ###########################################################################
+
+    def getFeature(self, featureId):
+        ''' Retrieves a Feature
+        Args:
+            featureId: id of a feature to be retrieved
+        Returns:
+            'result' from the json response OR nothing is feature was not found
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        jsn_resp = self.retrieveJson(
+            self.base_url + "/feature/" + str(featureId))
+
+        if jsn_resp:
+            return jsn_resp['result']
+        else:
+            return ''
+
+    def insertFeature(
+            self, name, featureTypeId, featureLocations,
+            sequenceId, description='', featureDefault=False, parentId=None):
+        ''' Creates a Feature
+        Args:
+            name: name of the feature
+        Returns:
+            'result' from the json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        post_data = {
+            "feature": {
+                "name": name,
+                "featureType": {"id": featureTypeId},
+                "featureLocations": featureLocations,
+                "description": description,
+                "featureDefault": featureDefault
+            }
+        }
+        if parentId is not None:
+            post_data["feature"]["parentFeature"] = {"id": parentId}
+
+        resp = self.create(self.base_url + "/sequence/" +
+                           str(sequenceId) + "/feature", json.dumps(post_data))
+
+        jsn_resp = resp.json()
+
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp['result']
+
+    def deleteFeature(self, featureId):
+        ''' Deletes a Feature
+        Args:
+            featureId: id of the feature to be deleted
+        Returns:
+            json response
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        request_url = "/feature/" + str(featureId)
+        jsn_resp = self.delete(self.base_url + request_url).json()
+
+        if 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp
+    
+
+
+    ###########################################################################
+    # Feature Type
+    ###########################################################################
+
 
     def getFeatureTypesWithIds(self):
         ''' 
@@ -821,79 +964,11 @@ class seqdbWebService:
 
         return jsn_resp
 
-    def getFeature(self, featureId):
-        ''' Retrieves a Feature
-        Args:
-            featureId: id of a feature to be retrieved
-        Returns:
-            'result' from the json response OR nothing is feature was not found
-        Raises:
-            requests.exceptions.ConnectionError
-            requests.exceptions.ReadTimeout
-            requests.exceptions.HTTPError
-            UnexpectedContent
-        '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/feature/" + str(featureId))
 
-        if jsn_resp:
-            return jsn_resp['result']
-        else:
-            return ''
-
-    def insertFeature(
-            self, name, featureTypeId, featureLocations,
-            sequenceId, description='', featureDefault=False, parentId=None):
-        ''' Creates a Feature
-        Args:
-            name: name of the feature
-        Returns:
-            'result' from the json response
-        Raises:
-            requests.exceptions.ConnectionError
-            requests.exceptions.HTTPError
-            UnexpectedContent
-        '''
-        post_data = {
-            "feature": {
-                "name": name,
-                "featureType": {"id": featureTypeId},
-                "featureLocations": featureLocations,
-                "description": description,
-                "featureDefault": featureDefault
-            }
-        }
-        if parentId is not None:
-            post_data["feature"]["parentFeature"] = {"id": parentId}
-
-        resp = self.create(self.base_url + "/sequence/" +
-                           str(sequenceId) + "/feature", json.dumps(post_data))
-
-        jsn_resp = resp.json()
-
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
-            raise UnexpectedContent(response=jsn_resp)
-
-        return jsn_resp['result']
-
-    def deleteFeature(self, featureId):
-        ''' Deletes a Feature
-        Args:
-            featureId: id of the feature to be deleted
-        Returns:
-            json response
-        Raises:
-            requests.exceptions.ConnectionError
-            requests.exceptions.HTTPError
-            UnexpectedContent
-        '''
-        request_url = "/feature/" + str(featureId)
-        jsn_resp = self.delete(self.base_url + request_url).json()
-
-        if 'statusCode' and 'message' not in jsn_resp.keys():
-            raise UnexpectedContent(response=jsn_resp)
-
-        return jsn_resp
+    
+    ###########################################################################
+    # Specimen
+    ###########################################################################
 
            
     # TODO Not tested
