@@ -122,6 +122,14 @@ def get_lieage_taxids(tax_parent_ids, taxon_id, lineage=None):
 def push_taxonomy_data(seqdbWS, info_file_name):
     ''' Extracts taxon id from the findLCA output file, finds lineage for the taxon id
         and pushes taxonomic identification to SeqDB
+    Args:
+        info_file_name: FindLCA output file. Example of 3 lines in a file:
+        Query: seqdb|6802    No suitable matches found.
+        Query: seqdb|28954    LCA: 164328    Name:Phytophthora ramorum    Rank: species    Matches: 1    Names: Phytophthora ramorum:55,    Evalue: 0.0,    Pid: 96.97,    Qcover: 0.929705215419501,    SourceGI: 46812520,74476198,78192394,81176726,81176727,81176728,408690088,378750406,378750408,643192938,643192939,44194092,47934204,49617503,60308861,89275889,108885436,114146744,55586083,643192936,55586084,46812521,42521138,32490530,315419600,643192937,55586085,643192935,227810703,227810722,46399123,323301609,227810723,295409544,284432200,308745533,551031928,227810464,227810545,227810570,372125558,284432218,284432396,308745534,478739030,227810622,227810639,42529489,227810623,284432190,227810547,417357152,417357145,38348758,171262896,
+        Query: seqdb|64071    LCA: 4783    Name:Phytophthora    Rank: genus    Matches: 4    Names: Phytophthora ramorum:2,Phytophthora mengei:1,Phytophthora citricola:1,Phytophthora capsici:2,    Evalue: 0.0,    Pid: 95.00,95.15,    Qcover: 0.928864569083447,    SourceGI: 320336471,308913225,308913137,308912963,308912935,320336197,
+    
+    Return:
+        list of determination ids, written to seqdb
     '''
     
     # Output file name for this execution. Is used in Galaxy, so don't change UYKWYD
@@ -131,16 +139,7 @@ def push_taxonomy_data(seqdbWS, info_file_name):
     or
     Query: seqdb|6802    No suitable matches found."""
     
-    """
-    Query: seqdb|6802    No suitable matches found.
-    """
-    """
-    Query: seqdb|28954    LCA: 164328    Name:Phytophthora ramorum    Rank: species    Matches: 1    Names: Phytophthora ramorum:55,    Evalue: 0.0,    Pid: 96.97,    Qcover: 0.929705215419501,    SourceGI: 46812520,74476198,78192394,81176726,81176727,81176728,408690088,378750406,378750408,643192938,643192939,44194092,47934204,49617503,60308861,89275889,108885436,114146744,55586083,643192936,55586084,46812521,42521138,32490530,315419600,643192937,55586085,643192935,227810703,227810722,46399123,323301609,227810723,295409544,284432200,308745533,551031928,227810464,227810545,227810570,372125558,284432218,284432396,308745534,478739030,227810622,227810639,42529489,227810623,284432190,227810547,417357152,417357145,38348758,171262896,
-    """
-    """
-    Query: seqdb|64071    LCA: 4783    Name:Phytophthora    Rank: genus    Matches: 4    Names: Phytophthora ramorum:2,Phytophthora mengei:1,Phytophthora citricola:1,Phytophthora capsici:2,    Evalue: 0.0,    Pid: 95.00,95.15,    Qcover: 0.928864569083447,    SourceGI: 320336471,308913225,308913137,308912963,308912935,320336197,
-    """
-    # parse the file and extract seqdb sequence ID - ncbi taxon id pairs
+    # Parse input file and extract (seqdb sequence ID, ncbi taxon id) pairs
     seqdb_sequence_taxon = {}
     try:
         with open(info_file_name, "r") as info_file_handler:
@@ -194,19 +193,63 @@ def push_taxonomy_data(seqdbWS, info_file_name):
     
     print seqdb_sequence_taxon
     
-    # Find lineage for each seqdb id
-  
-    start_time = time.time()
-
+    # For each (sequence_id, taxonomy_id) pair, find full lineage (from NCBI) and write to seqdb
     tax_lineage = TaxonomyLineage("./data/ncbi_taxonomy/")
-    lineage_names = tax_lineage.findLineage(129355)
+    
+    determinationIds = list()
+    for sequenceId in seqdb_sequence_taxon:
+        taxonomyId = seqdb_sequence_taxon[sequenceId]
+        notes = "Taxonomy derived from BLAST / LCA pipeline in Galaxy. "
         
-    print lineage_names  
-    print "Time to get lineage new way: %s" %(time.time()-start_time)
+        if isinstance( taxonomyId, ( int, long ) ):
+            #start_time = time.time()
+            lineage_names = tax_lineage.findLineage(taxonomyId)   
+            print lineage_names  
+            #print "Time to get lineage new way: %s" %(time.time()-start_time)
+        else:
+            notes = taxonomyId + " " + notes
+        
+        try:
+            determinationId = seqdbWS.insertSequenceDetermination(sequenceId=sequenceId, 
+                                                                  taxonomy=lineage_names,
+                                                                  isAccepted=False, 
+                                                                  notes=notes)
+            print determinationId
+            determinationIds.append(determinationId)
+        except requests.exceptions.ConnectionError as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_noDbConnection)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except requests.exceptions.HTTPError as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_httpError)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except UnexpectedContent as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_apiResponseFormat)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except:
+            warning_msg = "Unexpected error writing determination"
+            user_log.info(warning_msg)
+            logging.info(warning_msg)
+
     
-    # Write each lineage to SeqDB
-    
-    # Return taxonomy table id / feature id for each identification written
+    # Write determination ids, which were written to SeqDB, to a file (for Galaxy purposes)
+    output_file = open(output_file_name, 'w')
+    for detId in determinationIds:
+        output_file.write(str(detId) + '\n')
+    output_file.close()
+  
+    log_msg1 = "Number of determinations written to Sequence Dababase:   %i " % len(determinationIds)
+    log_msg2 = "Created determination ids are written to a file: '%s'" % output_file_name
+    report_log_info(log_msg1)
+    report_log_info(log_msg2)
+   
+    return determinationIds
+
 
 
 # B15_17_SH817_ITS_ITS5    622 bp.    SSU: Not found    ITS1: 1-241    5.8S: 242-399    ITS2: 400-557    LSU: 558-622

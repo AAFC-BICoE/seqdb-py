@@ -250,6 +250,7 @@ class seqdbWebService:
 
         return resp
 
+
     ###########################################################################
     # Sequence
     ###########################################################################
@@ -621,6 +622,7 @@ class seqdbWebService:
     ###########################################################################
     # Determination
     ###########################################################################
+    
     def getDetermination(self, determinationId):
         ''' Retrieves a Determination (taxonomic)
         Args:
@@ -642,8 +644,64 @@ class seqdbWebService:
             return ''
 
     
-    def insertDetermination(self, sequenceId, specimenId):
-        pass
+    def vetTaxonomy(self, taxonomy):
+        ''' Checks taxonomy dictionary and returns it in the format that can be accespted by seqDB (i.e. appropriate ranks)
+        '''
+        vettedTaxonomy = dict()
+        if taxonomy:
+            vettedTaxonomy['kingdom'] = taxonomy['kingdom']      
+            vettedTaxonomy['phylum'] = taxonomy['phylum']     
+            vettedTaxonomy['genus'] = taxonomy['genus']
+            vettedTaxonomy['species'] = taxonomy['species']
+            vettedTaxonomy['variety'] = taxonomy['variety']
+            vettedTaxonomy['strain'] = taxonomy['strain']
+            vettedTaxonomy['subgenera'] = taxonomy['subgenera']
+            vettedTaxonomy['authors'] = taxonomy['authors']
+            vettedTaxonomy['division'] = taxonomy['division']
+            vettedTaxonomy['family'] = taxonomy['family']
+            vettedTaxonomy['synonym'] = taxonomy['synonym']
+        # TODO: These need to be verified with NCBI taxonomy
+        ''' 
+        typeSpecimen    
+        taxanomicClass      
+        taxanomicOrder      
+        taxanomicGroup
+        '''     
+
+        return vettedTaxonomy
+    
+    
+    def insertSequenceDetermination(self, sequenceId, taxonomy, isAccepted=False, notes=None):
+        ''' Creates a determination for a sequence
+        Args:
+            sequenceId: id of a sequence for which determination is writtemn
+            isAccepted: boolean, whether this determination is an accepted determination
+            taxonomy:  list of tuples (taxonomy rank, taxonomy rank name)
+                        i.e. [['species', 'Phytophthora lateralis'], ['genus', 'Phytophthora'], ['order', 'Peronosporales']]
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        taxonomy = self.vetTaxonomy(taxonomy)
+        post_data = {
+            "identification": {
+                "accepted": isAccepted,
+                "sequence": {"id": sequenceId},
+                "taxonomy": taxonomy,
+                "evidenceNotes": notes}
+            }
+
+        resp = self.create(self.base_url + '/determination', json.dumps(post_data))
+        jsn_resp = resp.json()
+
+        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+            raise UnexpectedContent(response=jsn_resp)
+
+        return jsn_resp['result']
+
+    
     
     def deleteDetermination(self, determinationId):
         ''' Deletes a Determination

@@ -77,8 +77,24 @@ class TaxonomyLineage(object):
             lineage_ranks.append(curr_rank)
             curr_id = self.taxonomic_lineage_ids[curr_id][0]
             
+        '''
+        # NCBI Taxonomy would have the same name for rank at least in the case of 'no rank' 
+        # (i.e. ['no rank', 'Oomycetes'], ['no rank', 'Stramenopiles']. For this case I had this function
+        # return a list of tuples [taxonomic_rank, taxonomic_name] in the order from the given tax_id up.
+        # But for the purpose of this project, we only care about proper taxonomy ranks (genus, species, etc.)
+        # so the list of tuples solutions is not necessary. I keep it here in the case non standard information is
+        # required from NCBI taxonomy
+        
         lineage_names = list()
         for tax_id, rank in zip(lineage_ids,lineage_ranks):
             lineage_names.append([rank, self.taxonomy_names[tax_id]])
+        '''
+            
+        # See comment above. We only extract the taxonomy ranks that have a standard taxonomy rank. Therefore the ranks
+        # are unique and we can use a distionary rank:rank_name, instead of list of tuples.        
+        lineage_names = dict()
+        for tax_id, rank in zip(lineage_ids,lineage_ranks):
+            if rank != 'no rank':
+                lineage_names[rank] = self.taxonomy_names[tax_id]
             
         return lineage_names  
