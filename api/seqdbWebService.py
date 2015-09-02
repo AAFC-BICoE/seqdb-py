@@ -647,27 +647,55 @@ class seqdbWebService:
     def vetTaxonomy(self, taxonomy):
         ''' Checks taxonomy dictionary and returns it in the format that can be accespted by seqDB (i.e. appropriate ranks)
         '''
+        
+        # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. Keys are NCBI taxonomy ranks, and values are SeqDB
+        seqdb_to_ncbi_taxonomy = {'kingdom':'kingdom', 
+                                  'phylum':'phylum', 
+                                  'taxanomicClass':'class',
+                                  'taxanomicOrder':'order',
+                                  'family':'family',
+                                  'genus':'genus', 
+                                  'species':'species', 
+                                  'variety':'variety', 
+                                  'strain':'strain', 
+                                  'subgenera':'subgenera', 
+                                  'authors':'authors', 
+                                  'division':'division', 
+                                  'synonym':'synonym',
+                                  'typeSpecimen':'typeSpecimen',
+                                  'taxanomicGroup':'taxanomicGroup',
+                                  'commonName':'commonName',
+                                  'state':'state'}
+        '''
+        ncbi_to_seqdb_taxonomy = {'kingdom':'kingdom', 
+                                  'phylum':'phylum', 
+                                  'class':'taxanomicClass',
+                                  'order':'taxanomicOrder',
+                                  'family':'family',
+                                  'genus':'genus', 
+                                  'species':'species', 
+                                  'variety':'variety', 
+                                  'strain':'strain', 
+                                  'subgenera':'subgenera', 
+                                  'authors':'authors', 
+                                  'division':'division', 
+                                  'synonym':'synonym'}
+        '''
+        # TODO: go through all the ranks and verify
+        # Questions about mapping:
+        # NCBI surekingdom map to?
+        # reason why all is named with one word, but taxanomicClass, taxanomicOrder, taxanomicGroup ? Possibly special words in java / the app, but is it possible to re-map those for API
+        
         vettedTaxonomy = dict()
         if taxonomy:
-            vettedTaxonomy['kingdom'] = taxonomy['kingdom']      
-            vettedTaxonomy['phylum'] = taxonomy['phylum']     
-            vettedTaxonomy['genus'] = taxonomy['genus']
-            vettedTaxonomy['species'] = taxonomy['species']
-            vettedTaxonomy['variety'] = taxonomy['variety']
-            vettedTaxonomy['strain'] = taxonomy['strain']
-            vettedTaxonomy['subgenera'] = taxonomy['subgenera']
-            vettedTaxonomy['authors'] = taxonomy['authors']
-            vettedTaxonomy['division'] = taxonomy['division']
-            vettedTaxonomy['family'] = taxonomy['family']
-            vettedTaxonomy['synonym'] = taxonomy['synonym']
-        # TODO: These need to be verified with NCBI taxonomy
-        ''' 
-        typeSpecimen    
-        taxanomicClass      
-        taxanomicOrder      
-        taxanomicGroup
-        '''     
-
+            for seqdb_rank in seqdb_to_ncbi_taxonomy:
+                taxonomy_value = ''
+                ncbi_rank = seqdb_to_ncbi_taxonomy[seqdb_rank]
+                if ncbi_rank in taxonomy:
+                    taxonomy_value = taxonomy[ncbi_rank]
+                
+                vettedTaxonomy[seqdb_rank] = taxonomy_value
+        
         return vettedTaxonomy
     
     
