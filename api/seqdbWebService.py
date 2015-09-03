@@ -645,56 +645,31 @@ class seqdbWebService:
 
     
     def vetTaxonomy(self, taxonomy):
-        ''' Checks taxonomy dictionary and returns it in the format that can be accespted by seqDB (i.e. appropriate ranks)
+        ''' Checks taxonomy dictionary and returns it in the format that can be accepted by 
+            seqDB (i.e. appropriate ranks)
         '''
         
-        # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. Keys are NCBI taxonomy ranks, and values are SeqDB
+        # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
+        # Keys are seqdb taxonomy ranks, and values are NCBI
         seqdb_to_ncbi_taxonomy = {'kingdom':'kingdom', 
                                   'phylum':'phylum', 
                                   'taxanomicClass':'class',
                                   'taxanomicOrder':'order',
                                   'family':'family',
                                   'genus':'genus', 
+                                  'subgenera':'subgenus', 
                                   'species':'species', 
-                                  'variety':'variety', 
-                                  'strain':'strain', 
-                                  'subgenera':'subgenera', 
-                                  'authors':'authors', 
-                                  'division':'division', 
-                                  'synonym':'synonym',
-                                  'typeSpecimen':'typeSpecimen',
-                                  'taxanomicGroup':'taxanomicGroup',
-                                  'commonName':'commonName',
-                                  'state':'state'}
-        '''
-        ncbi_to_seqdb_taxonomy = {'kingdom':'kingdom', 
-                                  'phylum':'phylum', 
-                                  'class':'taxanomicClass',
-                                  'order':'taxanomicOrder',
-                                  'family':'family',
-                                  'genus':'genus', 
-                                  'species':'species', 
-                                  'variety':'variety', 
-                                  'strain':'strain', 
-                                  'subgenera':'subgenera', 
-                                  'authors':'authors', 
-                                  'division':'division', 
-                                  'synonym':'synonym'}
-        '''
-        # TODO: go through all the ranks and verify
-        # Questions about mapping:
-        # NCBI surekingdom map to?
-        # reason why all is named with one word, but taxanomicClass, taxanomicOrder, taxanomicGroup ? Possibly special words in java / the app, but is it possible to re-map those for API
+                                  'variety':'varietas',
+                                }
+        # NOTE that following SeqDB taxonomic ranks currently do not have equivalent in NCBI taxonomy:
+        # 'strain','authors','division','synonym','typeSpecimen','taxanomicGroup','commonName','state'
         
         vettedTaxonomy = dict()
         if taxonomy:
             for seqdb_rank in seqdb_to_ncbi_taxonomy:
-                taxonomy_value = ''
                 ncbi_rank = seqdb_to_ncbi_taxonomy[seqdb_rank]
                 if ncbi_rank in taxonomy:
-                    taxonomy_value = taxonomy[ncbi_rank]
-                
-                vettedTaxonomy[seqdb_rank] = taxonomy_value
+                    vettedTaxonomy[seqdb_rank] = taxonomy[ncbi_rank]
         
         return vettedTaxonomy
     
@@ -704,8 +679,8 @@ class seqdbWebService:
         Args:
             sequenceId: id of a sequence for which determination is writtemn
             isAccepted: boolean, whether this determination is an accepted determination
-            taxonomy:  list of tuples (taxonomy rank, taxonomy rank name)
-                        i.e. [['species', 'Phytophthora lateralis'], ['genus', 'Phytophthora'], ['order', 'Peronosporales']]
+            taxonomy:  list of tuples (taxonomy rank, taxonomy rank name). Usually from NCBI.
+                 i.e. [['species', 'Phytophthora lateralis'], ['genus', 'Phytophthora']]
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout

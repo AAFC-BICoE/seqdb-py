@@ -16,7 +16,7 @@ Other arguments:
 import argparse
 import logging.config
 import sys 
-import time
+#import time
 
 import requests.exceptions
 
@@ -191,8 +191,6 @@ def push_taxonomy_data(seqdbWS, info_file_name):
             raise
 
     
-    print seqdb_sequence_taxon
-    
     # For each (sequence_id, taxonomy_id) pair, find full lineage (from NCBI) and write to seqdb
     tax_lineage = TaxonomyLineage("./data/ncbi_taxonomy/")
     
@@ -200,11 +198,11 @@ def push_taxonomy_data(seqdbWS, info_file_name):
     for sequenceId in seqdb_sequence_taxon:
         taxonomyId = seqdb_sequence_taxon[sequenceId]
         notes = "Taxonomy derived from BLAST / LCA pipeline in Galaxy. "
+        lineage_names = {}
         
         if isinstance( taxonomyId, ( int, long ) ):
             #start_time = time.time()
             lineage_names = tax_lineage.findLineage(taxonomyId)   
-            print lineage_names  
             #print "Time to get lineage new way: %s" %(time.time()-start_time)
         else:
             notes = taxonomyId + " " + notes
@@ -214,7 +212,6 @@ def push_taxonomy_data(seqdbWS, info_file_name):
                                                                   taxonomy=lineage_names,
                                                                   isAccepted=False, 
                                                                   notes=notes)
-            print determinationId
             determinationIds.append(determinationId)
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
@@ -247,6 +244,8 @@ def push_taxonomy_data(seqdbWS, info_file_name):
     log_msg2 = "Created determination ids are written to a file: '%s'" % output_file_name
     report_log_info(log_msg1)
     report_log_info(log_msg2)
+    
+    logging.info("Determination IDs, written to SeqDB: %s" % determinationIds)
    
     return determinationIds
 
@@ -475,8 +474,8 @@ def main():
     ### Post-execution: messages and logging
     
     
-    print(tools_helper.log_msg_execEnded)
     print("Execution log is written to a file: '%s'" % user_log.getFileName())
+    print(tools_helper.log_msg_execEnded)
 
     log_info(tools_helper.log_msg_execEnded)
     user_log.close()

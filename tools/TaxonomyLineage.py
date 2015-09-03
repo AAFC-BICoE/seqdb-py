@@ -3,7 +3,7 @@ Created on Jul 10, 2015
 
 @author: korolo
 '''
-import time
+#import time
 
 class TaxonomyLineage(object):
     '''
@@ -21,7 +21,7 @@ class TaxonomyLineage(object):
                 Generated from names.dmp. Note that for multiple records with the same tax_id,
                 only scientific names are kept.
         '''
-        start_time = time.time()
+        #start_time = time.time()
         # Read in (tax_id, parent tax_id, tax_rank) from the nodes.dmp file
         nodes_file_path = taxonomy_location + "nodes.dmp"
         self.taxonomic_lineage_ids = {}
@@ -32,12 +32,10 @@ class TaxonomyLineage(object):
                 parent_tax_id = int(line_tokens[2])
                 taxon_rank = line_tokens[4]
                 self.taxonomic_lineage_ids[tax_id] = [parent_tax_id,taxon_rank]
-                #if tax_id == 129355:
-                #    print "Got 129355"
         
-        print "Time for loading nodes.dmp: %s" %(time.time()-start_time)
+        #print "Time for loading nodes.dmp: %s" %(time.time()-start_time)
         
-        start_time = time.time()
+        #start_time = time.time()
         # Read in tax_id - Taxonomy name pairs from the names.dmp list
         # Note that the tax_id column (first column) in names file does not contain unique ids.
         #      But we only keep a one-to-one relationship of tax_id - tax_name, therefore for 
@@ -60,7 +58,7 @@ class TaxonomyLineage(object):
                 
                 prev_tax_id = tax_id 
                       
-        print "Time for loading names.dmp: %s" %(time.time()-start_time)
+        #print "Time for loading names.dmp: %s" %(time.time()-start_time)
 
 
     def findLineage(self, tax_id):
