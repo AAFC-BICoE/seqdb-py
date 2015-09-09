@@ -81,7 +81,6 @@ class seqdbWebService:
         '''
         resp = self.retrieve(request_url, params=params)
         if resp:
-            # See if results were paginated, and if yes - retrieve the rest of the results
             jsn_resp =  json.loads(resp.text)
             resp = jsn_resp
             
@@ -90,6 +89,7 @@ class seqdbWebService:
                 raise UnexpectedContent(response=jsn_resp)
             
             '''
+            # See if results were paginated, and if yes - retrieve the rest of the results
             # If these values are present, there is a chance that we can get paginated result
             if 'count' in jsn_resp.keys() and 'limit' in jsn_resp.keys():
 

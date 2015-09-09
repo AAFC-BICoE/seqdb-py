@@ -967,6 +967,9 @@ def process_entrez_entry(
 
     #result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
     seq_ids, offset = seqdb_ws.getConsensusSequenceIdsWithOffset(genBankGI=genbank_id)
+    while offset:
+        more_seq_ids, offset = seqdb_ws.getConsensusSequenceIdsWithOffset(genBankGI=genbank_id, offset=offset)
+        seq_ids.extend(more_seq_ids)
 
 
     if seq_ids and delete:

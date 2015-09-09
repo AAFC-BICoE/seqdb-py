@@ -154,7 +154,11 @@ def get_ITS_seq_ids(seqdbWS):
 def get_consensus_seq_ids(seqdbWS):
     ''' Get all SeqDB consensus sequence ids (accessible with this API key) '''
     try:
-        consensus_seq_ids = seqdbWS.getConsensusSequenceIdsWithOffset()
+        consensus_seq_ids, offset = seqdbWS.getConsensusSequenceIdsWithOffset()
+        while offset:
+            more_consensus_seq_ids, offset = seqdbWS.getConsensusSequenceIdsWithOffset(offset=offset)
+            consensus_seq_ids.extend(more_consensus_seq_ids)
+            
     except requests.exceptions.ConnectionError as e:
         user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
         logging.error(tools_helper.log_msg_noDbConnection)
@@ -204,9 +208,18 @@ def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None, pub_r
     else:
         try:
             if pull_type == pull_types_dict["consensus"]:
-                seq_ids = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
+                seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs)
+                while resultOffset:
+                    more_seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
+                                                          sequenceName=sequence_name, 
+                                                          pubRefSeq=pub_ref_seqs,
+                                                          offset=resultOffset)
+                    seq_ids.extend(more_seq_ids)
+                    if len(seq_ids) > 200:
+                        pass
+                    
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
                 seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
