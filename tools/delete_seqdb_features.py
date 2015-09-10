@@ -14,34 +14,17 @@ from config import config_root
 import tools_helper
 
 
-usage_help_line = """Usage of the script: \ndelete_seqdb_feature -c <Path to yaml config with SeqDB API info> -f <feature ids file name>
-or
-delete_seqdb_feature -k <SeqDB API key> -u <SeqDB API URL> -f <feature ids file name>
-Other arguments:
-   -h   help (prints this message)
-"""
-
-
 output_file_name = "delete_failed_feature_ids.txt"
-log_file_name = "seqdb_delete.log"
-user_log = tools_helper.SimpleLog(log_file_name)
-log_fail_msg = "%s '%s'" %(tools_helper.log_msg_errorSeeLog, log_file_name)
-
+user_log = tools_helper.SimpleLog("seqdb_delete.log")
+delete_types_dict = {"feature":"features", "determination":"taxonomy"}
 
 
 def parse_input_args(argv):
-    ''' Parses command line arguments
-    Returns:
-        features_file_name: name of the file that contains ITS features to be pushed to SeqDB
-        config_file: path to a config file with has api information, 
-            or empty string if no such usage 
-        seqdb api_key to use for web services requests
-        seqdb api_url to use for web services requests
-    '''
     ''' Parses command line arguments '''
+    delete_types_set = frozenset(delete_types_dict.values())
     
-    
-    parser = argparse.ArgumentParser(description="Delete features from SeqDB")
+    parser = argparse.ArgumentParser(description="Delete items from SeqDB")
+    parser.add_argument('delete_type', help="Type of information to be deleted", type=str, choices=delete_types_set)
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
@@ -55,34 +38,38 @@ def parse_input_args(argv):
     return args
 
 
-def delete_features(api_key, feature_ids_file_name, base_url):
-    ''' Deletes features with the ids, specified in the file. 
-    File should contain feature ids either:
-        1) on a separate line; 
-        2) one line, separated by comma; 
-        3) separated by tab
+def delete_from_seqdb(seqdbWS, seqdb_ids_file_name, delete_type):
+    ''' Deletes items from seqDB. Need to specify SeqDB API connection details (seqdbWS),
+        type of items to delete (delete_type), and ids of items to be deleted (seqdb_ids_file_name)
+    Agrs:
+        seqdbWS: api.seqdbWebService object with accessor methods to SeqDB
+        delete_type: type of items to delete from SeqDB. Specified in the delete_types_dict
+        seqdb_ids_file_name: name of the file with the seqdb ids to be deleted
+            File should contain ids either:
+                1) on a separate line; 
+                2) one line, separated by comma; 
+                3) separated by tab
+    Return:
+        success_ids: list of ids that where successfully deleted from SeqDB
+        fail_ids: list of ids that failed to be deleted from SeqDB
     '''
-    #print "Sending request to: " + base_url
     
-    # Open an ITSx positions file
-    feat_file = ''
+    ids_file = ''
     try:
-        feat_file = open(feature_ids_file_name,"r")
+        ids_file = open(seqdb_ids_file_name,"r")
     except IOError as e:
         if e.errno == 2:
-            logging.error("Could not open feature ids file <%s>." % feature_ids_file_name)
+            logging.error("Could not open file <%s>." % seqdb_ids_file_name)
             logging.error(e.message)
-            print "Could not open feature ids file. See log file for details."
+            print "Could not open seqdb ids file. See log file for details."
             sys.exit(1)
         else:
             raise
     
-    seqdbWS = seqdbWebService(api_key, base_url)
-    
-    feature_ids = []
+    delete_ids = []
     line_number = 0
-    # parse the file delete features
-    for line in feat_file:
+    
+    for line in ids_file:
         line_number = line_number +1
         current_feature_ids = []
         
@@ -95,23 +82,26 @@ def delete_features(api_key, feature_ids_file_name, base_url):
         
         try:
             current_feature_ids = map(int, current_feature_ids)
-            feature_ids.extend(current_feature_ids)
+            delete_ids.extend(current_feature_ids)
         except:
-            logging.warning("Line number: %i. Could not parse line '%s' for feature ids. Ignoring." % (line_number,line.replace('\n', '')))
+            logging.warning("Line number: %i. Could not parse line '%s'. Ignoring." % (line_number,line.replace('\n', '')))
     
-    logging.info("Identified %i features to be deleted." % len(feature_ids))
+    logging.info("Identified %i items to be deleted." % len(delete_ids))
     
     success_ids = []
     fail_ids = []        
-    for feature_id in feature_ids:  
+    for delete_item_id in delete_ids:  
         try:
-            seqdbWS.deleteFeature(feature_id)
-            success_ids.append(feature_id)
+            if delete_types_dict["feature"] == delete_type:
+                seqdbWS.deleteFeature(delete_item_id)
+            elif delete_types_dict["determination"] == delete_type:
+                seqdbWS.deleteDetermination(delete_item_id)
+            success_ids.append(delete_item_id)
         except UnexpectedContent as e:
             print e
             sys.exit(1)
         except:
-            fail_ids.append(feature_id)    
+            fail_ids.append(delete_item_id)    
     
         
     output_file = open(output_file_name, 'w')
@@ -119,15 +109,11 @@ def delete_features(api_key, feature_ids_file_name, base_url):
         output_file.write(str(fid) + '\n')        
     output_file.close()        
     
-    logging.info("Number of features deleted from Sequence Dababase:   %i " % len(success_ids))  
-    logging.info("Number of features which failed to be deleted:   %i " % len(fail_ids))
-    logging.info("Feature ids, which failed to be deleted are written to a file: '%s'" % output_file_name)
-   
     return success_ids, fail_ids
     
     
 def main():
-    ''' Deletes features from SeqDB with the feature ids, specified in the input file. '''
+    ''' Deletes items from SeqDB. '''
     
     main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
 
@@ -152,20 +138,31 @@ def main():
     
     logging.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
     user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
-
-    log_msg = "File name with feature ids: %s" % parsed_args.features_file_name
+    
+    seqdbWS = seqdbWebService(api_key, api_url)
+             
+    log_msg = "Deleting items from SeqDB. File name with SeqDB ids to be deleted: %s" % parsed_args.features_file_name
     logging.info(log_msg)    
     user_log.info(log_msg)
+        
+        
+    success_ids,fail_ids = delete_from_seqdb(seqdbWS=seqdbWS, 
+                                             delete_type=parsed_args.delete_type,
+                                             seqdb_ids_file_name=parsed_args.features_file_name) 
     
+        
     
-    success_ids,fail_ids = delete_features(api_key, parsed_args.features_file_name, api_url)
+    ### Post-execution: messages and logging
+    logging.info("Number of items deleted from Sequence Dababase:   %i " % len(success_ids))  
+    print("Number of items deleted from Sequence Dababase:   %i " % len(success_ids))  
+    logging.info("Number of items which failed to be deleted:   %i " % len(fail_ids))
+    print("Number of items which failed to be deleted:   %i " % len(fail_ids))
+    logging.info("IDs, which failed to be deleted are written to a file: '%s'" % output_file_name)
+   
 
-    
+
+    print("Execution log is written to a file: '%s'" % user_log.getFileName())
     print(tools_helper.log_msg_execEnded)
-    print("Number of features deleted from Sequence Dababase:   %i " % len(success_ids))  
-    print("Number of features which failed to be deleted:   %i " % len(fail_ids))
-    print("Feature ids, which failed to be deleted are written to a file: '%s'" % output_file_name)
-    print("Execution log is written to a file: '%s'" % log_file_name)
     
     user_log.info(tools_helper.log_msg_execEnded)
     user_log.close()

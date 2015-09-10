@@ -452,9 +452,6 @@ def main():
     ### Script execution
     
     seqdbWS = seqdbWebService(api_key, api_url)
-    
-    # Open input file
-    
              
     if push_types_dict["its"] == parsed_args.push_type:
         #sys.exit("Not yet implemented")
