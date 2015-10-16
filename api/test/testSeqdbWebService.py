@@ -6,17 +6,15 @@ Created on Feb 12, 2015
 import unittest, requests, yaml
 from api import seqdbWebService
 
+
+test_url = '***REMOVED***:2002/seqdb/api/v1/'
+test_api_key = '***REMOVED***'
     
 class TestSeqdbWebService(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
-        try:
-            config = yaml.load(file('config.yaml', 'r'))
-        except IOError:
-            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
-        
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+        self.seqdbWS = seqdbWebService.seqdbWebService(api_key=test_api_key, base_url=test_url)
 
     def setUp(self):
         pass
@@ -34,12 +32,7 @@ class TestSeqdbWebService_NoDataSetup(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
-        try:
-            config = yaml.load(file('config.yaml', 'r'))
-        except IOError:
-            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
-        
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
+        self.seqdbWS = seqdbWebService.seqdbWebService(api_key=test_api_key, base_url=test_url)
 
     def setUp(self):
         self.featureTypeIds = []
@@ -128,13 +121,7 @@ class TestSeqdbWebService_FeatureType_Existing(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
-        try:
-            config = yaml.load(file('config.yaml', 'r'))
-        except IOError:
-            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
-        
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
-
+        self.seqdbWS = seqdbWebService.seqdbWebService(api_key=test_api_key, base_url=test_url)
     
     def setUp(self):
         featureTypeId = self.seqdbWS.createFeatureType("TestType", "Test")
@@ -167,13 +154,7 @@ class TestSeqdbWebService_Region_Existing(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
-        try:
-            config = yaml.load(file('config.yaml', 'r'))
-        except IOError:
-            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
-        
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
-
+        self.seqdbWS = seqdbWebService.seqdbWebService(api_key=test_api_key, base_url=test_url)
     
     def setUp(self):
         regionId = self.seqdbWS.createRegion("ITS", "Test", 168)
@@ -214,13 +195,7 @@ class TestSeqdbWebService_Sequence_Existing(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
-        try:
-            config = yaml.load(file('config.yaml', 'r'))
-        except IOError:
-            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
-        
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
-
+        self.seqdbWS = seqdbWebService.seqdbWebService(api_key=test_api_key, base_url=test_url)
     
     def setUp(self):
         seqId, errCod, msg = self.seqdbWS.createConsensusSequence(name="Test", sequence="ACGTCTGATCGATC")
@@ -269,13 +244,7 @@ class TestSeqdbWebService_Sequence_FeatureType_Feature_Existing(unittest.TestCas
 
     @classmethod
     def setUpClass(self):
-        try:
-            config = yaml.load(file('config.yaml', 'r'))
-        except IOError:
-            raise IOError("The tests require config.xml to run. Use config.xml.sample as a template.")
-        
-        self.seqdbWS = seqdbWebService.seqdbWebService(config['seqdb']['apikey'], config['seqdb']['url'])
-
+        self.seqdbWS = seqdbWebService.seqdbWebService(api_key=test_api_key, base_url=test_url)
 
     def setUp(self):
         seqId, code, msg = self.seqdbWS.createConsensusSequence("Test", "ACsdgafGTCTGATCGATC")

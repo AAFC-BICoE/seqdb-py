@@ -1,5 +1,0 @@
-seqdb:
-    url: "<seqdb base url + /api/v1"       # e.g. "http://10.117.203.142:10000/seqdb.web/api/v1/"
-    apikey: "<api key>"    # from user profile in SeqDB Web Interface
-  
-    
