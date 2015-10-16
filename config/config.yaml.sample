@@ -25,12 +25,12 @@ logging:
             class : logging.FileHandler
             formatter: simpleFormatter
             level: INFO
-            filename: tools.log
+            filename: seqdb_tools.log
         debug:
             class : logging.FileHandler
             formatter: simpleFormatter
             level: DEBUG
-            filename: tools_debug.log
+            filename: seqdb_tools_debug.log
 
     root:
         level: INFO # Not producing debug info by default

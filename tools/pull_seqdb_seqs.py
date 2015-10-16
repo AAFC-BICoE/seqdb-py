@@ -26,6 +26,7 @@ from config import config_root
 import tools_helper
 
 
+
 ### Values below are used in Galaxy wrappers, so make sure you know what 
 ### you're doing if you're changing any of them 
 # File name where the pulled sequences will be stored. 
@@ -77,47 +78,16 @@ def __init__(self, api_url, api_key):
 def get_ITS_seq_ids(seqdbWS):
     ''' Get all sequence ids, which are associated with the ITS regions '''
     
-    ### Get ITS regions
-    try:
-        its_region_ids = seqdbWS.getItsRegionIds()
-    except requests.exceptions.ConnectionError as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_noDbConnection)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except requests.exceptions.ReadTimeout as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_slowConnection)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except requests.exceptions.HTTPError as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_httpError)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except UnexpectedContent as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_apiResponseFormat)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except Exception as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-        
-    logging.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
-    user_log.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
-    logging.info("ITS region ids retrieved: %s " % its_region_ids)
-   
     ### Get sequence IDs for the ITS regions
-    its_seq_ids = []
-    for region_id in its_region_ids:
+    its_seq_ids = set()
+    its_region_names = ["18s", "its", "28s",  "ssu", "16s", "5.8s", "lsu", "23s", "25s", "internal transcribed spacer"]
+    for its_region_keyword in its_region_names:
         try:
-            curr_seq_ids, offset = seqdbWS.getSequenceIdsByRegionWithOffset(region_id)
-            its_seq_ids.extend(curr_seq_ids)
+            curr_seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(regionName=its_region_keyword)
+            its_seq_ids.update(curr_seq_ids)
             while offset:
-                curr_seq_ids, offset = seqdbWS.getSequenceIdsByRegionWithOffset(region_id, offset)
-                its_seq_ids.extend(curr_seq_ids)
+                curr_seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(regionName=its_region_keyword, offset=offset)
+                its_seq_ids.update(curr_seq_ids)
                 
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
@@ -148,7 +118,7 @@ def get_ITS_seq_ids(seqdbWS):
     logging.info("%s %i " % (msg_numITSseqs, len(its_seq_ids)))
     user_log.info("%s %i " % (msg_numITSseqs, len(its_seq_ids)))
 
-    return its_seq_ids
+    return list(its_seq_ids)
 
 
 def get_consensus_seq_ids(seqdbWS):
@@ -217,14 +187,22 @@ def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None, pub_r
                                                           pubRefSeq=pub_ref_seqs,
                                                           offset=resultOffset)
                     seq_ids.extend(more_seq_ids)
-                    if len(seq_ids) > 200:
-                        pass
                     
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
-                seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
+                seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
                                                  sequenceName=sequence_name,
                                                  pubRefSeq=pub_ref_seqs)
+                while resultOffset:
+                    more_seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
+                                                          sequenceName=sequence_name, 
+                                                          pubRefSeq=pub_ref_seqs,
+                                                          offset=resultOffset)
+                    seq_ids.extend(more_seq_ids)
+                    
+                    if (not len(seq_ids) % 1000):
+                        print len(seq_ids)
+                    
                 log_msg = "Number of sequences retrieved:"
             elif pull_type == pull_types_dict["raw"]:
                 sys.exit("Raw sequence retrieval is not implemented yet.")
