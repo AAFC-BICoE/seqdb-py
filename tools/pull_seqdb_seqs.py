@@ -77,46 +77,15 @@ def __init__(self, api_url, api_key):
 def get_ITS_seq_ids(seqdbWS):
     ''' Get all sequence ids, which are associated with the ITS regions '''
     
-    ### Get ITS regions
-    try:
-        its_region_ids = seqdbWS.getItsRegionIds()
-    except requests.exceptions.ConnectionError as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_noDbConnection)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except requests.exceptions.ReadTimeout as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_slowConnection)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except requests.exceptions.HTTPError as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_httpError)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except UnexpectedContent as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_apiResponseFormat)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except Exception as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-        
-    logging.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
-    user_log.info("Number of ITS regions retrieved: %i " % len(its_region_ids))
-    logging.info("ITS region ids retrieved: %s " % its_region_ids)
-   
     ### Get sequence IDs for the ITS regions
     its_seq_ids = []
-    for region_id in its_region_ids:
+    its_region_names = ["ssu", "16s", "18s", "its", "5.8s", "lsu", "23s", "25s", "28s", "internal transcribed spacer"]
+    for its_region_keyword in its_region_names:
         try:
-            curr_seq_ids, offset = seqdbWS.getSequenceIdsByRegionWithOffset(region_id)
+            curr_seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(regionName=its_region_keyword)
             its_seq_ids.extend(curr_seq_ids)
             while offset:
-                curr_seq_ids, offset = seqdbWS.getSequenceIdsByRegionWithOffset(region_id, offset)
+                curr_seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(regionName=its_region_keyword, offset=offset)
                 its_seq_ids.extend(curr_seq_ids)
                 
         except requests.exceptions.ConnectionError as e:

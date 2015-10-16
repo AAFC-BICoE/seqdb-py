@@ -255,7 +255,7 @@ class seqdbWebService:
     # Sequence
     ###########################################################################
 
-    def getSequenceIdsWithOffset(self, specimenNum=None, sequenceName=None, pubRefSeq=None, genBankGI=None, offset=0):
+    def getSequenceIdsWithOffset(self, specimenNum=None, sequenceName=None, pubRefSeq=None, genBankGI=None, regionName=None, offset=0):
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
@@ -286,6 +286,9 @@ class seqdbWebService:
         
         if genBankGI:
             params = params + "filterName=sequence.genBankGI&filterValue=%s&filterOperator=and&filterWildcard=false&" %genBankGI
+        
+        if regionName:
+            params = params + "filterName=region.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %regionName
         
         jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence", params=params, offset=offset)
         
