@@ -1,9 +1,11 @@
 # root config.yaml
 seqdb:
-    url: "http://<HOSTNAME>[:PORT]/<path>"       # e.g. "***REMOVED***/api/v1/"
+    url: "***REMOVED***:2002/seqdb/"       # e.g. "***REMOVED***/api/v1/"
+    #url: "http://<HOSTNAME>[:PORT]/<path>"       # e.g. "***REMOVED***/api/v1/"
 
 galaxy:
-	ncbi_taxonomy_dir: 			# e.g. ./data/ncbi_taxonomy/
+    ncbi_taxonomy_dir: ./scripts/taxonomy/		# e.g. "***REMOVED***/api/v1/"
+    #ncbi_taxonomy_dir: ./data/ncbi_taxonomy/	# e.g. "***REMOVED***/api/v1/"
 
 http_connect:
     debug_level: 0 # 0 - No output, 1 - Output to stderr
