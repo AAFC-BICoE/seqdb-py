@@ -2,6 +2,9 @@
 seqdb:
     url: "http://<HOSTNAME>[:PORT]/<path>"       # e.g. "***REMOVED***/api/v1/"
 
+galaxy:
+	ncbi_taxonomy_dir: 			# e.g. ./data/ncbi_taxonomy/
+
 http_connect:
     debug_level: 0 # 0 - No output, 1 - Output to stderr
 

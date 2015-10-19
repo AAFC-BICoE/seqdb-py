@@ -119,7 +119,7 @@ def get_lieage_taxids(tax_parent_ids, taxon_id, lineage=None):
     '''
     
 
-def push_taxonomy_data(seqdbWS, info_file_name):
+def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
     ''' Extracts taxon id from the findLCA output file, finds lineage for the taxon id
         and pushes taxonomic identification to SeqDB
     Args:
@@ -192,7 +192,7 @@ def push_taxonomy_data(seqdbWS, info_file_name):
 
     
     # For each (sequence_id, taxonomy_id) pair, find full lineage (from NCBI) and write to seqdb
-    tax_lineage = TaxonomyLineage("./data/ncbi_taxonomy/")
+    tax_lineage = TaxonomyLineage(taxonomy_dir)
     
     determinationIds = list()
     for sequenceId in seqdb_sequence_taxon:
@@ -464,7 +464,7 @@ def main():
         log_msg = "Writing taxonomy lineage information to SeqDB."
         log_info(log_msg) 
         
-        push_taxonomy_data(seqdbWS, parsed_args.lca_results_file)
+        push_taxonomy_data(seqdbWS, parsed_args.lca_results_file, main_conf['galaxy']['ncbi_taxonomy_dir'])
 
 
     
