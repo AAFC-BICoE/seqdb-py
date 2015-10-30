@@ -55,7 +55,8 @@ def parse_input_args(argv):
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
     parser.add_argument('--specNum', help="Specimen number (identifier)", dest="specimen_num", required=False)    
-    parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)    
+    parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)   
+    parser.add_argument('--geneRegion', help="Sequence name (keyword)", dest="gene_region_name", required=False)    
     parser.add_argument('--pubRefSeqs', help="Public reference sequences", dest="pub_ref_seqs", action='store_true', required=False)    
     #parser.add_argument('-t', help="Type of sequences to load", dest="load_type", type=str, choices=set(("its","consensus")), required=True)
     
@@ -162,7 +163,7 @@ def get_consensus_seq_ids(seqdbWS):
     return consensus_seq_ids
     
     
-def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None, pub_ref_seqs=None):
+def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None, pub_ref_seqs=None, region_name=None):
     ''' Gets sequence ids based on specified parameters 
     Agrs:
         pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
@@ -193,11 +194,13 @@ def get_seq_ids(seqdbWS, pull_type, specimen_num=None, sequence_name=None, pub_r
             elif pull_type == pull_types_dict["all"]:
                 seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
                                                  sequenceName=sequence_name,
-                                                 pubRefSeq=pub_ref_seqs)
+                                                 pubRefSeq=pub_ref_seqs,
+                                                 regionName=region_name)
                 while resultOffset:
                     more_seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
+                                                          regionName=region_name,
                                                           offset=resultOffset)
                     seq_ids.extend(more_seq_ids)
                     
@@ -346,6 +349,7 @@ def main():
                               pull_type=parsed_args.seq_type, 
                               specimen_num=parsed_args.specimen_num,
                               sequence_name=parsed_args.sequence_name,
+                              region_name=parsed_args.gene_region_name,
                               pub_ref_seqs=parsed_args.pub_ref_seqs)
     
     '''
