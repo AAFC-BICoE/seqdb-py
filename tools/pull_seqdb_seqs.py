@@ -82,6 +82,7 @@ def get_ITS_seq_ids(seqdbWS):
     its_seq_ids = set()
     its_region_names = ["18s", "its", "28s",  "ssu", "16s", "5.8s", "lsu", "23s", "25s", "internal transcribed spacer"]
     for its_region_keyword in its_region_names:
+        #TODO: parallelize; use locking when appending to its_seq_ids
         try:
             curr_seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(regionName=its_region_keyword)
             its_seq_ids.update(curr_seq_ids)
@@ -245,6 +246,12 @@ def write_fasta_file(seqdbWS, its_seq_ids, fasta_file_name):
     
     success_ids = []
     for seq_id in its_seq_ids:
+        #TODO: threads?
+        '''
+        import threading
+        
+        t = threading.Thread(target=<this try code>, args(seq_id,)
+        '''
         try:
             # Request sequence in fasto format from SeqDB:
             fastaSequence = seqdbWS.getFastaSeq(seq_id)
