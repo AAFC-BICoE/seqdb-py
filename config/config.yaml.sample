@@ -1,6 +1,6 @@
 # root config.yaml
 seqdb:
-    url: "***REMOVED***:2002/seqdb/"       # e.g. "***REMOVED***/api/v1/"
+    url: "***REMOVED***:2002/seqdb/api/v1/"       # e.g. "***REMOVED***/api/v1/"
 
 galaxy:
     ncbi_taxonomy_dir: "<localtion of ncbi taxonomy db>"  # e.g. /galaxy/scripts/ncbi_taxonomy
