@@ -255,7 +255,14 @@ class seqdbWebService:
     # Sequence
     ###########################################################################
 
-    def getSequenceIdsWithOffset(self, specimenNum=None, sequenceName=None, pubRefSeq=None, genBankGI=None, regionName=None, offset=0):
+    def getSequenceIdsWithOffset(self, 
+                                 specimenNum=None,
+                                 sequenceName=None,
+                                 pubRefSeq=None,
+                                 genBankGI=None,
+                                 regionName=None,
+                                 collectionCode=None,
+                                 offset=0):
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
@@ -290,6 +297,9 @@ class seqdbWebService:
         if regionName:
             params = params + "filterName=region.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %regionName
         
+        if collectionCode:
+            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %collectionCode
+      
         jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence", params=params, offset=offset)
         
         sequence_ids = ""
@@ -537,7 +547,15 @@ class seqdbWebService:
         return jsn_resp
 
 
-    def getConsensusSequenceIdsWithOffset(self, specimenNum=None, sequenceName=None, pubRefSeq=None, genBankGI=None, offset=0):
+    def getConsensusSequenceIdsWithOffset(self, 
+                                          specimenNum=None,
+                                          sequenceName=None,
+                                          pubRefSeq=None,
+                                          genBankGI=None,
+                                          regionName=None,
+                                          collectionCode=None,
+                                          offset=0):
+        
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
@@ -567,6 +585,13 @@ class seqdbWebService:
             
         if genBankGI:
             params = params + "filterName=sequence.genBankGI&filterValue=%s&filterOperator=and&filterWildcard=false&" %genBankGI
+        
+        if regionName:
+            params = params + "filterName=region.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %regionName
+       
+        if collectionCode:
+            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %collectionCode
+       
         
         #jsn_resp = self.getJsonConsensusSequenceIds(params)
         #jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
