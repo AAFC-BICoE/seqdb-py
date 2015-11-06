@@ -3,6 +3,9 @@ Created on Feb 12, 2015
 
 @author: korolo
 
+Given a SeqDB URL and API key, uses SeqDB webservices to load sequences, filtered by parameters 
+below, into a fasta file.
+
 Usage (for most current usage run this script with no options: >python pull_seqdb_seqs.py):
 pull_seqdb_seqs -c <Path to yaml config with SeqDB API info> 
 or
@@ -31,6 +34,8 @@ import tools_helper
 ### you're doing if you're changing any of them 
 # File name where the pulled sequences will be stored. 
 output_file_name = "seqdb_sequences.fasta"
+# File name where taxonomy for the sequences will be stored. Optional output. 
+output_taxonomy_file_name = "seqdb_sequences_taxonomy.fasta"
 # This log will provide users of Galaxy with extra information on the tool 
 # execution sysem statements should not go here, since full log is configured
 # in yaml
@@ -54,6 +59,7 @@ def parse_input_args(argv):
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
+    parser.add_argument('-t', help="Output taxonomy file as well as fasta", dest="output_taxonomy_file", action='store_true', required=False)
     parser.add_argument('--specNum', help="Specimen number (identifier)", dest="specimen_num", required=False)    
     parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)   
     parser.add_argument('--geneRegion', help="Gene region name (keyword)", dest="gene_region_name", required=False)    
@@ -164,7 +170,7 @@ def get_consensus_seq_ids(seqdbWS):
     return consensus_seq_ids
     
     
-def get_seq_ids(seqdbWS, pull_type, 
+def get_seq_ids(seqdbWS, pull_type,
                 specimen_num=None, 
                 sequence_name=None, 
                 pub_ref_seqs=None, 
@@ -308,6 +314,58 @@ def write_fasta_file(seqdbWS, its_seq_ids, fasta_file_name):
     return success_ids
     
 
+def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
+    # Get fasta sequences based on ids and write to a file 
+    output_file = open(output_file_name, 'w')
+    
+    success_ids = []
+    for seq_id in seq_ids:
+        
+        try:
+            #TODO get a taxonomy line from API
+            taxonomy_line = "lala"
+            output_file.write(taxonomy_line)
+            success_ids.append(seq_id)
+        except requests.exceptions.ConnectionError as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_noDbConnection)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except requests.exceptions.ReadTimeout as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_slowConnection)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except requests.exceptions.HTTPError as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_httpError)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except UnexpectedContent as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
+            logging.error(tools_helper.log_msg_apiResponseFormat)
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+        except Exception as e:
+            user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
+            logging.error(e.message)
+            sys.exit(tools_helper.log_msg_sysExit)
+     
+    output_file.close()   
+
+    msg_fileName = "Sequences written to a file:"
+    logging.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
+    user_log.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
+
+    msg_seqNum = "Number of sequences written:"
+    logging.info("%s %s" % (msg_seqNum, len(success_ids)) )
+    user_log.info("%s %s" % (msg_seqNum, len(success_ids)) )
+    
+
+    return success_ids
+    
+
+
     
 def main():
     ''' Retrieves ITS sequenes from SeqDB '''
@@ -382,6 +440,8 @@ def main():
         seq_ids = get_seq_ids(seqdbWS, parsed_args.specimen_num)
     '''    
     success_seq_ids = write_fasta_file(seqdbWS, seq_ids, output_file_name)
+    if (parsed_args.output_taxonomy_file):
+        write_taxonomy_file(seqdbWS, seq_ids, output_taxonomy_file_name)
 
     
     ### Post-execution: messages and logging
