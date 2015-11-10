@@ -43,6 +43,9 @@ user_log = tools_helper.SimpleLog("seqdb_pull.log")
 # Values for the types of sequences this script downloads. I.e. "its" loads 
 # ITS sequences. Note that raw sequences are not implemented in SeqDB yet. "raw":"raw",
 pull_types_dict = {"its":"its", "consensus":"consensus", "all":"all"}
+# Taxonomy ranks that can be specified as a filter parameter with corresponding value
+# These are used as a drop-down value in the wrapper
+taxonomy_ranks = {"species", "genus", "family", "order", "class", "phylum"}
 
 ###
 
@@ -65,6 +68,8 @@ def parse_input_args(argv):
     parser.add_argument('--geneRegion', help="Gene region name (keyword)", dest="gene_region_name", required=False)    
     parser.add_argument('--collectionCode', help="Collection code (keyword)", dest="collection_code", required=False)    
     parser.add_argument('--pubRefSeqs', help="Public reference sequences", dest="pub_ref_seqs", action='store_true', required=False)    
+    parser.add_argument('--taxRank', help="Taxonomic rank to filter sequences on (need to specify the value as well). Ex. --taxRank phylum --taxValue chordata ", dest="tax_rank", choices=taxonomy_ranks, required=False)
+    parser.add_argument('--taxValue', help="Value for the taxonomic rank to be filtered on (need to specify the rank as well)", dest="tax_value", required=False)
     #parser.add_argument('-t', help="Type of sequences to load", dest="load_type", type=str, choices=set(("its","consensus")), required=True)
     
     args = parser.parse_args(argv)
@@ -74,6 +79,10 @@ def parse_input_args(argv):
     
     if args.seq_type == pull_types_dict["its"] and (args.specimen_num or args.sequence_name or args.pub_ref_seqs):
         parser.error('ITS sequences can not be restricted by filters at the moment. Please do not use --specNum, --seqName or any other additional options.')
+    
+    if bool(args.tax_rank) != bool(args.tax_value):
+        parser.error('Either both --taxRank and --taxValue have to be specified, or none.')
+    
         
     return args
     
@@ -175,7 +184,8 @@ def get_seq_ids(seqdbWS, pull_type,
                 sequence_name=None, 
                 pub_ref_seqs=None, 
                 region_name=None, 
-                collection_code=None):
+                collection_code=None,
+                taxonomy_rank=None, taxonomy_value=None):
     ''' Gets sequence ids based on specified parameters 
     Agrs:
         pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
@@ -196,13 +206,17 @@ def get_seq_ids(seqdbWS, pull_type,
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
-                                                          collectionCode=collection_code)
+                                                          collectionCode=collection_code,
+                                                          taxonomy_rank=taxonomy_rank, 
+                                                          taxonomy_value=taxonomy_value)
                 while resultOffset:
                     more_seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
                                                           collectionCode=collection_code,
+                                                          taxonomy_rank=taxonomy_rank, 
+                                                          taxonomy_value=taxonomy_value,
                                                           offset=resultOffset)
                     seq_ids.extend(more_seq_ids)
                     
@@ -398,6 +412,7 @@ def main():
     logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
     user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
     
+    
     ### Script execution
     
     seqdbWS = seqdbWebService(api_key, api_url)
@@ -418,7 +433,10 @@ def main():
                               sequence_name=parsed_args.sequence_name,
                               region_name=parsed_args.gene_region_name,
                               collection_code=parsed_args.collection_code,
-                              pub_ref_seqs=parsed_args.pub_ref_seqs)
+                              pub_ref_seqs=parsed_args.pub_ref_seqs,
+                              taxonomy_rank=parsed_args.tax_rank,
+                              taxonomy_value=parsed_args.tax_value)
+
     
     '''
     elif pull_types_dict["consensus"] == parsed_args.seq_type:

@@ -554,6 +554,7 @@ class seqdbWebService:
                                           genBankGI=None,
                                           regionName=None,
                                           collectionCode=None,
+                                          taxonomy_rank=None, taxonomy_value=None,
                                           offset=0):
         
         ''' Returns sequence ids, limited by the specified filter parameters
@@ -591,7 +592,11 @@ class seqdbWebService:
        
         if collectionCode:
             params = params + "filterName=biologicalCollection.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %collectionCode
-       
+            
+        if taxonomy_rank:
+            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomy_rank)
+            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomy_value)
+            
         
         #jsn_resp = self.getJsonConsensusSequenceIds(params)
         #jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
@@ -672,35 +677,40 @@ class seqdbWebService:
             return ''
 
     
+    # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
+    # Keys are seqdb taxonomy ranks, and values are NCBI
+    _seqdb_to_ncbi_taxonomy = {'kingdom':'kingdom', 
+                              'phylum':'phylum', 
+                              'taxanomicClass':'class',
+                              'taxanomicOrder':'order',
+                              'family':'family',
+                              'genus':'genus', 
+                              'subgenera':'subgenus', 
+                              'species':'species', 
+                              'variety':'varietas',
+                            }
+    # NOTE that following SeqDB taxonomic ranks currently do not have equivalent in NCBI taxonomy:
+    # 'strain','authors','division','synonym','typeSpecimen','taxanomicGroup','commonName','state'
+    
+    
     def vetTaxonomy(self, taxonomy):
         ''' Checks taxonomy dictionary and returns it in the format that can be accepted by 
             seqDB (i.e. appropriate ranks)
         '''
-        
-        # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
-        # Keys are seqdb taxonomy ranks, and values are NCBI
-        seqdb_to_ncbi_taxonomy = {'kingdom':'kingdom', 
-                                  'phylum':'phylum', 
-                                  'taxanomicClass':'class',
-                                  'taxanomicOrder':'order',
-                                  'family':'family',
-                                  'genus':'genus', 
-                                  'subgenera':'subgenus', 
-                                  'species':'species', 
-                                  'variety':'varietas',
-                                }
-        # NOTE that following SeqDB taxonomic ranks currently do not have equivalent in NCBI taxonomy:
-        # 'strain','authors','division','synonym','typeSpecimen','taxanomicGroup','commonName','state'
-        
         vettedTaxonomy = dict()
         if taxonomy:
-            for seqdb_rank in seqdb_to_ncbi_taxonomy:
-                ncbi_rank = seqdb_to_ncbi_taxonomy[seqdb_rank]
+            for seqdb_rank in self._seqdb_to_ncbi_taxonomy:
+                ncbi_rank = self._seqdb_to_ncbi_taxonomy[seqdb_rank]
                 if ncbi_rank in taxonomy:
                     vettedTaxonomy[seqdb_rank] = taxonomy[ncbi_rank]
         
         return vettedTaxonomy
     
+    def convertNcbiToSeqdbTaxRank(self, tax_rank):
+        for seqdb_tax_rank in self._seqdb_to_ncbi_taxonomy:
+            if self._seqdb_to_ncbi_taxonomy[seqdb_tax_rank] == tax_rank:
+                return seqdb_tax_rank
+        return "No matches found."
     
     def insertSequenceDetermination(self, sequenceId, taxonomy, isAccepted=False, notes=None):
         ''' Creates a determination for a sequence
