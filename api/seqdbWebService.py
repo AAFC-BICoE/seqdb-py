@@ -256,7 +256,7 @@ class seqdbWebService:
     ###########################################################################
 
     def getSequenceIdsWithOffset(self, 
-                                 specimenNum=None,
+                                 specimenNums=None,
                                  sequenceName=None,
                                  pubRefSeq=None,
                                  genBankGI=None,
@@ -265,7 +265,7 @@ class seqdbWebService:
                                  offset=0):
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
-            specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
+            specimenNums: list of specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
             pubRefSeq: whether the sequence is a public reference sequence
             offset: nothing if it is a first query, then number of records from which to load the next set of ids
@@ -281,9 +281,10 @@ class seqdbWebService:
         '''
         
         params = ""
-             
-        if specimenNum:
-            params = "%sfilterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %(params,specimenNum)
+        
+        if specimenNums:
+            for specimenNum in specimenNums:
+                params = "%sfilterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %(params,specimenNum)
     
         if sequenceName:
             params = "%sfilterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %(params,sequenceName)
@@ -548,7 +549,7 @@ class seqdbWebService:
 
 
     def getConsensusSequenceIdsWithOffset(self, 
-                                          specimenNum=None,
+                                          specimenNums=None,
                                           sequenceName=None,
                                           pubRefSeq=None,
                                           genBankGI=None,
@@ -559,7 +560,7 @@ class seqdbWebService:
         
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
-            specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
+            specimenNums: list of specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
@@ -575,8 +576,9 @@ class seqdbWebService:
             UnexpectedContent
         '''
         params = ''
-        if specimenNum:
-            params = params + "filterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %specimenNum
+        if specimenNums:
+            for specimenNum in specimenNums:
+                params = params + "filterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %specimenNum
             
         if sequenceName:
             params = params + "filterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %sequenceName

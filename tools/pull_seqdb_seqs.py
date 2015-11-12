@@ -63,7 +63,7 @@ def parse_input_args(argv):
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
     parser.add_argument('-t', help="Output taxonomy file as well as fasta", dest="output_taxonomy_file", action='store_true', required=False)
-    parser.add_argument('--specNum', help="Specimen number (identifier)", dest="specimen_num", required=False)    
+    parser.add_argument('--specNums', help="Specimen number(s). If multiple, separate by comma.", dest="specimen_nums", required=False)    
     parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)   
     parser.add_argument('--geneRegion', help="Gene region name (keyword)", dest="gene_region_name", required=False)    
     parser.add_argument('--collectionCode', help="Collection code (keyword)", dest="collection_code", required=False)    
@@ -77,7 +77,7 @@ def parse_input_args(argv):
     if not (args.config_file or (args.api_url and args.api_key)):
         parser.error('Either -c <configuration file>, or -u <api_url> -k <api_key> have to be specified')
     
-    if args.seq_type == pull_types_dict["its"] and (args.specimen_num or args.sequence_name or args.pub_ref_seqs):
+    if args.seq_type == pull_types_dict["its"] and (args.specimen_nums or args.sequence_name or args.pub_ref_seqs):
         parser.error('ITS sequences can not be restricted by filters at the moment. Please do not use --specNum, --seqName or any other additional options.')
     
     if bool(args.tax_rank) != bool(args.tax_value):
@@ -180,7 +180,7 @@ def get_consensus_seq_ids(seqdbWS):
     
     
 def get_seq_ids(seqdbWS, pull_type,
-                specimen_num=None, 
+                specimen_nums=None, 
                 sequence_name=None, 
                 pub_ref_seqs=None, 
                 region_name=None, 
@@ -189,7 +189,7 @@ def get_seq_ids(seqdbWS, pull_type,
     ''' Gets sequence ids based on specified parameters 
     Agrs:
         pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
-        specimen_num: if specified, specimen number for which the sequence ids will be retrieved
+        specimen_nums: if specified, list of specimen numbers for which the sequence ids will be retrieved
     '''
     
     if pull_type not in pull_types_dict.values():
@@ -202,7 +202,7 @@ def get_seq_ids(seqdbWS, pull_type,
     else:
         try:
             if pull_type == pull_types_dict["consensus"]:
-                seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
+                seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_nums, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
@@ -210,7 +210,7 @@ def get_seq_ids(seqdbWS, pull_type,
                                                           taxonomy_rank=taxonomy_rank, 
                                                           taxonomy_value=taxonomy_value)
                 while resultOffset:
-                    more_seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
+                    more_seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_nums, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
@@ -222,13 +222,13 @@ def get_seq_ids(seqdbWS, pull_type,
                     
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
-                seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
+                seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_nums, 
                                                  sequenceName=sequence_name,
                                                  pubRefSeq=pub_ref_seqs,
                                                  regionName=region_name,
                                                  collectionCode=collection_code)
                 while resultOffset:
-                    more_seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
+                    more_seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_nums, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
@@ -426,10 +426,12 @@ def main():
         log_msg = "Loading %s sequences." %parsed_args.seq_type
         logging.info(log_msg)
         user_log.info(log_msg)
+        
+        specimen_nums_list = parsed_args.specimen_nums.replace(" ","").split(",") 
 
         seq_ids = get_seq_ids(seqdbWS=seqdbWS, 
                               pull_type=parsed_args.seq_type, 
-                              specimen_num=parsed_args.specimen_num,
+                              specimen_nums=specimen_nums_list,
                               sequence_name=parsed_args.sequence_name,
                               region_name=parsed_args.gene_region_name,
                               collection_code=parsed_args.collection_code,
