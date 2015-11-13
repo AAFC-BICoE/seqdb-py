@@ -25,11 +25,6 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_ITS_seq_ids(self.seqdbWS)
         self.assertEqual(18070, len(seq_ids), "Expected 18070 ITS sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
         
-    def test_get_consensus_seq_ids(self):    
-        # Note that this function is not used for some reason. Evaluate if this is the way to go.
-        seq_ids = pull_seqdb_seqs.get_consensus_seq_ids(self.seqdbWS)        
-        self.assertEqual(566, len(seq_ids), "Expected 566 consensus sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
-
     """        
     def test_get_seq_ids_all(self):    
         # Note: this test takes REALLY long time, like 40 hours long time

@@ -66,6 +66,7 @@ def parse_input_args(argv):
     parser.add_argument('--specNum', help="Specimen number (identifier)", dest="specimen_num", required=False)    
     parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)   
     parser.add_argument('--geneRegion', help="Gene region name (keyword)", dest="gene_region_name", required=False)    
+    parser.add_argument('--project', help="Project Name (keyword)", dest="project_name", required=False)    
     parser.add_argument('--collectionCode', help="Collection code (keyword)", dest="collection_code", required=False)    
     parser.add_argument('--pubRefSeqs', help="Public reference sequences", dest="pub_ref_seqs", action='store_true', required=False)    
     parser.add_argument('--taxRank', help="Taxonomic rank to filter sequences on (need to specify the value as well). Ex. --taxRank phylum --taxValue chordata ", dest="tax_rank", choices=taxonomy_ranks, required=False)
@@ -138,52 +139,13 @@ def get_ITS_seq_ids(seqdbWS):
 
     return list(its_seq_ids)
 
-
-def get_consensus_seq_ids(seqdbWS):
-    ''' Get all SeqDB consensus sequence ids (accessible with this API key) '''
-    try:
-        consensus_seq_ids, offset = seqdbWS.getConsensusSequenceIdsWithOffset()
-        while offset:
-            more_consensus_seq_ids, offset = seqdbWS.getConsensusSequenceIdsWithOffset(offset=offset)
-            consensus_seq_ids.extend(more_consensus_seq_ids)
-            
-    except requests.exceptions.ConnectionError as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_noDbConnection)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except requests.exceptions.ReadTimeout as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_slowConnection)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except requests.exceptions.HTTPError as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_httpError)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except UnexpectedContent as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
-        logging.error(tools_helper.log_msg_apiResponseFormat)
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-    except Exception as e:
-        user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
-        logging.error(e.message)
-        sys.exit(tools_helper.log_msg_sysExit)
-        
-    msg_numConsensusSeqs = "Number of consensus sequences retrieved:"
-    logging.info("%s %i " % (msg_numConsensusSeqs, len(consensus_seq_ids)))
-    user_log.info("%s %i " % (msg_numConsensusSeqs, len(consensus_seq_ids)))
-
-    return consensus_seq_ids
-    
     
 def get_seq_ids(seqdbWS, pull_type,
                 specimen_num=None, 
                 sequence_name=None, 
                 pub_ref_seqs=None, 
                 region_name=None, 
+                project_name=None,
                 collection_code=None,
                 taxonomy_rank=None, taxonomy_value=None):
     ''' Gets sequence ids based on specified parameters 
@@ -202,40 +164,25 @@ def get_seq_ids(seqdbWS, pull_type,
     else:
         try:
             if pull_type == pull_types_dict["consensus"]:
-                seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
+                
+                seq_ids = seqdbWS.getAllConsensusSequenceIds(specimenNum=specimen_num, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
+                                                          projectName=project_name,
                                                           collectionCode=collection_code,
-                                                          taxonomy_rank=taxonomy_rank, 
-                                                          taxonomy_value=taxonomy_value)
-                while resultOffset:
-                    more_seq_ids, resultOffset = seqdbWS.getConsensusSequenceIdsWithOffset(specimenNum=specimen_num, 
-                                                          sequenceName=sequence_name, 
-                                                          pubRefSeq=pub_ref_seqs,
-                                                          regionName=region_name,
-                                                          collectionCode=collection_code,
-                                                          taxonomy_rank=taxonomy_rank, 
-                                                          taxonomy_value=taxonomy_value,
-                                                          offset=resultOffset)
-                    seq_ids.extend(more_seq_ids)
+                                                          taxonomyRank=taxonomy_rank, 
+                                                          taxonomyValue=taxonomy_value)
                     
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
-                seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
-                                                 sequenceName=sequence_name,
-                                                 pubRefSeq=pub_ref_seqs,
-                                                 regionName=region_name,
-                                                 collectionCode=collection_code)
-                while resultOffset:
-                    more_seq_ids, resultOffset = seqdbWS.getSequenceIdsWithOffset(specimenNum=specimen_num, 
-                                                          sequenceName=sequence_name, 
-                                                          pubRefSeq=pub_ref_seqs,
-                                                          regionName=region_name,
-                                                          collectionCode=collection_code,
-                                                          offset=resultOffset)
-                    seq_ids.extend(more_seq_ids)
-                    
+                
+                seq_ids = seqdbWS.getAllSequenceIds(specimenNum=specimen_num, 
+                                                sequenceName=sequence_name,
+                                                pubRefSeq=pub_ref_seqs,
+                                                regionName=region_name,
+                                                collectionCode=collection_code)
+                
                 log_msg = "Number of sequences retrieved:"
             elif pull_type == pull_types_dict["raw"]:
                 sys.exit("Raw sequence retrieval is not implemented yet.")
@@ -432,31 +379,12 @@ def main():
                               specimen_num=parsed_args.specimen_num,
                               sequence_name=parsed_args.sequence_name,
                               region_name=parsed_args.gene_region_name,
+                              project_name=parsed_args.project_name,
                               collection_code=parsed_args.collection_code,
                               pub_ref_seqs=parsed_args.pub_ref_seqs,
                               taxonomy_rank=parsed_args.tax_rank,
                               taxonomy_value=parsed_args.tax_value)
 
-    
-    '''
-    elif pull_types_dict["consensus"] == parsed_args.seq_type:
-        logging.info(tools_helper.log_msg_ConsensusLoad)
-        user_log.info(tools_helper.log_msg_ConsensusLoad)
-        
-        #seq_ids = get_consensus_seq_ids(seqdbWS)
-        
-    elif pull_types_dict["raw"] == parsed_args.seq_type:
-        logging.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_num))
-        user_log.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_num))
-        
-        seq_ids = get_raw_seq_ids(seqdbWS, parsed_args.specimen_num)
-
-    elif pull_types_dict["all"] == parsed_args.seq_type:
-        logging.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_num))
-        user_log.info("%s %s" % (tools_helper.log_msg_RawLoad, parsed_args.specimen_num))
-        
-        seq_ids = get_seq_ids(seqdbWS, parsed_args.specimen_num)
-    '''    
     success_seq_ids = write_fasta_file(seqdbWS, seq_ids, output_file_name)
     if (parsed_args.output_taxonomy_file):
         write_taxonomy_file(seqdbWS, seq_ids, output_taxonomy_file_name)

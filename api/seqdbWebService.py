@@ -255,7 +255,35 @@ class seqdbWebService:
     # Sequence
     ###########################################################################
 
-    def getSequenceIdsWithOffset(self, 
+    def getSequenceIdsWithOffset(self, params=None, offset=0):
+        ''' Returns sequence ids, limited by the specified filter parameters
+        Agrs:
+            specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
+            sequenceName: keyword in the sequence name (i.e. not a direct match)
+            pubRefSeq: whether the sequence is a public reference sequence
+            offset: nothing if it is a first query, then number of records from which to load the next set of ids
+        Returns:
+            a list of seqdb sequence ids 
+            offset of results. If 0 then all/last set of results have been retrieved, if > 0,
+                then the function has to be called again with this offset to retrieve more results
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+      
+        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence", params=params, offset=offset)
+        
+        sequence_ids = ""
+        
+        if jsn_resp:            
+            sequence_ids = jsn_resp['result']
+        
+        return sequence_ids, result_offset
+       
+       
+    def getAllSequenceIds(self, 
                                  specimenNum=None,
                                  sequenceName=None,
                                  pubRefSeq=None,
@@ -268,11 +296,8 @@ class seqdbWebService:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
             pubRefSeq: whether the sequence is a public reference sequence
-            offset: nothing if it is a first query, then number of records from which to load the next set of ids
         Returns:
             a list of seqdb sequence ids 
-            offset of results. If 0 then all/last set of results have been retrieved, if > 0,
-                then the function has to be called again with this offset to retrieve more results
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout
@@ -300,19 +325,16 @@ class seqdbWebService:
         if collectionCode:
             params = params + "filterName=biologicalCollection.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %collectionCode
       
-        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence", params=params, offset=offset)
+        seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params)
+        while resultOffset:
+            more_seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params, offset=resultOffset)
+            seq_ids.extend(more_seq_ids)
         
-        sequence_ids = ""
-        
-        if jsn_resp:            
-            sequence_ids = jsn_resp['result']
-        
-        if genBankGI and len(sequence_ids) > 1:
+        if genBankGI and len(seq_ids) > 1:
             raise SystemError(
                 "More than one record associated with GenBank GI, which should be unique.")
         
-        return sequence_ids, result_offset
-       
+        return seq_ids
 
    
     def getSequenceIdsByRegionWithOffset(self, region_id, offset=0):
@@ -545,24 +567,83 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
-
-
-    def getConsensusSequenceIdsWithOffset(self, 
+    
+    
+    def getAllConsensusSequenceIds(self, 
                                           specimenNum=None,
                                           sequenceName=None,
                                           pubRefSeq=None,
                                           genBankGI=None,
                                           regionName=None,
+                                          projectName=None,
                                           collectionCode=None,
-                                          taxonomy_rank=None, taxonomy_value=None,
+                                          taxonomyRank=None, taxonomyValue=None,
                                           offset=0):
-        
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
+            regionName: gene region name
+            projectName: project tag name 
+            collectionCode: biological collection code
+            taxonomyRank: rank of taxonomy filter (i.e. "genus")
+            taxonomyValue: value of the taxonomy filter to go with rank (i.e. "Phytophthora")
+        Returns:
+            a list of seqdb sequence ids 
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        params = ''
+        if specimenNum:
+            params = params + "filterName=specimen.number&filterValue=%s&filterWildcard=false&" %specimenNum
+            
+        if sequenceName:
+            params = params + "filterName=sequence.name&filterValue=%s&filterWildcard=true&" %sequenceName
+        
+        if pubRefSeq:
+            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=true"
+            
+        if genBankGI:
+            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterWildcard=false&" %genBankGI
+        
+        if regionName:
+            params = params + "filterName=region.name&filterValue=%s&filterWildcard=true&" %regionName
+
+        if projectName:
+            params = params + "filterName=region.name&filterValue=%s&filterWildcard=true&" %projectName
+       
+        if collectionCode:
+            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterWildcard=true&" %collectionCode
+            
+        if taxonomyRank:
+            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomyRank)
+            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomyValue)
+        
+        seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params)
+        while resultOffset:
+            more_seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params,
+                                                          offset=resultOffset)
+            seq_ids.extend(more_seq_ids)
+        
+            
+        if genBankGI and len(seq_ids) > 1:
+            raise SystemError(
+                "More than one record associated with GenBank GI, which should be unique.")
+            
+        
+        return seq_ids
+
+
+    def getConsensusSequenceIdsWithOffset(self, params=None, offset=0):        
+        ''' Returns sequence ids, limited by the specified filter parameters and offset
+        Agrs:
+            params: string with (multiple) filter parameters 
+            (i.e. "filterName=specimen.number&filterValue=1234&filterName=sequence.name&filterValue=sequence_name")
             offset: nothing if it is a first query, then number of records from which to load the next set of ids
         Returns:
             a list of seqdb sequence ids 
@@ -574,45 +655,13 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        params = ''
-        if specimenNum:
-            params = params + "filterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %specimenNum
-            
-        if sequenceName:
-            params = params + "filterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %sequenceName
-        
-        if pubRefSeq:
-            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=true"
-            
-        if genBankGI:
-            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterOperator=and&filterWildcard=false&" %genBankGI
-        
-        if regionName:
-            params = params + "filterName=region.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %regionName
-       
-        if collectionCode:
-            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %collectionCode
-            
-        if taxonomy_rank:
-            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomy_rank)
-            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomy_value)
-            
-        
-        #jsn_resp = self.getJsonConsensusSequenceIds(params)
-        #jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
         jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/consensus", params=params, offset=offset)
-        
         
         sequence_ids = ""
         
         if jsn_resp:  
             sequence_ids = jsn_resp['result']
             
-        if genBankGI and len(sequence_ids) > 1:
-            raise SystemError(
-                "More than one record associated with GenBank GI, which should be unique.")
-            
-        
         return sequence_ids, result_offset
 
 
@@ -1064,6 +1113,55 @@ class seqdbWebService:
         return jsn_resp
 
 
+    
+    
+    ###########################################################################
+    # Project Tag
+    ###########################################################################
+    
+    def getProjectTagIdsWithOffset(self, name=None, offset=0):
+        ''' Get project tag ids with offset.
+        Args:
+            name: project tag name keyword, to filter the ids returned
+        Returns:
+            a list of seqdb tag ids 
+            offset (i.e. response has a limit on how many results it can return for one query, 
+                    therefore offset is used to iterate through a large response)
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        params = ""
+             
+        if name:
+            params = params + "%sfilterName=name&filterValue=%s&filterWildcard=false&" %name
+ 
+        
+        request_url = "/projectTag"
+        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url=request_url, params=params, offset=offset)
+        
+        tag_ids = ""
+        
+        if jsn_resp:            
+            tag_ids = jsn_resp['result']            
+        
+        return tag_ids, result_offset
+
+
+    def getAllProjectTagIds(self, name=None):
+        ''' Companion method to getProjectTagWithOffset. Returns all the results, iterating with offset.
+        '''
+        
+        tag_ids, offset = self.getProjectTagIdsWithOffset(name)
+        
+        while offset:
+            curr_tag_ids, offset = self.getProjectTagIdsWithOffset(name, offset)
+            tag_ids.extend(curr_tag_ids)
+        
+        return tag_ids
+    
     
     ###########################################################################
     # Specimen
