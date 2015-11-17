@@ -556,7 +556,19 @@ def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature):
     """Associate the sequence with a Taxa in the SeqDB Taxonomy based on the
        GBQualifier "organism" value"""
 
-    logging.warn("Taxonomy linking not yet implemented")
+    taxonomy = {
+        "genus":"genus name",
+        "species":"species name"
+    }
+
+    determinationId = seqdb_ws.insertSequenceDetermination(isAccepted="true", 
+                                                           sequenceId=seqdb_id, 
+                                                           taxonomy=taxonomy,
+                                                           ncbiTaxonId="1234",
+                                                           notes="here are notes",
+                                                           )
+  
+    logging.warn("inserting test determination record")
 
 
 def seqdb_update_seqsource_region(seqdb_ws, seqdb_id, seqdb_region_id):

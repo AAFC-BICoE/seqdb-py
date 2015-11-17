@@ -712,11 +712,12 @@ class seqdbWebService:
                 return seqdb_tax_rank
         return "No matches found."
     
-    def insertSequenceDetermination(self, sequenceId, taxonomy, isAccepted=False, notes=None):
+    def insertSequenceDetermination(self, sequenceId, taxonomy, isAccepted=False, ncbiTaxonId=None, notes=None):
         ''' Creates a determination for a sequence
         Args:
             sequenceId: id of a sequence for which determination is writtemn
             isAccepted: boolean, whether this determination is an accepted determination
+            ncbiTaxonId: integer of a ncbi taxon id
             taxonomy:  list of tuples (taxonomy rank, taxonomy rank name). Usually from NCBI.
                  i.e. [['species', 'Phytophthora lateralis'], ['genus', 'Phytophthora']]
         Raises:
@@ -725,12 +726,13 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        taxonomy = self.vetTaxonomy(taxonomy)
+        #taxonomy = self.vetTaxonomy(taxonomy)
         post_data = {
             "identification": {
                 "accepted": isAccepted,
                 "sequence": {"id": sequenceId},
                 "taxonomy": taxonomy,
+                "ncbiTaxonId": ncbiTaxonId,
                 "evidenceNotes": notes}
             }
 
@@ -796,7 +798,7 @@ class seqdbWebService:
             
         return list(its_region_ids)
         
-    '''
+
     def getRegionIdsByName(self, name, offset=0):
         params = {
             'filterName': 'name',
@@ -805,7 +807,7 @@ class seqdbWebService:
             'filterWildcard': 'true'
         }
         return self.getRegionIdsWithOffset(params, offset)
-    '''
+
 
     def getRegionIdsWithOffset(self, regionName=None, offset=0):
         ''' Get region IDs
