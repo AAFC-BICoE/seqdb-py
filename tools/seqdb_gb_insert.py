@@ -1037,6 +1037,8 @@ def main():
     Raises:
         None
     """
+    print("loading configuration file: %s" % config_root.path()+ '/config.yaml')
+    print("loading tools configuration file: %s" %  os.path.dirname(__file__) + '/seqdb_gb_insert_config.yaml')
     main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
     if not main_conf:
         logging.error(tools_helper.log_msg_noConfig)
