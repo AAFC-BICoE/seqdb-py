@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.seqdbWS = seqdbWebService(test_api_key, test_url)
+        self.fixture = seqdbWebService(test_api_key, test_url)
         
     
     def tearDown(self):
@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
         delete_seqdb_features.delete_features(test_api_key, push_seqdb_its_feat.output_file_name, test_url)
          
         for feature_id in ok_feature_ids:
-            self.assertFalse(self.seqdbWS.getFeature(feature_id), "Feature was found after being delete.")   
+            self.assertFalse(self.fixture.getFeature(feature_id), "Feature was found after being delete.")   
         
             
                 

@@ -66,7 +66,7 @@ def parse_input_args(argv):
     parser.add_argument('--specNum', help="Specimen number (identifier)", dest="specimen_num", required=False)    
     parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)   
     parser.add_argument('--geneRegion', help="Gene region name (keyword)", dest="gene_region_name", required=False)    
-    parser.add_argument('--project', help="Project Name (keyword)", dest="project_name", required=False)    
+    parser.add_argument('--projectName', help="Project Name (keyword)", dest="project_name", required=False)    
     parser.add_argument('--collectionCode', help="Collection code (keyword)", dest="collection_code", required=False)    
     parser.add_argument('--pubRefSeqs', help="Public reference sequences", dest="pub_ref_seqs", action='store_true', required=False)    
     parser.add_argument('--taxRank', help="Taxonomic rank to filter sequences on (need to specify the value as well). Ex. --taxRank phylum --taxValue chordata ", dest="tax_rank", choices=taxonomy_ranks, required=False)
@@ -102,12 +102,8 @@ def get_ITS_seq_ids(seqdbWS):
     for its_region_keyword in its_region_names:
         #TODO: parallelize; use locking when appending to its_seq_ids
         try:
-            curr_seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(regionName=its_region_keyword)
-            its_seq_ids.update(curr_seq_ids)
-            while offset:
-                curr_seq_ids, offset = seqdbWS.getSequenceIdsWithOffset(regionName=its_region_keyword, offset=offset)
-                its_seq_ids.update(curr_seq_ids)
-                
+            curr_seq_ids = seqdbWS.getAllSequenceIds(regionName=its_region_keyword)
+            its_seq_ids.update(curr_seq_ids)    
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
