@@ -392,12 +392,14 @@ class seqdbWebService:
             self.base_url + '/sequenceImport', json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'statusCode' and 'message' not in jsn_resp:
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         result = ""
         if 'result' in jsn_resp:
-            result = jsn_resp['result']
+            if type(jsn_resp['result']) == list and len(jsn_resp['result']) != 1:
+                raise UnexpectedContent("When creating a chromatogram sequence, response should contain only one result.")
+            result = jsn_resp['result'][0]
         else:
             logging.warn(
                 "Importing chromatogram failed with status code: '%s' "
@@ -461,7 +463,7 @@ class seqdbWebService:
         request_url = "sequence/" + str(seq_id)
         jsn_resp = self.delete(self.base_url + request_url).json()
 
-        if 'statusCode' and 'message' not in jsn_resp:
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -485,22 +487,21 @@ class seqdbWebService:
             json.dumps(params))
         jsn_resp = resp.json()
 
-        if 'result' and 'statusCode' and 'message' not in jsn_resp:
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result'], jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']
 
 
     def getJsonSeqSource(self, sequenceId):
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/sequence/" + str(sequenceId) + "/seqSource")
+        jsn_resp = self.retrieveJson("/sequence/" + str(sequenceId) + "/seqSource")
 
         return jsn_resp
 
 
     def getJsonSequence(self, seq_id, params=None):
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/sequence/" + str(seq_id), params)
+        jsn_resp = self.retrieveJson("/sequence/" + str(seq_id), params)
         if not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
 
@@ -558,8 +559,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/consensus", params=params)
+        jsn_resp = self.retrieveJson("/consensus", params=params)
 
         
         if jsn_resp['metadata']['resultCount'] > 0 and not jsn_resp['result']:
@@ -727,8 +727,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/determination/" + str(determinationId))
+        jsn_resp = self.retrieveJson("/determination/" + str(determinationId))
 
         if jsn_resp:
             return jsn_resp['result']
@@ -796,7 +795,8 @@ class seqdbWebService:
         resp = self.create(self.base_url + '/determination', json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'result' not in jsn_resp and 'statusCode' and 'message' not in jsn_resp['metadata']:
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
@@ -904,7 +904,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(self.base_url + "/region/" + str(region_id))
+        jsn_resp = self.retrieveJson("/region/" + str(region_id))
         if jsn_resp:
             return jsn_resp['result']['name']
         else:
@@ -935,7 +935,8 @@ class seqdbWebService:
         resp = self.create(self.base_url + '/region', json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'result' not in jsn_resp and 'statusCode' and 'message' not in jsn_resp['metadata']:
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
@@ -975,8 +976,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/feature/" + str(featureId))
+        jsn_resp = self.retrieveJson("/feature/" + str(featureId))
 
         if jsn_resp:
             return jsn_resp['result']
@@ -1013,7 +1013,8 @@ class seqdbWebService:
 
         jsn_resp = resp.json()
 
-        if 'result' not in jsn_resp and 'statusCode' and 'message' not in jsn_resp['metadata']:
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
@@ -1055,7 +1056,6 @@ class seqdbWebService:
             UnexpectedContent
         '''
         feature_types = ''
-        #jsn_resp = self.retrieveJson(self.base_url + "/featureType")
         jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/featureType")
         
 
@@ -1071,8 +1071,7 @@ class seqdbWebService:
             feature_types = {}
 
             for feat_type_id in feature_type_ids:
-                jsn_resp = self.retrieveJson(
-                    self.base_url + "/featureType/" + str(feat_type_id))
+                jsn_resp = self.retrieveJson("/featureType/" + str(feat_type_id))
 
                 if jsn_resp:
 
@@ -1099,7 +1098,8 @@ class seqdbWebService:
             self.base_url + '/featureType', json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'result' not in jsn_resp and 'statusCode' and 'message' not in jsn_resp['metadata']:
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
@@ -1213,8 +1213,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/specimen/" + str(specimenId))
+        jsn_resp = self.retrieveJson("/specimen/" + str(specimenId))
 
         if jsn_resp:
             return jsn_resp['result']
@@ -1229,7 +1228,8 @@ class seqdbWebService:
             json.dumps(params))
         jsn_resp = resp.json()
 
-        if 'result' not in jsn_resp and 'statusCode' and 'message' not in jsn_resp['metadata']:
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result'], jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']
@@ -1263,8 +1263,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/specimen", params=params)
+        jsn_resp = self.retrieveJson("/specimen", params=params)
 
         
         if jsn_resp['metadata']['resultCount'] > 0 and not jsn_resp['result']:
