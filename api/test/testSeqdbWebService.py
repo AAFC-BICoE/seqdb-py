@@ -19,15 +19,12 @@ from api import seqdbWebService
 
 #from seqdb_ws import json_seqdb_request, seqdb_ws_request
 
-seqdb_api_url = "***REMOVED***:2002/seqdb/api/v1/"
-seqdb_api_key = "***REMOVED***"
+seqdb_api_url = "http://.../api/v1/"
+seqdb_api_key = ""
 
 class TestSeqdbWebService(unittest.TestCase):
     
     def setUp(self):
-
-        #local: "***REMOVED***:8181/seqdb.web-2.5/api/v1"
-        #prod: "***REMOVED***/api/v1"
         
         self.fixture = seqdbWebService.seqdbWebService(api_key=seqdb_api_key, base_url=seqdb_api_url)
     
@@ -127,7 +124,19 @@ class TestSeqdbWebService(unittest.TestCase):
     # Determination
     ###########################################################################
     
-    
+    def testCreateGetDeleteDetermination(self):
+        test_taxonomy = {'superkingdom': 'Eukaryota', 'genus': 'Phytophthora', 'species': 'Phytophthora ramorum', 'order': 'Peronosporales'}
+        det_id = self.fixture.insertSequenceDetermination(28954, test_taxonomy)
+        self.assertTrue(det_id, "Creating determination on a sequence did not return a determination id.")
+        
+        get_determination = self.fixture.getDetermination(det_id)
+        self.assertTrue(get_determination, "Did not get determination back.")
+        self.assertEquals(False, get_determination['accepted'], "")
+        self.assertEquals('Phytophthora', get_determination['taxonomy']['genus'], "")
+        
+        # delete
+        delete_jsn_resp = self.fixture.deleteDetermination(det_id)
+        self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete determination.")
     
     ###########################################################################
     # Gene Region
