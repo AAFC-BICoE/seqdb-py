@@ -30,11 +30,11 @@ This section is for those who just want to run (i.e. use) seqdb-py. If you'd lik
 
 * Install seqdb-py from git (use one of the options below):
 
-	- Source distribution:
+- Source distribution:
   
    > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git#egg=seqdb-py
 
-	- Installing a particular version (i.e. Version 1.0 in the example below):
+- Installing a particular version (i.e. Version 1.0 in the example below):
 
    > pip install -e git+https://bitbucket.org/aafc-mbb/seqdb-py.git@1.0#egg=seqdb-py
 
