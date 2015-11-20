@@ -966,11 +966,7 @@ def process_entrez_entry(
     logging.debug("Checking for gi:%s in SeqDB" % (genbank_id))
 
     #result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
-    seq_ids, offset = seqdb_ws.getConsensusSequenceIdsWithOffset(genBankGI=genbank_id)
-    while offset:
-        more_seq_ids, offset = seqdb_ws.getConsensusSequenceIdsWithOffset(genBankGI=genbank_id, offset=offset)
-        seq_ids.extend(more_seq_ids)
-
+    seq_ids = seqdb_ws.getAllConsensusSequenceIdsWithOffset(genBankGI=genbank_id)
 
     if seq_ids and delete:
         logging.info(

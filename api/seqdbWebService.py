@@ -71,6 +71,10 @@ class seqdbWebService:
 
     def retrieveJson(self, request_url, params=None):
         ''' Submits a request to SeqDB web services
+            Note: in case of paginated results, will return one page only. 
+                    Use WithOffset to get all results.
+        Args:
+            request_url: part of the API url, specific to the requests (i.e. "/sequences")
         Returns:
             json formatted object
         Raises:
@@ -79,50 +83,14 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        resp = self.retrieve(request_url, params=params)
+        resp = self.retrieve(self.base_url + request_url, params=params)
         if resp:
             jsn_resp =  json.loads(resp.text)
             resp = jsn_resp
             
-            #if 'count' and 'sortColum' and 'limit' and 'offset' and 'message' and 'statusCode' and 'sortOrder' not in jsn_resp:
-            if 'result' not in jsn_resp.keys():
+            if 'result' not in jsn_resp:
                 raise UnexpectedContent(response=jsn_resp)
-            
-            '''
-            # See if results were paginated, and if yes - retrieve the rest of the results
-            # If these values are present, there is a chance that we can get paginated result
-            if 'count' in jsn_resp.keys() and 'limit' in jsn_resp.keys():
-
-                result_num = int(jsn_resp['count'])
-                result_per_page =  int(jsn_resp['limit'])
-                
-                if (result_num > result_per_page):
                     
-                    for curr_offset in xrange(result_per_page, result_num, result_per_page):
-                        if params:
-                            if type(params) is dict:
-                                params['offset'] = curr_offset
-                            elif type(params) is str:
-                                if 'offset' in params:
-                                    params = re.sub('offset=[0-9]*', "offset=%s" %curr_offset, params)
-                                else:
-                                    params = "%s&offset=%s" %(params,curr_offset)
-                        else:
-                            params={'offset': curr_offset}
-                            
-                        resp2 = self.retrieve(request_url, params)
-                        jsn_resp2 =  json.loads(resp2.text)
-                
-                        if 'count' and 'limit' and 'result' not in jsn_resp2.keys():
-                            raise UnexpectedContent(response=jsn_resp)
-                        
-                        jsn_resp['result'] = jsn_resp['result'] + jsn_resp2['result'] 
-                        
-                    jsn_resp['limit'] = jsn_resp['count']
-        
-            resp = jsn_resp
-            '''
-        
         return resp
     
     def retrieveJsonWithOffset(self, request_url, params=None, offset=0):
@@ -156,21 +124,24 @@ class seqdbWebService:
         if offset:
             params ="%s&offset=%s&" %(params,offset)
                        
-        jsn_resp = self.retrieveJson(self.base_url + request_url, params)
+        jsn_resp = self.retrieveJson(request_url, params)
         
         result_offset = 0
         
         if jsn_resp:
-            if 'count' not in jsn_resp and 'limit' not in jsn_resp and 'offset' not in jsn_resp:
+            if 'metadata' not in jsn_resp:
+                raise UnexpectedContent(response=jsn_resp)
+                
+            if 'resultCount' not in jsn_resp['metadata'] and 'limit' not in jsn_resp['metadata'] and 'offset' not in jsn_resp['metadata']:
                 raise UnexpectedContent(response=jsn_resp)
             
             # TODO verify this works for all cases
-            #if jsn_resp['count'] > 0 and not jsn_resp['result']:
+            #if jsn_resp['metadata']['resultCount'] > 0 and not jsn_resp['result']:
             #    raise UnexpectedContent(response=jsn_resp)
 
             # Checking for paginated results
-            result_total_num = int(jsn_resp['count'])
-            result_returned_so_far =  int(jsn_resp['limit']) + int(jsn_resp['offset'])
+            result_total_num = int(jsn_resp['metadata']['resultCount'])
+            result_returned_so_far =  int(jsn_resp['metadata']['limit']) + int(jsn_resp['metadata']['offset'])
             if (result_total_num > result_returned_so_far):    
                 result_offset = result_returned_so_far
             
@@ -255,24 +226,56 @@ class seqdbWebService:
     # Sequence
     ###########################################################################
 
-    def getSequenceIdsWithOffset(self, 
-                                 specimenNums=None,
-                                 sequenceName=None,
-                                 pubRefSeq=None,
-                                 genBankGI=None,
-                                 regionName=None,
-                                 collectionCode=None,
-                                 offset=0):
+
+    def getSequenceIdsWithOffset(self, params=None, offset=0):
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
-            specimenNums: list of specimen number (identifier) for which sequence IDs will be retrieved
-            sequenceName: keyword in the sequence name (i.e. not a direct match)
-            pubRefSeq: whether the sequence is a public reference sequence
+            params: string with API parameters, to be apended to the request URL
             offset: nothing if it is a first query, then number of records from which to load the next set of ids
         Returns:
             a list of seqdb sequence ids 
             offset of results. If 0 then all/last set of results have been retrieved, if > 0,
                 then the function has to be called again with this offset to retrieve more results
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+      
+        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence", params=params, offset=offset)
+        
+        sequence_ids = ""
+        
+        if jsn_resp:            
+            sequence_ids = jsn_resp['result']
+        
+        return sequence_ids, result_offset
+       
+
+    def getAllSequenceIds(self, 
+                         specimenNums=None,
+                         sequenceName=None,
+                         pubRefSeq=None,
+                         genBankGI=None,
+                         regionName=None,
+                         projectName=None,
+                         collectionCode=None,
+                         taxonomyRank=None, taxonomyValue=None,
+                         offset=0):
+        ''' Returns sequence ids, limited by the specified filter parameters
+        Agrs:
+            specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
+            sequenceName: keyword in the sequence name (i.e. not a direct match)
+            pubRefSeq: whether the sequence is a public reference sequence
+            genBankGI: genBank GI (identifier) for those sequences that are in genBank
+            regionName: gene region name
+            projectName: project tag name 
+            collectionCode: biological collection code
+            taxonomyRank: rank of taxonomy filter (i.e. "genus")
+            taxonomyValue: value of the taxonomy filter to go with rank (i.e. "Phytophthora")
+        Returns:
+            a list of seqdb sequence ids 
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout
@@ -290,30 +293,47 @@ class seqdbWebService:
             params = "%sfilterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %(params,sequenceName)
             
         if pubRefSeq:
-            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=true"
+            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=false"
         
         if genBankGI:
             params = params + "filterName=sequence.genBankGI&filterValue=%s&filterOperator=and&filterWildcard=false&" %genBankGI
         
         if regionName:
             params = params + "filterName=region.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %regionName
-        
+            
+        if projectName:
+            project_ids = self.getAllProjectTagIds(projectName)
+            
+            if len(project_ids) == 1:
+                params = params + "tagId=%s&" %project_ids[0]
+                
+            elif len(project_ids) > 1:
+                raise "More than one project is associated with the name '%s'. Currently sequences can only be filtered on one project only. Please refine your search."
+            
         if collectionCode:
-            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %collectionCode
+            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterWildcard=false&" %collectionCode
+            
+        if taxonomyRank:
+            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomyRank)
+            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomyValue)
+        
+        seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params)
+        while resultOffset:
+            more_seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params,
+                                                          offset=resultOffset)
+            seq_ids.extend(more_seq_ids)
+        
       
-        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence", params=params, offset=offset)
+        seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params)
+        while resultOffset:
+            more_seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params, offset=resultOffset)
+            seq_ids.extend(more_seq_ids)
         
-        sequence_ids = ""
-        
-        if jsn_resp:            
-            sequence_ids = jsn_resp['result']
-        
-        if genBankGI and len(sequence_ids) > 1:
+        if genBankGI and len(seq_ids) > 1:
             raise SystemError(
                 "More than one record associated with GenBank GI, which should be unique.")
         
-        return sequence_ids, result_offset
-       
+        return seq_ids
 
    
     def getSequenceIdsByRegionWithOffset(self, region_id, offset=0):
@@ -372,17 +392,19 @@ class seqdbWebService:
             self.base_url + '/sequenceImport', json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         result = ""
-        if 'result' in jsn_resp.keys():
-            result = jsn_resp['result']
+        if 'result' in jsn_resp:
+            if type(jsn_resp['result']) == list and len(jsn_resp['result']) != 1:
+                raise UnexpectedContent("When creating a chromatogram sequence, response should contain only one result.")
+            result = jsn_resp['result'][0]
         else:
             logging.warn(
                 "Importing chromatogram failed with status code: '%s' "
                 "and message: '%s'" % (
-                    jsn_resp['statusCode'], jsn_resp['message']))
+                    jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']))
 
         return result
 
@@ -441,7 +463,7 @@ class seqdbWebService:
         request_url = "sequence/" + str(seq_id)
         jsn_resp = self.delete(self.base_url + request_url).json()
 
-        if 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -465,27 +487,26 @@ class seqdbWebService:
             json.dumps(params))
         jsn_resp = resp.json()
 
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
-        return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+        return jsn_resp['result'], jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']
 
 
     def getJsonSeqSource(self, sequenceId):
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/sequence/" + str(sequenceId) + "/seqSource")
+        jsn_resp = self.retrieveJson("/sequence/" + str(sequenceId) + "/seqSource")
 
         return jsn_resp
 
 
     def getJsonSequence(self, seq_id, params=None):
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/sequence/" + str(seq_id), params)
+        jsn_resp = self.retrieveJson("/sequence/" + str(seq_id), params)
         if not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
 
         jsn_seq = jsn_resp['result']
-        if 'seq' not in jsn_seq.keys() or 'name' not in jsn_seq.keys():
+        if 'seq' not in jsn_seq or 'name' not in jsn_seq:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_seq
@@ -538,32 +559,99 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/consensus", params=params)
+        jsn_resp = self.retrieveJson("/consensus", params=params)
 
         
-        if jsn_resp['count'] > 0 and not jsn_resp['result']:
+        if jsn_resp['metadata']['resultCount'] > 0 and not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
 
 
-    def getConsensusSequenceIdsWithOffset(self, 
-                                          specimenNums=None,
-                                          sequenceName=None,
-                                          pubRefSeq=None,
-                                          genBankGI=None,
-                                          regionName=None,
-                                          collectionCode=None,
-                                          taxonomy_rank=None, taxonomy_value=None,
-                                          offset=0):
-        
+    def getAllConsensusSequenceIds(self, 
+                                  specimenNums=None,
+                                  sequenceName=None,
+                                  pubRefSeq=None,
+                                  genBankGI=None,
+                                  regionName=None,
+                                  projectName=None,
+                                  collectionCode=None,
+                                  taxonomyRank=None, taxonomyValue=None,
+                                  offset=0):
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
             specimenNums: list of specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
+            regionName: gene region name
+            projectName: project tag name 
+            collectionCode: biological collection code
+            taxonomyRank: rank of taxonomy filter (i.e. "genus")
+            taxonomyValue: value of the taxonomy filter to go with rank (i.e. "Phytophthora")
+        Returns:
+            a list of seqdb sequence ids 
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        params = ''
+
+        if specimenNums:
+            for specimenNum in specimenNums:
+                params = params + "filterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %specimenNum
+            
+        if sequenceName:
+            params = params + "filterName=sequence.name&filterValue=%s&filterWildcard=true&" %sequenceName
+        
+        if pubRefSeq:
+            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
+            
+        if genBankGI:
+            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterWildcard=false&" %genBankGI
+        
+        if regionName:
+            params = params + "filterName=region.name&filterValue=%s&filterWildcard=true&" %regionName
+
+        if projectName:
+            project_ids = self.getAllProjectTagIds(projectName)
+            
+            if len(project_ids) == 1:
+                params = params + "tagId=%s&" %project_ids[0]
+                
+            elif len(project_ids) > 1:
+                raise "More than one project is associated with the name '%s'. Currently sequences can only be filtered on one project only. Please refine your search."
+            
+       
+        if collectionCode:
+            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterWildcard=false&" %collectionCode
+            
+        if taxonomyRank:
+            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomyRank)
+            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomyValue)
+        
+        seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params)
+        while resultOffset:
+            more_seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params,
+                                                          offset=resultOffset)
+            seq_ids.extend(more_seq_ids)
+        
+            
+        if genBankGI and len(seq_ids) > 1:
+            raise SystemError(
+                "More than one record associated with GenBank GI, which should be unique.")
+            
+        
+        return seq_ids
+
+
+    def getConsensusSequenceIdsWithOffset(self, params=None, offset=0):        
+        ''' Returns sequence ids, limited by the specified filter parameters and offset
+        Agrs:
+            params: string with (multiple) filter parameters 
+            (i.e. "filterName=specimen.number&filterValue=1234&filterName=sequence.name&filterValue=sequence_name")
             offset: nothing if it is a first query, then number of records from which to load the next set of ids
         Returns:
             a list of seqdb sequence ids 
@@ -575,46 +663,13 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        params = ''
-        if specimenNums:
-            for specimenNum in specimenNums:
-                params = params + "filterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %specimenNum
-            
-        if sequenceName:
-            params = params + "filterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %sequenceName
-        
-        if pubRefSeq:
-            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=true"
-            
-        if genBankGI:
-            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterOperator=and&filterWildcard=false&" %genBankGI
-        
-        if regionName:
-            params = params + "filterName=region.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %regionName
-       
-        if collectionCode:
-            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %collectionCode
-            
-        if taxonomy_rank:
-            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomy_rank)
-            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomy_value)
-            
-        
-        #jsn_resp = self.getJsonConsensusSequenceIds(params)
-        #jsn_resp = self.retrieveJson(self.base_url + "/consensus", params=params)
         jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/consensus", params=params, offset=offset)
-        
         
         sequence_ids = ""
         
         if jsn_resp:  
             sequence_ids = jsn_resp['result']
             
-        if genBankGI and len(sequence_ids) > 1:
-            raise SystemError(
-                "More than one record associated with GenBank GI, which should be unique.")
-            
-        
         return sequence_ids, result_offset
 
 
@@ -638,17 +693,21 @@ class seqdbWebService:
         resp = self.create(self.base_url + "/consensus", json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'result' and 'metadata' not in jsn_resp:
+            raise UnexpectedContent(response=jsn_resp)
+        
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
-        return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+
+        return jsn_resp['result'], jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']
 
 
     def deleteConsensusSequence(self, consensus_id):
         request_url = "/consensus/" + str(consensus_id)
         jsn_resp = self.delete(self.base_url + request_url).json()
 
-        if 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -670,8 +729,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/determination/" + str(determinationId))
+        jsn_resp = self.retrieveJson("/determination/" + str(determinationId))
 
         if jsn_resp:
             return jsn_resp['result']
@@ -739,7 +797,8 @@ class seqdbWebService:
         resp = self.create(self.base_url + '/determination', json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
@@ -760,7 +819,7 @@ class seqdbWebService:
         request_url = "/determination/" + str(determinationId)
         jsn_resp = self.delete(self.base_url + request_url).json()
 
-        if 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -847,7 +906,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(self.base_url + "/region/" + str(region_id))
+        jsn_resp = self.retrieveJson("/region/" + str(region_id))
         if jsn_resp:
             return jsn_resp['result']['name']
         else:
@@ -878,7 +937,8 @@ class seqdbWebService:
         resp = self.create(self.base_url + '/region', json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
@@ -896,7 +956,7 @@ class seqdbWebService:
         request_url = "/region/" + str(regionId)
         jsn_resp = self.delete(self.base_url + request_url).json()
 
-        if 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -918,8 +978,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/feature/" + str(featureId))
+        jsn_resp = self.retrieveJson("/feature/" + str(featureId))
 
         if jsn_resp:
             return jsn_resp['result']
@@ -956,7 +1015,8 @@ class seqdbWebService:
 
         jsn_resp = resp.json()
 
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
@@ -975,7 +1035,7 @@ class seqdbWebService:
         request_url = "/feature/" + str(featureId)
         jsn_resp = self.delete(self.base_url + request_url).json()
 
-        if 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -998,7 +1058,6 @@ class seqdbWebService:
             UnexpectedContent
         '''
         feature_types = ''
-        #jsn_resp = self.retrieveJson(self.base_url + "/featureType")
         jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url="/featureType")
         
 
@@ -1014,8 +1073,7 @@ class seqdbWebService:
             feature_types = {}
 
             for feat_type_id in feature_type_ids:
-                jsn_resp = self.retrieveJson(
-                    self.base_url + "/featureType/" + str(feat_type_id))
+                jsn_resp = self.retrieveJson("/featureType/" + str(feat_type_id))
 
                 if jsn_resp:
 
@@ -1042,7 +1100,8 @@ class seqdbWebService:
             self.base_url + '/featureType', json.dumps(post_data))
         jsn_resp = resp.json()
 
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
@@ -1060,12 +1119,61 @@ class seqdbWebService:
         request_url = "/featureType/" + str(featureTypeId)
         jsn_resp = self.delete(self.base_url + request_url).json()
 
-        if 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
 
 
+    
+    
+    ###########################################################################
+    # Project Tag
+    ###########################################################################
+    
+    def getProjectTagIdsWithOffset(self, name=None, offset=0):
+        ''' Get project tag ids with offset.
+        Args:
+            name: project tag name keyword, to filter the ids returned
+        Returns:
+            a list of seqdb tag ids 
+            offset (i.e. response has a limit on how many results it can return for one query, 
+                    therefore offset is used to iterate through a large response)
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        params = ""
+             
+        if name:
+            params = params + "filterName=name&filterValue=%s&filterWildcard=false&" %name
+ 
+        
+        request_url = "/projectTag"
+        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url=request_url, params=params, offset=offset)
+        
+        tag_ids = ""
+        
+        if jsn_resp:            
+            tag_ids = jsn_resp['result']            
+        
+        return tag_ids, result_offset
+
+
+    def getAllProjectTagIds(self, name=None):
+        ''' Companion method to getProjectTagWithOffset. Returns all the results, iterating with offset.
+        '''
+        
+        tag_ids, offset = self.getProjectTagIdsWithOffset(name)
+        
+        while offset:
+            curr_tag_ids, offset = self.getProjectTagIdsWithOffset(name, offset)
+            tag_ids.extend(curr_tag_ids)
+        
+        return tag_ids
+    
     
     ###########################################################################
     # Specimen
@@ -1107,8 +1215,7 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/specimen/" + str(specimenId))
+        jsn_resp = self.retrieveJson("/specimen/" + str(specimenId))
 
         if jsn_resp:
             return jsn_resp['result']
@@ -1123,10 +1230,11 @@ class seqdbWebService:
             json.dumps(params))
         jsn_resp = resp.json()
 
-        if 'result' and 'statusCode' and 'message' not in jsn_resp.keys():
+        if ('result' not in jsn_resp and 
+            ('statusCode' and 'message' not in jsn_resp['metadata'])):
             raise UnexpectedContent(response=jsn_resp)
 
-        return jsn_resp['result'], jsn_resp['statusCode'], jsn_resp['message']
+        return jsn_resp['result'], jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']
 
 
     def deleteSpecimen(self, specimenId):
@@ -1143,7 +1251,7 @@ class seqdbWebService:
         request_url = "/specimen/" + str(specimenId)
         jsn_resp = self.delete(self.base_url + request_url).json()
 
-        if 'statusCode' and 'message' not in jsn_resp.keys():
+        if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -1157,11 +1265,10 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(
-            self.base_url + "/specimen", params=params)
+        jsn_resp = self.retrieveJson("/specimen", params=params)
 
         
-        if jsn_resp['count'] > 0 and not jsn_resp['result']:
+        if jsn_resp['metadata']['resultCount'] > 0 and not jsn_resp['result']:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
@@ -1184,7 +1291,7 @@ class seqdbWebService:
         jsn_resp = self.getJsonSpecimenIds(params)
 
         # Collection Name + Specimen Number should be unique
-        if jsn_resp['count'] > 1:
+        if jsn_resp['metadata']['resultCount'] > 1:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
