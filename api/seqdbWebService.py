@@ -511,6 +511,17 @@ class seqdbWebService:
 
         return jsn_seq
 
+    def getFastaSeq(self, seq_id):
+        ''' Gets sequence in fasta format (SeqDB fasta request)
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+        '''
+        url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
+        response = self.retrieve(url)
+        return response.content
+
     def getFastaSeqPlus(self, seq_id):
         ''' Gets sequence from SeqDB and returns it in a fasta format with a
             unique header. Note, the fasta formatting is done here, instead of
@@ -528,16 +539,6 @@ class seqdbWebService:
             str(seq_id) + '\n' + jsn_seq['seq'] + '\n'
         return fasta_seq
 
-    def getFastaSeq(self, seq_id):
-        ''' Gets sequence in fasta format (SeqDB fasta request)
-        Raises:
-            requests.exceptions.ConnectionError
-            requests.exceptions.ReadTimeout
-            requests.exceptions.HTTPError
-        '''
-        url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
-        response = self.retrieve(url)
-        return response.content
 
 
     ###########################################################################
