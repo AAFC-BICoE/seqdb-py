@@ -20,13 +20,15 @@ Not required, but recommended
 Running
 =======
 
+This section is for those who just want to run (i.e. use) seqdb-py. If you'd like to develop it, see instruction below. 
 
-* Create and start your virtual environment:
+*Create and start your virtual environment:*
 
    > virtualenv venv
+   
    > source venv/bin/activate
 
-* Install seqdb-py from git:
+*Install seqdb-py from git (use one of the options below):*
 
 1. Source distribution:
 
@@ -61,8 +63,9 @@ Example: Running seqdb_gb_insert.py
   
 * Create config/config.yaml and tools/seqdb_gb_insert_config.yaml
 
-   > cp config/config.yaml.sample config.yaml
-   > cp tools/seqdb_gb_insert_config.yaml.sample seqdb_gb_insert_config.yaml
+   > cp config/config.yaml.sample config/config.yaml
+   
+   > cp tools/seqdb_gb_insert_config.yaml.sample tools/seqdb_gb_insert_config.yaml
 
 * Initialize above files according to instructions inside each .yaml file
 
@@ -70,6 +73,28 @@ Example: Running seqdb_gb_insert.py
 
    > seqdb_gb_insert
 
+
+
+
+Developing
+==========
+
+If you would like to contribute to seqdb-py codebase, do the following.
+
+* Clone the repo
+
+> git clone https://bitbucket.org/aafc-mbb/seqdb-py.git
+
+* Switch to the seqdb-py directory
+
+* Create virtual environment, source it and install required packages in it:
+
+   > virtualenv venv
+   
+   > source venv/bin/activate
+   
+   > pip install -r requirements.txt
+   
 
 
 
