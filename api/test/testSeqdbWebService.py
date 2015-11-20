@@ -19,8 +19,8 @@ from api import seqdbWebService
 
 #from seqdb_ws import json_seqdb_request, seqdb_ws_request
 
-seqdb_api_url = "http://.../api/v1/"
-seqdb_api_key = ""
+seqdb_api_url = "***REMOVED***:2002/seqdb/api/v1/"
+seqdb_api_key = "***REMOVED***"
 
 class TestSeqdbWebService(unittest.TestCase):
     
