@@ -990,7 +990,7 @@ def process_entrez_entry(
     logging.debug("Checking for gi:%s in SeqDB" % (genbank_id))
 
     #result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
-    seq_ids = seqdb_ws.getAllConsensusSequenceIdsWithOffset(genBankGI=genbank_id)
+    seq_ids = seqdb_ws.getAllConsensusSequenceIds(genBankGI=genbank_id)
 
     if seq_ids and delete:
         logging.info(
