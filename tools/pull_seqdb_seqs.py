@@ -35,7 +35,7 @@ import tools_helper
 # File name where the pulled sequences will be stored. 
 output_file_name = "seqdb_sequences.fasta"
 # File name where taxonomy for the sequences will be stored. Optional output. 
-output_taxonomy_file_name = "seqdb_sequences_taxonomy.fasta"
+output_taxonomy_file_name = "seqdb_taxonomy_file.txt"
 # This log will provide users of Galaxy with extra information on the tool 
 # execution sysem statements should not go here, since full log is configured
 # in yaml
@@ -277,10 +277,21 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
     for seq_id in seq_ids:
         
         try:
-            #TODO get a taxonomy line from API
-            taxonomy_line = "lala"
-            output_file.write(taxonomy_line)
-            success_ids.append(seq_id)
+            # This is mothur taxonomy; Full version has 13 ranks
+            # http://www.mothur.org/wiki/Classify.seqs
+            unclassified_keyword = "unclassified"
+            determ_jsn = seqdbWS.getAcceptedSpecimenDetermination(seq_id)
+            if determ_jsn:
+                taxonomy_line = "%s\t%s;%s;%s;%s;%s;%s;" %(seq_id, 
+                    determ_jsn["kingdom"] if determ_jsn["kingdom"] else unclassified_keyword,
+                    determ_jsn["phylum"] if determ_jsn["phylum"] else unclassified_keyword,
+                    determ_jsn["taxanomicClass"] if determ_jsn["taxanomicClass"] else unclassified_keyword,
+                    determ_jsn["taxanomicOrder"] if determ_jsn["taxanomicOrder"] else unclassified_keyword,
+                    determ_jsn["family"] if determ_jsn["family"] else unclassified_keyword,
+                    determ_jsn["genus"] if determ_jsn["genus"] else unclassified_keyword,
+                    determ_jsn["species"] if determ_jsn["species"] else unclassified_keyword)
+                output_file.write(taxonomy_line)
+                success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
@@ -308,13 +319,8 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
      
     output_file.close()   
 
-    msg_fileName = "Sequences written to a file:"
+    msg_fileName = "Taxonomy written to a file:"
     logging.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
-    user_log.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
-
-    msg_seqNum = "Number of sequences written:"
-    logging.info("%s %s" % (msg_seqNum, len(success_ids)) )
-    user_log.info("%s %s" % (msg_seqNum, len(success_ids)) )
     
 
     return success_ids

@@ -736,7 +736,28 @@ class seqdbWebService:
             return jsn_resp['result']
         else:
             return ''
+        
+        
+    def getAcceptedSpecimenDetermination(self, sequence_id):
+        ''' Returns an accepted determination of a SPECIMEN, which is associated with this sequence
+        '''
+        """ TODO
+        specimen_id = 
+        jsn_resp = self.retrieveJson("/specimen/%s/determination" %specimen_id)
 
+        if jsn_resp:
+            return jsn_resp['result']
+        else:
+            return ''
+        """
+        
+        spec_jsn = self.getSpecimen(1322)
+        for determ_id in spec_jsn["identification"]:
+            determ_jsn = self.getDetermination(determ_id)
+            if determ_jsn["accepted"]:
+                return determ_jsn
+        
+        return None
     
     # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
     # Keys are seqdb taxonomy ranks, and values are NCBI
@@ -1200,7 +1221,6 @@ class seqdbWebService:
         logging.warn("createSpecimen not yet implemented")
 
 
-    # TODO Not tested
     # TODO get/retrieve - review for consistency
     def getSpecimen(self, specimenId):
         ''' Retrieves a Specimen

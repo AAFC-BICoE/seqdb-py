@@ -240,6 +240,11 @@ class TestSeqdbWebService(unittest.TestCase):
     # Specimen
     ###########################################################################
 
+    def testGetSpecimen(self):
+        specimen_jsn = self.fixture.getSpecimen("1322")
+        self.assertTrue(specimen_jsn, "Specimen was not returned.")
+        self.assertEqual(1322, specimen_jsn["id"])
+            
 
                 
 if __name__ == "__main__":
