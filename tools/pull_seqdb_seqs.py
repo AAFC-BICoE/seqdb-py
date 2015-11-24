@@ -279,17 +279,25 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
         try:
             # This is mothur taxonomy; Full version has 13 ranks
             # http://www.mothur.org/wiki/Classify.seqs
-            unclassified_keyword = "unclassified"
+            unclassified_keyword = u'unclassified'
             determ_jsn = seqdbWS.getAcceptedSpecimenDetermination(seq_id)
             if determ_jsn:
-                taxonomy_line = "%s\t%s;%s;%s;%s;%s;%s;" %(seq_id, 
-                    determ_jsn["kingdom"] if determ_jsn["kingdom"] else unclassified_keyword,
-                    determ_jsn["phylum"] if determ_jsn["phylum"] else unclassified_keyword,
-                    determ_jsn["taxanomicClass"] if determ_jsn["taxanomicClass"] else unclassified_keyword,
-                    determ_jsn["taxanomicOrder"] if determ_jsn["taxanomicOrder"] else unclassified_keyword,
-                    determ_jsn["family"] if determ_jsn["family"] else unclassified_keyword,
-                    determ_jsn["genus"] if determ_jsn["genus"] else unclassified_keyword,
-                    determ_jsn["species"] if determ_jsn["species"] else unclassified_keyword)
+                t_kingdom = determ_jsn["taxonomy"]["kingdom"]
+                t_phylum = determ_jsn["taxonomy"]["phylum"]
+                t_class = determ_jsn["taxonomy"]["taxanomicClass"]
+                t_order = determ_jsn["taxonomy"]["taxanomicOrder"]
+                t_family = determ_jsn["taxonomy"]["family"]
+                t_genus = determ_jsn["taxonomy"]["genus"]
+                t_species = determ_jsn["taxonomy"]["species"]
+                
+                taxonomy_line = u'{}\t{};{};{};{};{};{};{};\n'.format(seq_id, 
+                    t_kingdom if t_kingdom else unclassified_keyword,
+                    t_phylum if t_phylum else unclassified_keyword,
+                    t_class if t_class else unclassified_keyword,
+                    t_order if t_order else unclassified_keyword,
+                    t_family if t_family else unclassified_keyword,
+                    t_genus if t_genus else unclassified_keyword,
+                    t_species if t_species else unclassified_keyword)
                 output_file.write(taxonomy_line)
                 success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
@@ -374,7 +382,9 @@ def main():
         logging.info(log_msg)
         user_log.info(log_msg)
         
-        specimen_nums_list = parsed_args.specimen_nums.replace(" ","").split(",") 
+        specimen_nums_list = None
+        if parsed_args.specimen_nums:
+            specimen_nums_list = parsed_args.specimen_nums.replace(" ","").split(",") 
 
         seq_ids = get_seq_ids(seqdbWS=seqdbWS, 
                               pull_type=parsed_args.seq_type, 
@@ -390,13 +400,14 @@ def main():
     success_seq_ids = write_fasta_file(seqdbWS, seq_ids, output_file_name)
     if (parsed_args.output_taxonomy_file):
         write_taxonomy_file(seqdbWS, seq_ids, output_taxonomy_file_name)
+        print("Taxonomy file is written to a file: '%s'" % output_taxonomy_file_name)
 
     
     ### Post-execution: messages and logging
     
     print("Number of sequences retrieved from Sequence Dababase:  %s" % len(success_seq_ids)) 
     print("Sequences are written to a file: '%s'" % output_file_name)
-    print("Execution log is written to a file: '%s'" % user_log.getFileName())
+    #print("Execution log is written to a file: '%s'" % user_log.getFileName())
     print("Execution complete.")
 
     user_log.info(tools_helper.log_msg_execEnded)

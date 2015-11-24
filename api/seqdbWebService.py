@@ -753,7 +753,7 @@ class seqdbWebService:
         
         spec_jsn = self.getSpecimen(1322)
         for determ_id in spec_jsn["identification"]:
-            determ_jsn = self.getDetermination(determ_id)
+            determ_jsn = self.getDetermination(spec_jsn["identification"][determ_id])
             if determ_jsn["accepted"]:
                 return determ_jsn
         
