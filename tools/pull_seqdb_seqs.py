@@ -154,13 +154,18 @@ def get_seq_ids(seqdbWS, pull_type,
         msg = "Value for pull_type should be one of the following: %s" %pull_types_dict.values()
         logging.error(msg)
         sys.exit(tools_helper.log_msg_sysExit + msg)
+        
+    seq_ids = []
     
     if pull_type == pull_types_dict["its"]:
         seq_ids = get_ITS_seq_ids(seqdbWS)
     else:
         try:
             if pull_type == pull_types_dict["consensus"]:
-                seq_ids = seqdbWS.getAllConsensusSequenceIds(specimenNums=specimen_nums, 
+                if not specimen_nums:
+                    specimen_nums = [None]
+                for specimen_num in specimen_nums:
+                    curr_seq_ids = seqdbWS.getAllConsensusSequenceIds(specimenNum=specimen_num, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
@@ -168,14 +173,22 @@ def get_seq_ids(seqdbWS, pull_type,
                                                           collectionCode=collection_code,
                                                           taxonomyRank=taxonomy_rank, 
                                                           taxonomyValue=taxonomy_value)
+                    seq_ids.extend(curr_seq_ids)
                     
                 log_msg = "Number of consensus sequences retrieved:"
-            elif pull_type == pull_types_dict["all"]:                
-                seq_ids = seqdbWS.getAllSequenceIds(specimenNums=specimen_nums, 
+            elif pull_type == pull_types_dict["all"]:
+                if not specimen_nums:
+                    specimen_nums = [None]
+                for specimen_num in specimen_nums:
+                    curr_seq_ids = seqdbWS.getAllSequenceIds(specimenNum=specimen_num, 
                                                 sequenceName=sequence_name,
                                                 pubRefSeq=pub_ref_seqs,
                                                 regionName=region_name,
-                                                collectionCode=collection_code)
+                                                projectName=project_name,
+                                                collectionCode=collection_code,
+                                                taxonomyRank=taxonomy_rank, 
+                                                taxonomyValue=taxonomy_value)
+                    seq_ids.extend(curr_seq_ids)
                 
                 log_msg = "Number of sequences retrieved:"
             elif pull_type == pull_types_dict["raw"]:

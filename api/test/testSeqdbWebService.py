@@ -58,10 +58,11 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
         
     def testGetSequenceIds(self):
-        actual = self.fixture.getAllSequenceIds(specimenNums=[4405])
+        actual = self.fixture.getAllSequenceIds(specimenNum=4405)
         self.assertTrue(actual, "No Sequence ids returned.")
         self.assertEqual(23, len(actual),"Expecting 23 sequences associated with this specimen.")
         self.assertIn(27755, actual, "Sequence id 27755 is expected to be associated with specimen 4405.")
+        self.assertIn(358301, actual, "Sequence id 358301 is expected to be associated with specimen 4405.")  
 
     def testCreateChromatSequence_wrong_path(self):
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "data/")
@@ -103,6 +104,12 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
     # Consensus Sequence
     ###########################################################################
+    
+    def testGetConsensusSequenceIds(self):
+        actual = self.fixture.getAllConsensusSequenceIds(specimenNum=4405)
+        self.assertTrue(actual, "No Sequence ids returned.")
+        self.assertEqual(1, len(actual),"Expecting 1 consensus sequence associated with this specimen.")
+        self.assertIn(358301, actual, "Sequence id 358301 is expected to be associated with specimen 4405.")
     
     def testCreateGetDeleteSequence(self):
         # create

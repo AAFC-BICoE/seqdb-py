@@ -254,7 +254,7 @@ class seqdbWebService:
        
 
     def getAllSequenceIds(self, 
-                         specimenNums=None,
+                         specimenNum=None,
                          sequenceName=None,
                          pubRefSeq=None,
                          genBankGI=None,
@@ -285,9 +285,8 @@ class seqdbWebService:
         
         params = ""
         
-        if specimenNums:
-            for specimenNum in specimenNums:
-                params = "%sfilterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %(params,specimenNum)
+        if specimenNum:
+            params = "%sfilterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %(params,specimenNum)
     
         if sequenceName:
             params = "%sfilterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %(params,sequenceName)
@@ -570,7 +569,7 @@ class seqdbWebService:
 
 
     def getAllConsensusSequenceIds(self, 
-                                  specimenNums=None,
+                                  specimenNum=None,
                                   sequenceName=None,
                                   pubRefSeq=None,
                                   genBankGI=None,
@@ -581,7 +580,7 @@ class seqdbWebService:
                                   offset=0):
         ''' Returns sequence ids, limited by the specified filter parameters
         Agrs:
-            specimenNums: list of specimen number (identifier) for which sequence IDs will be retrieved
+            specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
@@ -600,9 +599,8 @@ class seqdbWebService:
         '''
         params = ''
 
-        if specimenNums:
-            for specimenNum in specimenNums:
-                params = params + "filterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %specimenNum
+        if specimenNum:
+            params = params + "filterName=specimen.number&filterValue=%s&filterWildcard=false&" %specimenNum
             
         if sequenceName:
             params = params + "filterName=sequence.name&filterValue=%s&filterWildcard=true&" %sequenceName
