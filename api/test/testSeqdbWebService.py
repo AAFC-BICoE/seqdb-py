@@ -145,6 +145,19 @@ class TestSeqdbWebService(unittest.TestCase):
         delete_jsn_resp = self.fixture.deleteDetermination(det_id)
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete determination.")
     
+    def testGetAcceptedSpecimenDetermination(self):
+        actual = self.fixture.getAcceptedSpecimenDetermination(27755)
+        self.assertTrue(actual, "Expecting accepted determination, but got none.")
+        self.assertEquals("Fungi", actual['taxonomy']['kingdom'], "Expecting kingdom Fungi, but got {}".format(actual['taxonomy']['kingdom']))
+        self.assertEquals("arrhenomanes", actual['taxonomy']['species'], "Expecting species arrhenomanes, but got {}".format(actual['taxonomy']['species']))
+
+        actual = self.fixture.getAcceptedSpecimenDetermination(358301)
+        self.assertTrue(actual, "Expecting accepted determination, but got none.")
+        self.assertEquals("Oomycota", actual['taxonomy']['phylum'], "Expecting phylum Oomycota, but got {}".format(actual['taxonomy']['phylum']))
+        self.assertEquals("Pythiales", actual['taxonomy']['taxanomicOrder'], "Expecting order Pythiales, but got {}".format(actual['taxonomy']['taxanomicOrder']))
+        
+        
+    
     ###########################################################################
     # Gene Region
     ###########################################################################
