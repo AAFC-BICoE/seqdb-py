@@ -4,20 +4,21 @@ Created on Oct 16, 2015
 @author: korolo
 '''
 import unittest
+import yaml
+
 from tools import pull_seqdb_seqs
 from api.seqdbWebService import seqdbWebService
+from config import config_root
 
-test_url = '***REMOVED***:2002/seqdb/api/v1/'
-test_api_key = '***REMOVED***'
 
 class Test(unittest.TestCase):
 
-    def setUp(self):
-        self.fixture = seqdbWebService(test_api_key, test_url)
-        
+    @classmethod
+    def setUpClass(self):
+        config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
+        self.fixture = seqdbWebService(api_key=config['seqdb_api_key'],
+                                                   base_url=config['seqdb_api_url'])
     
-    def tearDown(self):
-        pass
         
     def test_get_ITS_seq_ids(self): 
         # Takes a few minutes to run   

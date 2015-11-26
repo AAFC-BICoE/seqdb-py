@@ -102,7 +102,7 @@ def get_ITS_seq_ids(seqdbWS):
     for its_region_keyword in its_region_names:
         #TODO: parallelize; use locking when appending to its_seq_ids
         try:
-            curr_seq_ids = seqdbWS.getAllSequenceIds(regionName=its_region_keyword)
+            curr_seq_ids = seqdbWS.getSequenceIds(regionName=its_region_keyword)
             its_seq_ids.update(curr_seq_ids)    
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
@@ -165,7 +165,7 @@ def get_seq_ids(seqdbWS, pull_type,
                 if not specimen_nums:
                     specimen_nums = [None]
                 for specimen_num in specimen_nums:
-                    curr_seq_ids = seqdbWS.getAllConsensusSequenceIds(specimenNum=specimen_num, 
+                    curr_seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, 
                                                           sequenceName=sequence_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
@@ -180,7 +180,7 @@ def get_seq_ids(seqdbWS, pull_type,
                 if not specimen_nums:
                     specimen_nums = [None]
                 for specimen_num in specimen_nums:
-                    curr_seq_ids = seqdbWS.getAllSequenceIds(specimenNum=specimen_num, 
+                    curr_seq_ids = seqdbWS.getSequenceIds(specimenNum=specimen_num, 
                                                 sequenceName=sequence_name,
                                                 pubRefSeq=pub_ref_seqs,
                                                 regionName=region_name,

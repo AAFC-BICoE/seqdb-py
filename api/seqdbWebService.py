@@ -253,7 +253,7 @@ class seqdbWebService:
         return sequence_ids, result_offset
        
 
-    def getAllSequenceIds(self, 
+    def getSequenceIds(self, 
                          specimenNum=None,
                          sequenceName=None,
                          pubRefSeq=None,
@@ -301,7 +301,7 @@ class seqdbWebService:
             params = params + "filterName=region.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %regionName
             
         if projectName:
-            project_ids = self.getAllProjectTagIds(projectName)
+            project_ids = self.getProjectTagIds(projectName)
             
             if len(project_ids) == 1:
                 params = params + "tagId=%s&" %project_ids[0]
@@ -568,7 +568,7 @@ class seqdbWebService:
         return jsn_resp
 
 
-    def getAllConsensusSequenceIds(self, 
+    def getConsensusSequenceIds(self, 
                                   specimenNum=None,
                                   sequenceName=None,
                                   pubRefSeq=None,
@@ -615,7 +615,7 @@ class seqdbWebService:
             params = params + "filterName=region.name&filterValue=%s&filterWildcard=true&" %regionName
 
         if projectName:
-            project_ids = self.getAllProjectTagIds(projectName)
+            project_ids = self.getProjectTagIds(projectName)
             
             if len(project_ids) == 1:
                 params = params + "tagId=%s&" %project_ids[0]
@@ -1182,7 +1182,7 @@ class seqdbWebService:
         return tag_ids, result_offset
 
 
-    def getAllProjectTagIds(self, name=None):
+    def getProjectTagIds(self, name=None):
         ''' Companion method to getProjectTagWithOffset. Returns all the results, iterating with offset.
         '''
         

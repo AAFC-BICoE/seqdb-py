@@ -8,29 +8,29 @@ Note: these tests should be run against a local SeqDB instance only. They do not
     Therefore, these tests are brittle. They depend not only on the current content of your 
     local SeqDB, but also on the information that you have access to (i.e. groups you're 
     part of). Here, by "you" I mean the user whose API Key is used for testing (seqdb_api_key)
-    
+
+Before running the tests:
+    - Make suse that config/config4tests.yaml is created from sample and the modified to point
+     to local instance of SeqDB
+    - Make sure that local instance of SeqDB is running
 
 @author: korolo
 '''
 import requests
 import unittest 
+import yaml
 
 from api import seqdbWebService
+from config import config_root
 
-#from seqdb_ws import json_seqdb_request, seqdb_ws_request
-
-seqdb_api_url = "***REMOVED***:2002/seqdb/api/v1/"
-seqdb_api_key = "***REMOVED***"
 
 class TestSeqdbWebService(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
+        self.fixture = seqdbWebService.seqdbWebService(api_key=config['seqdb_api_key'],
+                                                   base_url=config['seqdb_api_url'])
     
-    def setUp(self):
-        
-        self.fixture = seqdbWebService.seqdbWebService(api_key=seqdb_api_key, base_url=seqdb_api_url)
-    
-    def tearDown(self):
-        pass
-
     def testRetrieve(self):
         # Test faulty connection
         self.assertRaises(requests.exceptions.ConnectionError, self.fixture.retrieve, "http://jibberish")
@@ -58,7 +58,7 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
         
     def testGetSequenceIds(self):
-        actual = self.fixture.getAllSequenceIds(specimenNum=4405)
+        actual = self.fixture.getSequenceIds(specimenNum=4405)
         self.assertTrue(actual, "No Sequence ids returned.")
         self.assertEqual(23, len(actual),"Expecting 23 sequences associated with this specimen.")
         self.assertIn(27755, actual, "Sequence id 27755 is expected to be associated with specimen 4405.")
@@ -106,7 +106,7 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
     
     def testGetConsensusSequenceIds(self):
-        actual = self.fixture.getAllConsensusSequenceIds(specimenNum=4405)
+        actual = self.fixture.getConsensusSequenceIds(specimenNum=4405)
         self.assertTrue(actual, "No Sequence ids returned.")
         self.assertEqual(1, len(actual),"Expecting 1 consensus sequence associated with this specimen.")
         self.assertIn(358301, actual, "Sequence id 358301 is expected to be associated with specimen 4405.")
@@ -118,7 +118,7 @@ class TestSeqdbWebService(unittest.TestCase):
         self.assertEqual(errCod, 201, "Did not get successful exit code for create consensus sequence.")
         
         # get
-        seqIds = self.fixture.getAllConsensusSequenceIds(sequenceName="Test")
+        seqIds = self.fixture.getConsensusSequenceIds(sequenceName="Test")
         self.assertTrue(seqIds, "Creating consensus sequence did not return an id.")
         self.assertIn(seqId, seqIds, "Expected sequence id was not in the result.")
         
