@@ -290,8 +290,8 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
     for seq_id in seq_ids:
         
         try:
-            # This is mothur taxonomy; Full version has 13 ranks
-            # http://www.mothur.org/wiki/Classify.seqs
+            # Quiime/Mothur taxonomy file format as described in Unite:
+            # https://unite.ut.ee/repository.php
             unclassified_keyword = u'unclassified'
             determ_jsn = seqdbWS.getAcceptedSpecimenDetermination(seq_id)
             if determ_jsn:
@@ -303,14 +303,14 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
                 t_genus = determ_jsn["taxonomy"]["genus"]
                 t_species = determ_jsn["taxonomy"]["species"]
                 
-                taxonomy_line = u'{}\t{};{};{};{};{};{};{};\n'.format(seq_id, 
-                    t_kingdom if t_kingdom else unclassified_keyword,
-                    t_phylum if t_phylum else unclassified_keyword,
-                    t_class if t_class else unclassified_keyword,
-                    t_order if t_order else unclassified_keyword,
-                    t_family if t_family else unclassified_keyword,
-                    t_genus if t_genus else unclassified_keyword,
-                    t_species if t_species else unclassified_keyword)
+                taxonomy_line = u'{}\tk__{};p__{};c__{};o__{};f__{};g__{};s__{};\n'.format(seq_id, 
+                    t_kingdom.replace(" ", "_") if t_kingdom else unclassified_keyword,
+                    t_phylum.replace(" ", "_") if t_phylum else unclassified_keyword,
+                    t_class.replace(" ", "_") if t_class else unclassified_keyword,
+                    t_order.replace(" ", "_") if t_order else unclassified_keyword,
+                    t_family.replace(" ", "_") if t_family else unclassified_keyword,
+                    t_genus.replace(" ", "_") if t_genus else unclassified_keyword,
+                    t_species.replace(" ", "_") if t_species else unclassified_keyword)
                 output_file.write(taxonomy_line)
                 success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
