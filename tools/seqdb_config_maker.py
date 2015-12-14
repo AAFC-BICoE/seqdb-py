@@ -2,20 +2,12 @@
 Created on May 28, 2015
 
 @author: korolo
-
-Usage:
-python pull_seqdb_its_seqs.py -k <SeqDB API key>
-or
-python pull_seqdb_its_seqs.py --seqdb_api_key <SeqDB API key>
--h is help
--p is to use production URL (uses ***REMOVED*** (Oksana's) machine by default, since we don't have UAT for SeqDB as of this time)
 '''
 import sys
 import os
 import getopt
 import logging.config
 import tools_helper
-from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
 
 
