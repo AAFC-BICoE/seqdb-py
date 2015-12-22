@@ -740,7 +740,7 @@ class seqdbWebService:
         ''' Returns an accepted determination of a SPECIMEN, which is associated with this sequence
         '''
 
-        jsn_resp = self.retrieveJson("sequence/{}/acceptedSpecimenDetermination".format(sequence_id))
+        jsn_resp = self.retrieveJson("/sequence/{}/acceptedSpecimenDetermination".format(sequence_id))
         
         if jsn_resp:
             return jsn_resp['result']
