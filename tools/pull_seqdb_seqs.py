@@ -296,21 +296,61 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
             determ_jsn = seqdbWS.getAcceptedSpecimenDetermination(seq_id)
             if determ_jsn:
                 t_kingdom = determ_jsn["taxonomy"]["kingdom"]
-                t_phylum = determ_jsn["taxonomy"]["phylum"]
-                t_class = determ_jsn["taxonomy"]["taxanomicClass"]
-                t_order = determ_jsn["taxonomy"]["taxanomicOrder"]
-                t_family = determ_jsn["taxonomy"]["family"]
-                t_genus = determ_jsn["taxonomy"]["genus"]
-                t_species = determ_jsn["taxonomy"]["species"]
+                if t_kingdom:
+                    t_kingdom.replace(" ", "_")
+                else:
+                    t_kingdom = unclassified_keyword
                 
-                taxonomy_line = u'{}\tk__{};p__{};c__{};o__{};f__{};g__{};s__{};\n'.format(seq_id, 
-                    t_kingdom.replace(" ", "_") if t_kingdom else unclassified_keyword,
-                    t_phylum.replace(" ", "_") if t_phylum else unclassified_keyword,
-                    t_class.replace(" ", "_") if t_class else unclassified_keyword,
-                    t_order.replace(" ", "_") if t_order else unclassified_keyword,
-                    t_family.replace(" ", "_") if t_family else unclassified_keyword,
-                    t_genus.replace(" ", "_") if t_genus else unclassified_keyword,
-                    t_species.replace(" ", "_") if t_species else unclassified_keyword)
+                t_phylum = determ_jsn["taxonomy"]["phylum"]
+                if t_phylum:
+                    t_phylum.replace(" ", "_")  
+                else:
+                    t_phylum = unclassified_keyword
+                
+                t_class = determ_jsn["taxonomy"]["taxanomicClass"]
+                if t_class:
+                    t_class.replace(" ", "_")
+                else: 
+                    t_class = unclassified_keyword
+                
+                t_order = determ_jsn["taxonomy"]["taxanomicOrder"]
+                if t_order:
+                    t_order.replace(" ", "_")
+                else:
+                    t_order = unclassified_keyword
+                
+                t_family = determ_jsn["taxonomy"]["family"]
+                if t_family:
+                    t_family.replace(" ", "_")
+                else:
+                    t_family = unclassified_keyword
+                
+                t_genus = determ_jsn["taxonomy"]["genus"]
+                if t_genus:
+                    t_genus.replace(" ", "_")
+                else:
+                    t_genus = unclassified_keyword
+                
+                t_species = determ_jsn["taxonomy"]["species"]
+                if t_species or determ_jsn["taxonomy"]["genus"]:
+                    if t_species:
+                            t_species.replace(" ", "_")
+                    else:
+                        t_species = "sp."
+
+                    t_species = "{}_{}".format(t_genus, t_species)
+                    
+                else:
+                    t_species = unclassified_keyword
+                
+                taxonomy_line = u'{}\tk__{};p__{};c__{};o__{};f__{};g__{};s__{}\n'.format(seq_id, 
+                    t_kingdom,
+                    t_phylum,
+                    t_class,
+                    t_order,
+                    t_family,
+                    t_genus,
+                    t_species)
                 output_file.write(taxonomy_line)
                 success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
