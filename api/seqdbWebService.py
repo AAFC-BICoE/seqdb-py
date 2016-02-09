@@ -256,6 +256,7 @@ class seqdbWebService:
     def getSequenceIds(self, 
                          specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -267,6 +268,7 @@ class seqdbWebService:
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
+            sampleName: name to identify the sample
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
             regionName: gene region name
@@ -290,6 +292,9 @@ class seqdbWebService:
     
         if sequenceName:
             params = "%sfilterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %(params,sequenceName)
+            
+        if sampleName:
+            params = "%sfilterName=sample.name&filterValue=%s&filterOperator=and&filterWildcard=false&" %(params, sampleName)
             
         if pubRefSeq:
             params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=false"
@@ -571,6 +576,7 @@ class seqdbWebService:
     def getConsensusSequenceIds(self, 
                                   specimenNum=None,
                                   sequenceName=None,
+                                  sampleName=None,
                                   pubRefSeq=None,
                                   genBankGI=None,
                                   regionName=None,
@@ -582,6 +588,7 @@ class seqdbWebService:
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
+            sampleName: name to identify the sample
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
             regionName: gene region name
@@ -604,6 +611,9 @@ class seqdbWebService:
             
         if sequenceName:
             params = params + "filterName=sequence.name&filterValue=%s&filterWildcard=true&" %sequenceName
+            
+        if sampleName:
+            params = params + "filterName=sample.name&filterValue=%s&filterWildcard=false&" %sampleName
         
         if pubRefSeq:
             params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
