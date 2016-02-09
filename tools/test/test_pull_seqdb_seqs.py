@@ -70,7 +70,10 @@ class Test(unittest.TestCase):
     def test_get_ids_sampleName(self):
         #time:
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", sample_name="abc")
-        self.assertEquals(2, len(seq_ids), "Expected 2 sequences, but got %i." % len(seq_ids))   
+        self.assertEquals(2, len(seq_ids), "Expected 2 sequences, but got %i. " % len(seq_ids))
+        
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", sample_name="LEV1848")
+        self.assertEquals(4, len(seq_ids), "Expected 4 sequences, but got %i. " % len(seq_ids))   
 
     def test_get_seq_ids_regionName(self): 
         # time: 0.091s   
