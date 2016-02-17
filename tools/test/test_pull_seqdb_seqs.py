@@ -19,12 +19,12 @@ class Test(unittest.TestCase):
         self.fixture = seqdbWebService(api_key=config['seqdb_api_key'],
                                                    base_url=config['seqdb_api_url'])
     
-        
+    '''    
     def test_get_ITS_seq_ids(self): 
         # time: 1117.424s    
         seq_ids = pull_seqdb_seqs.get_ITS_seq_ids(self.fixture)
         self.assertEqual(17787, len(seq_ids), "Expected 17787 ITS sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
-    
+    '''
     """        
     def test_get_seq_ids_all(self):    
         # Note: this test takes REALLY long time, like 40 hours long time
@@ -50,11 +50,11 @@ class Test(unittest.TestCase):
         self.assertIn(358301, seq_ids, "Sequence id 358301 is expected to be associated with specimen 4405.")
         self.assertIn(358302, seq_ids, "Sequence id 358302 is expected to be associated with specimen 4264.")
    
-        # all        
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, "all", [4405])  
+        # raw        
+        seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, "raw", [4405])  
         self.assertEqual(22 , len(seq_ids), "Expected 22 sequences, but got {}. ".format(len(seq_ids)))
         
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, "all", [4405,4264])  
+        seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, "raw", [4405,4264])  
         self.assertEqual(33 , len(seq_ids), "Expected 33 sequences, but got {}. ".format(len(seq_ids)))
         self.assertIn(27755, seq_ids, "Sequence id 27755 is expected to be associated with specimen 4405.")
         self.assertIn(28262, seq_ids, "Sequence id 358302 is expected to be associated with specimen 4264.")
@@ -70,7 +70,7 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", region_name="28s")  
         self.assertEqual(69, len(seq_ids), "Expected 69 sequences, but got %i. " % len(seq_ids))
  
-        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", region_name="ef-1a")  
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw", region_name="ef-1a")  
         self.assertEqual(492, len(seq_ids), "Expected 492 sequences, but got %i. " % len(seq_ids))
 
     def test_get_seq_ids_projectName(self):  
@@ -79,15 +79,15 @@ class Test(unittest.TestCase):
         self.assertEqual(5555, len(seq_ids), "Expected 5555 sequences, but got %i. " % len(seq_ids))
 
         # TODO: takes too long
-        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", project_name="Pythium Type Specimens")  
-        self.assertEqual(4373, len(seq_ids), "Expected 4373 sequences, but got %i. " % len(seq_ids))
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw", project_name="Pythium Type Specimens")  
+        self.assertEqual(4331, len(seq_ids), "Expected 4331 sequences, but got %i. " % len(seq_ids))
 
     def test_get_seq_ids_colletionCode(self): 
         # time: 1.35s
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", collection_code="lev")  
         self.assertEqual(211, len(seq_ids), "Expected 211 sequences, but got %i. " % len(seq_ids))
   
-        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", collection_code="pm")  
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw", collection_code="pm")  
         self.assertEqual(148, len(seq_ids), "Expected 32936 sequences, but got %i. " % len(seq_ids))
 
 
@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", taxonomy_rank="species", taxonomy_value="megasperma")  
         self.assertEqual(3, len(seq_ids), "Expected 3 sequences, but got %i. " % len(seq_ids))
 
-        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", taxonomy_rank="species", taxonomy_value="megasperma")  
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw", taxonomy_rank="species", taxonomy_value="megasperma")  
         self.assertEqual(215, len(seq_ids), "Expected 215 sequences, but got %i. " % len(seq_ids))
 
                 

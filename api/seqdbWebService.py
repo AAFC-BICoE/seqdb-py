@@ -29,7 +29,7 @@ class UnexpectedContent(requests.exceptions.RequestException):
 
 # CRUD (create, retrieve, update, delete)
 
-class seqdbWebService:
+class seqdbWebService(object):
 
     def __init__(self, api_key, base_url):
         self.api_key = api_key
@@ -325,15 +325,15 @@ class seqdbWebService:
         return sequence_ids, result_offset
 
        
-    def getRawSequencesFastaWithOffset(self, specimenNum=None,
+    def getRawSequencesFastaWithOffset(self, offset, 
+                         specimenNum=None,
                          sequenceName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
                          projectName=None,
                          collectionCode=None,
-                         taxonomyRank=None, taxonomyValue=None,
-                         offset):
+                         taxonomyRank=None, taxonomyValue=None):
         ''' Returns raw sequences in fasta format, limited by the specified filter parameters
         Agrs:
             params: string with API parameters, to be apended to the request URL
@@ -356,9 +356,9 @@ class seqdbWebService:
                          collectionCode=collectionCode,
                          taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
         
-        fasta_resp = self.retrieve(self.base_url + "/sequence/.fasta", params=params)
+        resp = self.retrieve(self.base_url + "/sequence.fasta", params=params)
         
-
+        fasta_resp = resp.content
         #fasta_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence.fasta", params=params, offset=offset)
         
         
@@ -368,7 +368,7 @@ class seqdbWebService:
         return fasta_resp
        
 
-    def getSequenceIds(self, 
+    def getRawSequenceIds(self, 
                          specimenNum=None,
                          sequenceName=None,
                          pubRefSeq=None,
@@ -426,7 +426,7 @@ class seqdbWebService:
         return seq_ids
 
    
-    def getSequenceIdsByRegionWithOffset(self, region_id, offset=0):
+    def getRawSequenceIdsByRegionWithOffset(self, region_id, offset=0):
         ''' Given a region id, return sequence ids, belonging to this region
         Returns:
             a list of seqdb sequence ids for the created sequences OR empty
@@ -540,7 +540,7 @@ class seqdbWebService:
                 blob=blob, dest_file_name=dest_file_name,
                 notes=notes, trace_file_path=trace_file_path)
 
-    def deleteSequence(self, seq_id):
+    def deleteRawSequence(self, seq_id):
         ''' Deletes a SeqDB sequence
         Args:
             seq_id: id of the sequence to be deleted
@@ -558,7 +558,7 @@ class seqdbWebService:
 
         return jsn_resp
 
-    def bulkDeleteSequence(self, seq_ids):
+    def bulkDeleteRawSequence(self, seq_ids):
         ''' Deletes a list of SeqDB sequences
         Args:
             seq_ids: list of seqdb sequence ids to be deleted
@@ -569,7 +569,7 @@ class seqdbWebService:
             UnexpectedContent
         '''
         for seq_id in seq_ids:
-            self.deleteSequence(seq_id)
+            self.deleteRawSequence(seq_id)
 
     def updateSeqSource(self, sequenceId, params):
         resp = self.update(
