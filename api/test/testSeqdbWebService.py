@@ -60,9 +60,9 @@ class TestSeqdbWebService(unittest.TestCase):
     def testGetSequenceIds(self):
         actual = self.fixture.getSequenceIds(specimenNum=4405)
         self.assertTrue(actual, "No Sequence ids returned.")
-        self.assertEqual(23, len(actual),"Expecting 23 sequences associated with this specimen.")
+        self.assertEqual(22, len(actual),"Expecting 22 sequences associated with this specimen.")
         self.assertIn(27755, actual, "Sequence id 27755 is expected to be associated with specimen 4405.")
-        self.assertIn(358301, actual, "Sequence id 358301 is expected to be associated with specimen 4405.")  
+        self.assertIn(65881, actual, "Sequence id 65881 is expected to be associated with specimen 4405.")  
 
     def testCreateChromatSequence_wrong_path(self):
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "data/")

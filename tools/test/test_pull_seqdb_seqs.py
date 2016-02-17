@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
     def test_get_seq_ids_consensus(self):
         # time: 4.493s 
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus")
-        self.assertEqual(3035 , len(seq_ids), "Expected 3035 consensus sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
+        self.assertEqual(5555 , len(seq_ids), "Expected 5555 consensus sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
         
     def test_get_seq_ids_specimen(self):  
         # time: 3.131s
@@ -69,11 +69,11 @@ class Test(unittest.TestCase):
     # This test method hasn't been checked yet, because I need to figure out how to run it.      
     def test_get_ids_sampleName(self):
         #time:
-        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", sample_name="abc")
-        self.assertEquals(2, len(seq_ids), "Expected 2 sequences, but got %i. " % len(seq_ids))
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", sample_name="LEV4183")
+        self.assertEquals(1, len(seq_ids), "Expected 1 sequence, but got %i. " % len(seq_ids))
         
-        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", sample_name="LEV1848")
-        self.assertEquals(4, len(seq_ids), "Expected 4 sequences, but got %i. " % len(seq_ids))   
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", sample_name="LEV6103")
+        self.assertEquals(60, len(seq_ids), "Expected 60 sequences, but got %i. " % len(seq_ids))   
 
     def test_get_seq_ids_regionName(self): 
         # time: 0.091s   
