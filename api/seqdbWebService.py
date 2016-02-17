@@ -274,7 +274,29 @@ class seqdbWebService:
             
         return params
 
-
+    
+    def getRawSeqNum(self, specimenNum=None,
+                         sequenceName=None,
+                         pubRefSeq=None,
+                         genBankGI=None,
+                         regionName=None,
+                         projectName=None,
+                         collectionCode=None,
+                         taxonomyRank=None, taxonomyValue=None):
+        ''' Returns number of raw sequences, depending on the filters specified.
+        '''
+        params = self.createSequenceParamsStr(specimenNum=specimenNum,
+                         sequenceName=sequenceName,
+                         pubRefSeq=pubRefSeq,
+                         genBankGI=genBankGI,
+                         regionName=regionName,
+                         projectName=projectName,
+                         collectionCode=collectionCode,
+                         taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+        jsn_resp = self.retrieveJson("/sequence", params)
+        result_num = int(jsn_resp['metadata']['resultCount'])
+        
+        return result_num
 
 
     def getSequenceIdsWithOffset(self, params=None, offset=0):
@@ -303,7 +325,7 @@ class seqdbWebService:
         return sequence_ids, result_offset
 
        
-    def getFastaSequencesWithOffset(self, specimenNum=None,
+    def getRawSequencesFastaWithOffset(self, specimenNum=None,
                          sequenceName=None,
                          pubRefSeq=None,
                          genBankGI=None,
@@ -311,15 +333,13 @@ class seqdbWebService:
                          projectName=None,
                          collectionCode=None,
                          taxonomyRank=None, taxonomyValue=None,
-                         offset=0):
+                         offset):
         ''' Returns raw sequences in fasta format, limited by the specified filter parameters
         Agrs:
             params: string with API parameters, to be apended to the request URL
-            offset: nothing if it is a first query, then number of records from which to load the next set of ids
+            offset: the number of records from which to load the next set of fasta sequences
         Returns:
             a list of seqdb sequences in fasta format
-            offset of results. If 0 then all/last set of results have been retrieved, if > 0,
-                then the function has to be called again with this offset to retrieve more results
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout
@@ -336,19 +356,16 @@ class seqdbWebService:
                          collectionCode=collectionCode,
                          taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
         
-        url = self.base_url + "/sequence/.fasta"
-        resp = self.retrieve(self.base_url + "/sequence/.fasta", params=params)
+        fasta_resp = self.retrieve(self.base_url + "/sequence/.fasta", params=params)
         
-        response = self.retrieve(url)
-        return response.content
 
-        fasta_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence.fasta", params=params, offset=offset)
+        #fasta_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence.fasta", params=params, offset=offset)
         
         
         if fasta_resp and fasta_resp[0]!=">":
             raise UnexpectedContent("Response is not in fasta format.")
         
-        return fasta_resp, result_offset
+        return fasta_resp
        
 
     def getSequenceIds(self, 
@@ -640,6 +657,29 @@ class seqdbWebService:
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
+    
+    def getConsensusSeqNum(self, specimenNum=None,
+                         sequenceName=None,
+                         pubRefSeq=None,
+                         genBankGI=None,
+                         regionName=None,
+                         projectName=None,
+                         collectionCode=None,
+                         taxonomyRank=None, taxonomyValue=None):
+        ''' Returns number of raw sequences, depending on the filters specified.
+        '''
+        params = self.createSequenceParamsStr(specimenNum=specimenNum,
+                         sequenceName=sequenceName,
+                         pubRefSeq=pubRefSeq,
+                         genBankGI=genBankGI,
+                         regionName=regionName,
+                         projectName=projectName,
+                         collectionCode=collectionCode,
+                         taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+        jsn_resp = self.retrieveJson("/consensus", params)
+        result_num = int(jsn_resp['metadata']['resultCount'])
+        
+        return result_num
 
 
     def getConsensusSequenceIds(self, 
