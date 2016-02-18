@@ -97,9 +97,14 @@ class TestSeqdbWebService(unittest.TestCase):
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete feature type.")     
         
     def testGetFastaSeq(self):
-        actual = self.fixture.getFastaSeq("1")
+        actual = self.fixture.getFormattedSeq("1", "fasta")
         self.assertTrue(actual, "Fasta sequence is empty.")
         self.assertIn(">", actual, "Fasta does not contain >.")        
+    
+    def testGetFastqSeq(self):
+        actual = self.fixture.getFormattedSeq("1", "fastq")
+        self.assertTrue(actual, "Fastq sequence is empty.")
+        self.assertIn("@seqdb", actual, "Fastq does not contain @seqdb.")        
 
     def testGetFastaSeqPlus(self):
         # "http://localhost:2002/seqdb\/api/v1/sequence/1"
