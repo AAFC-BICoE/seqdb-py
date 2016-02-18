@@ -66,7 +66,8 @@ def parse_input_args(argv):
     parser.add_argument('-r', help="Reurn file type: fasta (default) or fastq", dest="return_type", required=False)    
     parser.add_argument('-t', help="Output taxonomy file as well as sequence file", dest="output_taxonomy_file", action='store_true', required=False)
     parser.add_argument('--specNums', help="Specimen number(s). If multiple, separate by comma.", dest="specimen_nums", required=False)    
-    parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)   
+    parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)
+    parser.add_argument('--sampleName', help="Sample name (keyword)", dest="sample_name", required=False)   
     parser.add_argument('--geneRegion', help="Gene region name (keyword)", dest="gene_region_name", required=False)    
     parser.add_argument('--projectName', help="Project Name (keyword)", dest="project_name", required=False)    
     parser.add_argument('--collectionCode', help="Collection code (keyword)", dest="collection_code", required=False)    
@@ -148,7 +149,8 @@ def get_ITS_seq_ids(seqdbWS):
     
 def get_seq_ids(seqdbWS, pull_type,
                 specimen_nums=None, 
-                sequence_name=None, 
+                sequence_name=None,
+                sample_name=None, 
                 pub_ref_seqs=None, 
                 region_name=None, 
                 project_name=None,
@@ -176,7 +178,8 @@ def get_seq_ids(seqdbWS, pull_type,
                     specimen_nums = [None]
                 for specimen_num in specimen_nums:
                     curr_seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, 
-                                                          sequenceName=sequence_name, 
+                                                          sequenceName=sequence_name,
+                                                          sampleName=sample_name, 
                                                           pubRefSeq=pub_ref_seqs,
                                                           regionName=region_name,
                                                           projectName=project_name,
@@ -196,6 +199,7 @@ def get_seq_ids(seqdbWS, pull_type,
                 for specimen_num in specimen_nums:
                     curr_seq_ids = seqdbWS.getRawSequenceIds(specimenNum=specimen_num, 
                                                 sequenceName=sequence_name,
+                                                sampleName=sample_name,
                                                 pubRefSeq=pub_ref_seqs,
                                                 regionName=region_name,
                                                 projectName=project_name,
@@ -238,7 +242,8 @@ def get_seq_ids(seqdbWS, pull_type,
 def retrieve_write_raw_sequences_file(seqdbWS, 
                                       file_name, file_type, file_append,
                                       specimenNum=None, 
-                                      sequenceName=None, 
+                                      sequenceName=None,
+                                      sampleName=None, 
                                       pubRefSeq=None,
                                       regionName=None,
                                       projectName=None,
@@ -254,7 +259,8 @@ def retrieve_write_raw_sequences_file(seqdbWS,
 
     #TODO: implement offsetting and increase the limit
     fasta_seqs = seqdbWS.getRawSequencesFastaWithOffset(specimenNum=specimenNum, 
-                                                          sequenceName=sequenceName, 
+                                                          sequenceName=sequenceName,
+                                                          sampleName=sampleName, 
                                                           pubRefSeq=pubRefSeq,
                                                           regionName=regionName,
                                                           projectName=projectName,
@@ -483,6 +489,7 @@ def main():
                               pull_type=parsed_args.seq_type, 
                               specimen_nums=specimen_nums_list,
                               sequence_name=parsed_args.sequence_name,
+                              sample_name=parsed_args.sample_name,
                               region_name=parsed_args.gene_region_name,
                               project_name=parsed_args.project_name,
                               collection_code=parsed_args.collection_code,
