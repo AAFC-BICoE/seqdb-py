@@ -42,7 +42,7 @@ output_taxonomy_file_name = "seqdb_taxonomy_file.txt"
 user_log = tools_helper.SimpleLog("seqdb_pull.log")
 # Values for the types of sequences this script downloads. I.e. "its" loads 
 # ITS sequences. Note that raw sequences are not implemented in SeqDB yet. "raw":"raw",
-pull_types_dict = {"its":"its", "consensus":"consensus", "all":"all"}
+pull_types_dict = {"its":"its", "consensus":"consensus", "raw":"raw", "all":"all"}
 # Taxonomy ranks that can be specified as a filter parameter with corresponding value
 # These are used as a drop-down value in the wrapper
 taxonomy_ranks = {"species", "genus", "family", "order", "class", "phylum"}
@@ -103,7 +103,7 @@ def get_ITS_seq_ids(seqdbWS):
     for its_region_keyword in its_region_names:
         #TODO: parallelize; use locking when appending to its_seq_ids
         try:
-            curr_seq_ids = seqdbWS.getSequenceIds(regionName=its_region_keyword)
+            curr_seq_ids = seqdbWS.getRawSequenceIds(regionName=its_region_keyword)
             its_seq_ids.update(curr_seq_ids)    
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
@@ -180,10 +180,14 @@ def get_seq_ids(seqdbWS, pull_type,
                     
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
+                sys.exit("All sequence retrieval is not implemented yet.")
+                #seq_ids = seqdbWS.getRawSequenceIds()
+                #log_msg = "Number of raw sequences retrieved:"
+            elif pull_type == pull_types_dict["raw"]:
                 if not specimen_nums:
                     specimen_nums = [None]
                 for specimen_num in specimen_nums:
-                    curr_seq_ids = seqdbWS.getSequenceIds(specimenNum=specimen_num, 
+                    curr_seq_ids = seqdbWS.getRawSequenceIds(specimenNum=specimen_num, 
                                                 sequenceName=sequence_name,
                                                 sampleName=sample_name,
                                                 pubRefSeq=pub_ref_seqs,
@@ -194,11 +198,7 @@ def get_seq_ids(seqdbWS, pull_type,
                                                 taxonomyValue=taxonomy_value)
                     seq_ids.extend(curr_seq_ids)
                 
-                log_msg = "Number of sequences retrieved:"
-            elif pull_type == pull_types_dict["raw"]:
-                sys.exit("Raw sequence retrieval is not implemented yet.")
-                #seq_ids = seqdbWS.getRawSequenceIds()
-                #log_msg = "Number of raw sequences retrieved:"
+                log_msg = "Number of raw sequences retrieved:"
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
@@ -229,6 +229,35 @@ def get_seq_ids(seqdbWS, pull_type,
         
     return seq_ids
     
+def retrieve_write_raw_fasta_file(seqdbWS, 
+                                        fasta_file_name, file_append,
+                                      specimenNum=None, 
+                                      sequenceName=None, 
+                                      pubRefSeq=None,
+                                      regionName=None,
+                                      projectName=None,
+                                      collectionCode=None,
+                                      taxonomyRank=None, 
+                                      taxonomyValue=None):
+    if file_append:
+        output_file = open(fasta_file_name, 'a')
+    else:
+        output_file = open(fasta_file_name, 'w')
+        
+
+    #TODO: implement offsetting and increase the limit
+    fasta_seqs = seqdbWS.getRawSequencesFastaWithOffset(specimenNum=specimenNum, 
+                                                          sequenceName=sequenceName, 
+                                                          pubRefSeq=pubRefSeq,
+                                                          regionName=regionName,
+                                                          projectName=projectName,
+                                                          collectionCode=collectionCode,
+                                                          taxonomyRank=taxonomyRank, 
+                                                          taxonomyValue=taxonomyValue,
+                                                          offset=0)
+    output_file.write(fasta_seqs)                
+    output_file.close()
+         
          
 def write_fasta_file(seqdbWS, its_seq_ids, fasta_file_name):
     # Get fasta sequences based on ids and write to a file 
