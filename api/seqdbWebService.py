@@ -614,14 +614,17 @@ class seqdbWebService(object):
 
         return jsn_seq
 
-    def getFastaSeq(self, seq_id):
-        ''' Gets sequence in fasta format (SeqDB fasta request)
+    def getFormattedSeq(self, seq_id, format_type):
+        ''' Gets sequence in fasta or fastq format 
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout
             requests.exceptions.HTTPError
         '''
-        url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
+        if format_type not in {"fasta", "fastq"}:
+            raise SystemError("Sequences can only be in fasta or fastq format.")
+        
+        url = self.base_url + "/sequence/" + str(seq_id) + "." + format_type
         response = self.retrieve(url)
         return response.content
 
