@@ -235,8 +235,8 @@ def get_seq_ids(seqdbWS, pull_type,
         
     return seq_ids
     
-def retrieve_write_raw_fasta_file(seqdbWS, 
-                                        fasta_file_name, file_append,
+def retrieve_write_raw_sequences_file(seqdbWS, 
+                                      file_name, file_type, file_append,
                                       specimenNum=None, 
                                       sequenceName=None, 
                                       pubRefSeq=None,
@@ -245,11 +245,12 @@ def retrieve_write_raw_fasta_file(seqdbWS,
                                       collectionCode=None,
                                       taxonomyRank=None, 
                                       taxonomyValue=None):
+    file_name = file_name + file_type
+    
     if file_append:
-        output_file = open(fasta_file_name, 'a')
+        output_file = open(file_name, 'a')
     else:
-        output_file = open(fasta_file_name, 'w')
-        
+        output_file = open(file_name, 'w')
 
     #TODO: implement offsetting and increase the limit
     fasta_seqs = seqdbWS.getRawSequencesFastaWithOffset(specimenNum=specimenNum, 
