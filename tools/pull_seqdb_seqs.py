@@ -33,7 +33,7 @@ import tools_helper
 ### Values below are used in Galaxy wrappers, so make sure you know what 
 ### you're doing if you're changing any of them 
 # File name where the pulled sequences will be stored. 
-output_file_name = "seqdb_sequences.fasta"
+output_file_name = "seqdb_sequences."
 # File name where taxonomy for the sequences will be stored. Optional output. 
 output_taxonomy_file_name = "seqdb_taxonomy_file.txt"
 # This log will provide users of Galaxy with extra information on the tool 
@@ -43,6 +43,7 @@ user_log = tools_helper.SimpleLog("seqdb_pull.log")
 # Values for the types of sequences this script downloads. I.e. "its" loads 
 # ITS sequences. Note that raw sequences are not implemented in SeqDB yet. "raw":"raw",
 pull_types_dict = {"its":"its", "consensus":"consensus", "raw":"raw", "all":"all"}
+return_types = {"fasta", "fastq"}
 # Taxonomy ranks that can be specified as a filter parameter with corresponding value
 # These are used as a drop-down value in the wrapper
 taxonomy_ranks = {"species", "genus", "family", "order", "class", "phylum"}
@@ -61,8 +62,9 @@ def parse_input_args(argv):
     parser.add_argument('seq_type', help="Type of sequences to load", type=str, choices=pull_types_set)
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
-    parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
-    parser.add_argument('-t', help="Output taxonomy file as well as fasta", dest="output_taxonomy_file", action='store_true', required=False)
+    parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)
+    parser.add_argument('-r', help="Reurn file type: fasta (default) or fastq", dest="return_type", required=False)    
+    parser.add_argument('-t', help="Output taxonomy file as well as sequence file", dest="output_taxonomy_file", action='store_true', required=False)
     parser.add_argument('--specNums', help="Specimen number(s). If multiple, separate by comma.", dest="specimen_nums", required=False)    
     parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)   
     parser.add_argument('--geneRegion', help="Gene region name (keyword)", dest="gene_region_name", required=False)    
@@ -74,7 +76,15 @@ def parse_input_args(argv):
     #parser.add_argument('-t', help="Type of sequences to load", dest="load_type", type=str, choices=set(("its","consensus")), required=True)
     
     args = parser.parse_args(argv)
-
+    
+    if not (args.return_type):
+        args.return_type = "fasta"
+    elif args.return_type not in return_types:
+        parser.error('Return type (-r) should be one of the following: {}'.format(return_types))
+    elif args.return_type == "fastq" and args.seq_type != pull_types_dict["raw"]:
+        parser.error('Fastq file format is only possible for raw sequences.')
+        
+        
     if not (args.config_file or (args.api_url and args.api_key)):
         parser.error('Either -c <configuration file>, or -u <api_url> -k <api_key> have to be specified')
     
@@ -255,9 +265,9 @@ def retrieve_write_raw_fasta_file(seqdbWS,
     output_file.close()
          
          
-def write_fasta_file(seqdbWS, its_seq_ids, fasta_file_name):
+def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
     # Get fasta sequences based on ids and write to a file 
-    output_file = open(fasta_file_name, 'w')
+    output_file = open(file_name + file_type, 'w')
     
     success_ids = []
     for seq_id in its_seq_ids:
@@ -269,8 +279,8 @@ def write_fasta_file(seqdbWS, its_seq_ids, fasta_file_name):
         '''
         try:
             # Request sequence in fasto format from SeqDB:
-            fastaSequence = seqdbWS.getFastaSeq(seq_id)
-            output_file.write(fastaSequence)
+            sequence = seqdbWS.getFormattedSeq(seq_id, file_type)
+            output_file.write(sequence)
             success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
             user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
@@ -478,8 +488,8 @@ def main():
                               pub_ref_seqs=parsed_args.pub_ref_seqs,
                               taxonomy_rank=parsed_args.tax_rank,
                               taxonomy_value=parsed_args.tax_value)
-
-    success_seq_ids = write_fasta_file(seqdbWS, seq_ids, output_file_name)
+   
+    success_seq_ids = write_sequence_file(seqdbWS, seq_ids, output_file_name, parsed_args.return_type)
     if (parsed_args.output_taxonomy_file):
         write_taxonomy_file(seqdbWS, seq_ids, output_taxonomy_file_name)
         print("Taxonomy file is written to a file: '%s'" % output_taxonomy_file_name)
@@ -488,7 +498,7 @@ def main():
     ### Post-execution: messages and logging
     
     print("Number of sequences retrieved from Sequence Dababase:  %s" % len(success_seq_ids)) 
-    print("Sequences are written to a file: '%s'" % output_file_name)
+    print("Sequences are written to a file: '%s'" % output_file_name + str(parsed_args.return_type))
     #print("Execution log is written to a file: '%s'" % user_log.getFileName())
     print("Execution complete.")
 
