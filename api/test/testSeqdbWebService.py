@@ -71,6 +71,7 @@ class TestSeqdbWebService(unittest.TestCase):
         self.assertIn(27755, actual, "Sequence id 27755 is expected to be associated with specimen 4405.")
         self.assertNotIn(358301, actual, "Sequence id 358301 is not expected to be in results, since it is consensus.")  
 
+
     def testCreateChromatSequence_wrong_path(self):
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "data/")
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "zzz/non-existent.ab1")

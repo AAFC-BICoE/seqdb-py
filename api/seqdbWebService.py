@@ -229,6 +229,7 @@ class seqdbWebService(object):
     def createSequenceParamsStr(self, 
                          specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -245,6 +246,9 @@ class seqdbWebService(object):
     
         if sequenceName:
             params = params + "filterName=sequence.name&filterValue=%s&filterWildcard=true&" %sequenceName
+            
+        if sampleName:
+            params = params + "filterName=sample.name&filterValue=%s&filterWildcard=true&" %sampleName
             
         if pubRefSeq:
             params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
@@ -277,6 +281,7 @@ class seqdbWebService(object):
     
     def getRawSeqNum(self, specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -287,6 +292,7 @@ class seqdbWebService(object):
         '''
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
@@ -328,6 +334,7 @@ class seqdbWebService(object):
     def getRawSequencesFastaWithOffset(self, offset, 
                          specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -349,6 +356,7 @@ class seqdbWebService(object):
         
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
@@ -371,6 +379,7 @@ class seqdbWebService(object):
     def getRawSequenceIds(self, 
                          specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -382,6 +391,7 @@ class seqdbWebService(object):
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
+            sampleName: name to identify the sample
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
             regionName: gene region name
@@ -398,14 +408,17 @@ class seqdbWebService(object):
             UnexpectedContent
         '''
         
+        
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
                          projectName=projectName,
                          collectionCode=collectionCode,
                          taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+          
           
         seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params)
         while resultOffset:
@@ -660,6 +673,7 @@ class seqdbWebService(object):
     
     def getConsensusSeqNum(self, specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -670,6 +684,7 @@ class seqdbWebService(object):
         '''
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
@@ -685,6 +700,7 @@ class seqdbWebService(object):
     def getConsensusSequenceIds(self, 
                                   specimenNum=None,
                                   sequenceName=None,
+                                  sampleName=None,
                                   pubRefSeq=None,
                                   genBankGI=None,
                                   regionName=None,
@@ -696,6 +712,7 @@ class seqdbWebService(object):
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
+            sampleName: name to identify the sample
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
             regionName: gene region name
@@ -711,8 +728,10 @@ class seqdbWebService(object):
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
+        
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
@@ -720,6 +739,7 @@ class seqdbWebService(object):
                          collectionCode=collectionCode,
                          taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
                
+
         seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params)
         while resultOffset:
             more_seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params,
