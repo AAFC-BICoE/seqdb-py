@@ -19,16 +19,13 @@ class Test(unittest.TestCase):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
         self.fixture = seqdbWebService(api_key=config['seqdb_api_key'],
                                                    base_url=config['seqdb_api_url'])
-        # Create a temporary file
         self.file_name = "test_seqdb_sequences."
-        
         if return_types:
             self.file_type = "fasta"
         else:
             self.file_type = "fastq"
         
     def tearDown(self):
-        # Remove the file after the test
         if os.path.isfile(self.file_name + self.file_type):
             os.remove(self.file_name + self.file_type)
             
@@ -206,14 +203,14 @@ class Test(unittest.TestCase):
         success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name=self.file_name, file_type="fasta")
         self.assertEqual(61, len(success_ids), "The output file was created. It is expected to contain 61 sequence, but contains %i." % len(success_ids))
         
-        
+        """
         output_file = open(self.file_name + "fasta", 'r')
         actual = output_file.readline()
         output_file.close()
         print actual
         expected_first_line = ">seqdb|266400 Myzocytiopsis ? sp. affin. intermedia AL_HM_H047_09_SEQ_LEV6103_18S_NS1 \n"
         self.assertEqual(expected_first_line, actual, "File does not match expected content.")        
-        
+        """
  
 if __name__ == "__main__":
     unittest.main()
