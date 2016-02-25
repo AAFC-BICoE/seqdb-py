@@ -25,10 +25,11 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_ITS_seq_ids(self.fixture)
         self.assertEqual(17787, len(seq_ids), "Expected 17787 ITS sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
     '''
-    """        
-    def test_get_seq_ids_all(self):    
-        # Note: this test takes REALLY long time, like 40 hours long time
-        seq_ids = pull_seqdb_seqs.get_seq_ids(fixture=self.fixture, pull_type="all")
+    
+    """       
+    def test_get_seq_ids_all(self):
+        # time: 9666.604s    
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all")
         self.assertEqual(485643 , len(seq_ids), "Expected 485,643 sequences (total), but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
     """
         
