@@ -3,12 +3,13 @@ Created on Oct 16, 2015
 
 @author: korolo
 '''
-import unittest
+import unittest, os
 import yaml
 
 from tools import pull_seqdb_seqs
 from api.seqdbWebService import seqdbWebService
 from config import config_root
+from tools.pull_seqdb_seqs import return_types
 
 
 class Test(unittest.TestCase):
@@ -18,7 +19,19 @@ class Test(unittest.TestCase):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
         self.fixture = seqdbWebService(api_key=config['seqdb_api_key'],
                                                    base_url=config['seqdb_api_url'])
-    
+        # Create a temporary file
+        self.file_name = "test_seqdb_sequences."
+        
+        if return_types:
+            self.file_type = "fasta"
+        else:
+            self.file_type = "fastq"
+        
+    def tearDown(self):
+        # Remove the file after the test
+        if os.path.isfile(self.file_name + self.file_type):
+            os.remove(self.file_name + self.file_type)
+            
     '''    
     def test_get_ITS_seq_ids(self): 
         # time: 1117.424s    
@@ -159,6 +172,48 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, pull_type="all", taxonomy_rank="species", taxonomy_value="megasperma")
         self.assertEqual(218, len(seq_ids), "Expected 218 sequences, but got %i." % len(seq_ids))
 
-                
+           
+    def test_write_sequence_file(self):
+        # time 14.067s
+        # consensus
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", sample_name="LEV4183")
+        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name=self.file_name, file_type="fasta")
+        self.assertEqual(1, len(success_ids), "The output file is created. The file is expected to contain 1 sequence, but contains %i." % len(success_ids))
+        
+        """
+        output_file = open(self.file_name + "fasta", 'r')
+        actual = output_file.readline()
+        output_file.close()
+        print actual
+        expected_first_line = ">seqdb|358455 Pythium scleroteichum Phy_operculata_CBS24183_ACA \n"
+        self.assertEqual(expected_first_line, actual, "File does not match expected content.")
+        """
+        # raw
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw", sample_name="LEV6103")
+        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name=self.file_name, file_type="fastq")
+        self.assertEqual(60, len(success_ids), "The output file is created. The file is expected to contain 60 sequence, but contains %i." % len(success_ids))
+    
+        """
+        output_file = open(self.file_name + "fastq", 'r')
+        actual = output_file.readline()
+        output_file.close()
+        print actual
+        expected_first_line = "@seqdb|266400 Myzocytiopsis ? sp. affin. intermedia AL_HM_H047_09_SEQ_LEV6103_18S_NS1\n"
+        self.assertEqual(expected_first_line, actual, "File does not match expected content.")        
+        """
+        # all
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", sample_name="LEV6103")
+        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name=self.file_name, file_type="fasta")
+        self.assertEqual(61, len(success_ids), "The output file was created. It is expected to contain 61 sequence, but contains %i." % len(success_ids))
+        
+        
+        output_file = open(self.file_name + "fasta", 'r')
+        actual = output_file.readline()
+        output_file.close()
+        print actual
+        expected_first_line = ">seqdb|266400 Myzocytiopsis ? sp. affin. intermedia AL_HM_H047_09_SEQ_LEV6103_18S_NS1 \n"
+        self.assertEqual(expected_first_line, actual, "File does not match expected content.")        
+        
+ 
 if __name__ == "__main__":
     unittest.main()
