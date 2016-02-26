@@ -259,7 +259,8 @@ def get_seq_ids(seqdbWS, pull_type,
         user_log.info("%s %i " % (log_msg, len(seq_ids)))
         
     return seq_ids
-    
+
+
 def retrieve_write_raw_sequences_file(seqdbWS, 
                                       file_name, file_type, file_append,
                                       specimenNum=None, 
@@ -278,28 +279,38 @@ def retrieve_write_raw_sequences_file(seqdbWS,
     else:
         output_file = open(file_name, 'w')
 
-    seq_num = seqdbWS.getRawSeqNum(specimenNum=specimenNum, 
-                                                          sequenceName=sequenceName,
-                                                          sampleName=sampleName, 
-                                                          pubRefSeq=pubRefSeq,
-                                                          regionName=regionName,
-                                                          projectName=projectName,
-                                                          collectionCode=collectionCode,
-                                                          taxonomyRank=taxonomyRank, 
-                                                          taxonomyValue=taxonomyValue)
+    seq_num = seqdbWS.getRawSeqNum(
+                        specimenNum=specimenNum, 
+                        sequenceName=sequenceName,
+                        sampleName=sampleName, 
+                        pubRefSeq=pubRefSeq,
+                        regionName=regionName,
+                        projectName=projectName,
+                        collectionCode=collectionCode,
+                        taxonomyRank=taxonomyRank, 
+                        taxonomyValue=taxonomyValue)
+    limit = 40
+    curr_offset = 0
     
-    fasta_seqs = seqdbWS.getRawSequencesFastaWithOffset(specimenNum=specimenNum, 
-                                                          sequenceName=sequenceName,
-                                                          sampleName=sampleName, 
-                                                          pubRefSeq=pubRefSeq,
-                                                          regionName=regionName,
-                                                          projectName=projectName,
-                                                          collectionCode=collectionCode,
-                                                          taxonomyRank=taxonomyRank, 
-                                                          taxonomyValue=taxonomyValue,
-                                                          offset=0)
-    output_file.write(fasta_seqs)                
-    output_file.close()
+    while curr_offset < seq_num:
+        
+        sequence_str = seqdbWS.getRawSequencesFastaWithOffset(
+                                offset=curr_offset,
+                                limit=limit,
+                                sequence_format=file_type,
+                                specimenNum=specimenNum, 
+                                sequenceName=sequenceName,
+                                sampleName=sampleName, 
+                                pubRefSeq=pubRefSeq,
+                                regionName=regionName,
+                                projectName=projectName,
+                                collectionCode=collectionCode,
+                                taxonomyRank=taxonomyRank, 
+                                taxonomyValue=taxonomyValue)
+        output_file.write(sequence_str)                
+        output_file.close()
+        curr_offset = curr_offset + limit
+        
          
          
 def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
@@ -465,8 +476,7 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
 
 
     
-def main():
-    ''' Retrieves ITS sequenes from SeqDB '''
+def main(input_args, output_file_name=output_file_name, output_taxonomy_file_name=output_taxonomy_file_name):
     
     ### Load main configuration file and set up logging for the script
     
@@ -483,7 +493,7 @@ def main():
     
     ### Parse sript's input arguments
     
-    parsed_args = parse_input_args(sys.argv[1:])
+    parsed_args = parse_input_args(input_args)
     
     if parsed_args.config_file:
         tool_config = tools_helper.load_config(parsed_args.config_file)
@@ -547,4 +557,4 @@ def main():
     
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
