@@ -257,7 +257,16 @@ def retrieve_write_raw_sequences_file(seqdbWS,
     else:
         output_file = open(file_name, 'w')
 
-    #TODO: implement offsetting and increase the limit
+    seq_num = seqdbWS.getRawSeqNum(specimenNum=specimenNum, 
+                                                          sequenceName=sequenceName,
+                                                          sampleName=sampleName, 
+                                                          pubRefSeq=pubRefSeq,
+                                                          regionName=regionName,
+                                                          projectName=projectName,
+                                                          collectionCode=collectionCode,
+                                                          taxonomyRank=taxonomyRank, 
+                                                          taxonomyValue=taxonomyValue)
+    
     fasta_seqs = seqdbWS.getRawSequencesFastaWithOffset(specimenNum=specimenNum, 
                                                           sequenceName=sequenceName,
                                                           sampleName=sampleName, 
