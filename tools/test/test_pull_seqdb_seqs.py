@@ -18,16 +18,7 @@ class Test(unittest.TestCase):
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
         self.fixture = seqdbWebService(api_key=config['seqdb_api_key'],
-                                                   base_url=config['seqdb_api_url'])
-        self.file_name = "test_seqdb_sequences."
-        if return_types:
-            self.file_type = "fasta"
-        else:
-            self.file_type = "fastq"
-        
-    def tearDown(self):
-        if os.path.isfile(self.file_name + self.file_type):
-            os.remove(self.file_name + self.file_type)
+                                                   base_url=config['seqdb_api_url'])        
             
     '''    
     def test_get_ITS_seq_ids(self): 
@@ -171,46 +162,27 @@ class Test(unittest.TestCase):
 
            
     def test_write_sequence_file(self):
-        # time 14.067s
+        # time 19.587ss
+        
         # consensus
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", sample_name="LEV4183")
-        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name=self.file_name, file_type="fasta")
+        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name="test_1_seqdb_sequences.", file_type="fasta")
         self.assertEqual(1, len(success_ids), "The output file is created. The file is expected to contain 1 sequence, but contains %i." % len(success_ids))
         
-        """
-        output_file = open(self.file_name + "fasta", 'r')
-        actual = output_file.readline()
-        output_file.close()
-        print actual
-        expected_first_line = ">seqdb|358455 Pythium scleroteichum Phy_operculata_CBS24183_ACA \n"
-        self.assertEqual(expected_first_line, actual, "File does not match expected content.")
-        """
         # raw
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw", sample_name="LEV6103")
-        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name=self.file_name, file_type="fastq")
+        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name="test_2_seqdb_sequences.", file_type="fastq")
         self.assertEqual(60, len(success_ids), "The output file is created. The file is expected to contain 60 sequence, but contains %i." % len(success_ids))
-    
-        """
-        output_file = open(self.file_name + "fastq", 'r')
-        actual = output_file.readline()
-        output_file.close()
-        print actual
-        expected_first_line = "@seqdb|266400 Myzocytiopsis ? sp. affin. intermedia AL_HM_H047_09_SEQ_LEV6103_18S_NS1\n"
-        self.assertEqual(expected_first_line, actual, "File does not match expected content.")        
-        """
+        
+        seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw", sample_name="LEV6103")
+        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, "test_3_seqdb_sequences.", file_type="fasta")
+        self.assertEqual(60, len(success_ids), "The output file is created. The file is expected to contain 60 sequence, but contains %i." % len(success_ids))
+        
         # all
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", sample_name="LEV6103")
-        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name=self.file_name, file_type="fasta")
+        success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name="test_4_seqdb_sequences.", file_type="fasta")
         self.assertEqual(61, len(success_ids), "The output file was created. It is expected to contain 61 sequence, but contains %i." % len(success_ids))
-        
-        """
-        output_file = open(self.file_name + "fasta", 'r')
-        actual = output_file.readline()
-        output_file.close()
-        print actual
-        expected_first_line = ">seqdb|266400 Myzocytiopsis ? sp. affin. intermedia AL_HM_H047_09_SEQ_LEV6103_18S_NS1 \n"
-        self.assertEqual(expected_first_line, actual, "File does not match expected content.")        
-        """
+    
  
 if __name__ == "__main__":
     unittest.main()
