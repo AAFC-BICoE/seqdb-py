@@ -3,14 +3,12 @@ Created on Oct 16, 2015
 
 @author: korolo
 '''
-import unittest, os
+import unittest
 import yaml
 
 from tools import pull_seqdb_seqs
 from api.seqdbWebService import seqdbWebService
 from config import config_root
-from tools.pull_seqdb_seqs import return_types
-
 
 class Test(unittest.TestCase):
 
@@ -159,8 +157,7 @@ class Test(unittest.TestCase):
         # all
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, pull_type="all", taxonomy_rank="species", taxonomy_value="megasperma")
         self.assertEqual(218, len(seq_ids), "Expected 218 sequences, but got %i." % len(seq_ids))
-
-           
+     
     def test_write_sequence_file(self):
         # time 19.587ss
         
