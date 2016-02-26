@@ -190,9 +190,30 @@ def get_seq_ids(seqdbWS, pull_type,
                     
                 log_msg = "Number of consensus sequences retrieved:"
             elif pull_type == pull_types_dict["all"]:
-                sys.exit("All sequence retrieval is not implemented yet.")
-                #seq_ids = seqdbWS.getRawSequenceIds()
-                #log_msg = "Number of raw sequences retrieved:"
+                if not specimen_nums:
+                    specimen_nums=[None]
+                for specimen_num in specimen_nums:
+                    curr_seq_ids_raw = seqdbWS.getRawSequenceIds(specimenNum=specimen_num, 
+                                                    sequenceName=sequence_name,
+                                                    sampleName=sample_name,
+                                                    pubRefSeq=pub_ref_seqs,
+                                                    regionName=region_name,
+                                                    projectName=project_name,
+                                                    collectionCode=collection_code,
+                                                    taxonomyRank=taxonomy_rank, 
+                                                    taxonomyValue=taxonomy_value)
+                    curr_seq_ids_consensus = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, 
+                                                                    sequenceName=sequence_name,
+                                                                    sampleName=sample_name, 
+                                                                    pubRefSeq=pub_ref_seqs,
+                                                                    regionName=region_name,
+                                                                    projectName=project_name,
+                                                                    collectionCode=collection_code,
+                                                                    taxonomyRank=taxonomy_rank, 
+                                                                    taxonomyValue=taxonomy_value)
+                    seq_ids = curr_seq_ids_raw + curr_seq_ids_consensus
+                    
+                log_msg = "Number of all sequences retrieved:"
             elif pull_type == pull_types_dict["raw"]:
                 if not specimen_nums:
                     specimen_nums = [None]
