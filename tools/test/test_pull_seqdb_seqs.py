@@ -65,6 +65,13 @@ class Test(unittest.TestCase):
         pull_seqdb_seqs.main(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
+        
+    def test_main_raw(self):
+        # time: 13.751s
+        # time with optimization: 5.143s
+        pull_seqdb_seqs.main(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
+                             self.output_file_name, self.output_taxon_file_name)
+        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
 
              
     def test_get_seq_ids_specimen(self):  
