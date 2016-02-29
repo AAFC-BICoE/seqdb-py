@@ -55,11 +55,12 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus")
         self.assertEqual(5555 , len(seq_ids), "Expected 5,555 consensus sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
     
+    """
     def test_get_seq_ids_raw(self):
         # time: stopped
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw")
         self.assertEquals(480088, len(seq_ids), "Expected 480,088 raw sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
-        
+    """    
     def test_main_consensus(self):
         # time: 124.221s
         pull_seqdb_seqs.main(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus"], 

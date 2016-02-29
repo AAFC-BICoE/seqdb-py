@@ -36,10 +36,6 @@ import tools_helper
 output_file_name = "seqdb_sequences."
 # File name where taxonomy for the sequences will be stored. Optional output. 
 output_taxonomy_file_name = "seqdb_taxonomy_file.txt"
-# This log will provide users of Galaxy with extra information on the tool 
-# execution sysem statements should not go here, since full log is configured
-# in yaml
-user_log = tools_helper.SimpleLog("seqdb_pull.log")
 # Values for the types of sequences this script downloads. I.e. "its" loads 
 # ITS sequences. Note that raw sequences are not implemented in SeqDB yet. "raw":"raw",
 pull_types_dict = {"its":"its", "consensus":"consensus", "raw":"raw", "all":"all"}
@@ -116,33 +112,27 @@ def get_ITS_seq_ids(seqdbWS):
             curr_seq_ids = seqdbWS.getRawSequenceIds(regionName=its_region_keyword)
             its_seq_ids.update(curr_seq_ids)    
         except requests.exceptions.ConnectionError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_slowConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_httpError)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_apiResponseFormat)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except Exception as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
     
     msg_numITSseqs = "Number of ITS sequences retrieved:"
     logging.info("%s %i " % (msg_numITSseqs, len(its_seq_ids)))
-    user_log.info("%s %i " % (msg_numITSseqs, len(its_seq_ids)))
 
     return list(its_seq_ids)
 
@@ -231,108 +221,29 @@ def get_seq_ids(seqdbWS, pull_type,
                 
                 log_msg = "Number of raw sequences retrieved:"
         except requests.exceptions.ConnectionError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_slowConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_httpError)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_apiResponseFormat)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except Exception as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         
         logging.info("%s %i " % (log_msg, len(seq_ids)))
-        user_log.info("%s %i " % (log_msg, len(seq_ids)))
         
     return seq_ids
 
-
-""" Experimantal
-TODO: 
-    1. Use pull_type. I.e. currently only pulls raw sequences. Need to pull consensus as well.
-Usage:
-            retrieve_write_raw_sequences_file(seqdbWS=seqdbWS, 
-                                              file_name=output_file_name, 
-                                              file_type=parsed_args.return_type, 
-                                              file_append=False, 
-                              pull_type=parsed_args.seq_type, 
-                              specimenNum=specimen_nums_list,
-                              sequenceName=parsed_args.sequence_name,
-                              sampleName=parsed_args.sample_name,
-                              regionName=parsed_args.gene_region_name,
-                              projectName=parsed_args.project_name,
-                              collectionCode=parsed_args.collection_code,
-                              pubRefSeq=parsed_args.pub_ref_seqs,
-                              taxonomyRank=parsed_args.tax_rank,
-                              taxonomyValue=parsed_args.tax_value)
-  
-        
-"""
-def retrieve_write_raw_sequences_file(seqdbWS, pull_type, 
-                                      file_name, file_type, file_append,
-                                      specimenNum=None, 
-                                      sequenceName=None,
-                                      sampleName=None, 
-                                      pubRefSeq=None,
-                                      regionName=None,
-                                      projectName=None,
-                                      collectionCode=None,
-                                      taxonomyRank=None, 
-                                      taxonomyValue=None):
-    file_name = file_name + file_type
-    
-    if file_append:
-        output_file = open(file_name, 'a')
-    else:
-        output_file = open(file_name, 'w')
-
-    seq_num = seqdbWS.getRawSeqNum(
-                        specimenNum=specimenNum, 
-                        sequenceName=sequenceName,
-                        sampleName=sampleName, 
-                        pubRefSeq=pubRefSeq,
-                        regionName=regionName,
-                        projectName=projectName,
-                        collectionCode=collectionCode,
-                        taxonomyRank=taxonomyRank, 
-                        taxonomyValue=taxonomyValue)
-    limit = 40
-    curr_offset = 0
-    
-    while curr_offset < seq_num:
-        
-        sequence_str = seqdbWS.getRawSequencesWithOffset(
-                                offset=curr_offset,
-                                limit=limit,
-                                sequence_format=file_type,
-                                specimenNum=specimenNum, 
-                                sequenceName=sequenceName,
-                                sampleName=sampleName, 
-                                pubRefSeq=pubRefSeq,
-                                regionName=regionName,
-                                projectName=projectName,
-                                collectionCode=collectionCode,
-                                taxonomyRank=taxonomyRank, 
-                                taxonomyValue=taxonomyValue)
-        output_file.write(sequence_str)                
-        curr_offset = curr_offset + limit
-        
-    output_file.close()
-         
          
 def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
     # Get fasta sequences based on ids and write to a file 
@@ -352,27 +263,22 @@ def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
             output_file.write(sequence)
             success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_slowConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_httpError)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_apiResponseFormat)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except Exception as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
      
@@ -380,12 +286,9 @@ def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
 
     msg_fileName = "Sequences written to a file:"
     logging.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
-    user_log.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
 
     msg_seqNum = "Number of sequences written:"
     logging.info("%s %s" % (msg_seqNum, len(success_ids)) )
-    user_log.info("%s %s" % (msg_seqNum, len(success_ids)) )
-    
 
     return success_ids
     
@@ -462,27 +365,22 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
                 output_file.write(taxonomy_line)
                 success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_slowConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_slowConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_httpError)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_apiResponseFormat)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except Exception as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_scriptError, tools_helper.log_msg_sysAdmin))
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
      
@@ -510,7 +408,6 @@ def main(input_args, output_file_name=output_file_name, output_taxonomy_file_nam
     logging.config.dictConfig(main_conf['logging'])
     
     logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
-    user_log.info(tools_helper.log_msg_execStarted_simple)
     
     ### Parse sript's input arguments
     
@@ -525,7 +422,6 @@ def main(input_args, output_file_name=output_file_name, output_taxonomy_file_nam
         api_key = parsed_args.api_key 
         
     logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
-    user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
     
     
     ### Script execution
@@ -534,13 +430,11 @@ def main(input_args, output_file_name=output_file_name, output_taxonomy_file_nam
      
     if pull_types_dict["its"] == parsed_args.seq_type:
         logging.info(tools_helper.log_msg_ITSLoad)
-        user_log.info(tools_helper.log_msg_ITSLoad)
         
         seq_ids = get_ITS_seq_ids(seqdbWS)
     else:
         log_msg = "Loading %s sequences." %parsed_args.seq_type
         logging.info(log_msg)
-        user_log.info(log_msg)
         
         specimen_nums_list = None
         if parsed_args.specimen_nums:
@@ -567,11 +461,8 @@ def main(input_args, output_file_name=output_file_name, output_taxonomy_file_nam
     ### Post-execution: messages and logging
     print("Number of sequences retrieved from Sequence Dababase:  %s" % len(success_seq_ids)) 
     print("Sequences are written to a file: '%s'" % output_file_name + str(parsed_args.return_type))
-    #print("Execution log is written to a file: '%s'" % user_log.getFileName())
     print("Execution complete.")
 
-    user_log.info(tools_helper.log_msg_execEnded)
-    user_log.close()
     
     logging.info(tools_helper.log_msg_execEnded)
 
