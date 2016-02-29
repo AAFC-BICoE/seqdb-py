@@ -565,7 +565,6 @@ def main(input_args, output_file_name=output_file_name, output_taxonomy_file_nam
 
     
     ### Post-execution: messages and logging
-    """
     print("Number of sequences retrieved from Sequence Dababase:  %s" % len(success_seq_ids)) 
     print("Sequences are written to a file: '%s'" % output_file_name + str(parsed_args.return_type))
     #print("Execution log is written to a file: '%s'" % user_log.getFileName())
@@ -575,7 +574,7 @@ def main(input_args, output_file_name=output_file_name, output_taxonomy_file_nam
     user_log.close()
     
     logging.info(tools_helper.log_msg_execEnded)
-    """
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
