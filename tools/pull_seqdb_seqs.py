@@ -259,8 +259,30 @@ def get_seq_ids(seqdbWS, pull_type,
         user_log.info("%s %i " % (log_msg, len(seq_ids)))
         
     return seq_ids
-    
-def retrieve_write_raw_sequences_file(seqdbWS, 
+
+
+""" Experimantal
+TODO: 
+    1. Use pull_type. I.e. currently only pulls raw sequences. Need to pull consensus as well.
+Usage:
+            retrieve_write_raw_sequences_file(seqdbWS=seqdbWS, 
+                                              file_name=output_file_name, 
+                                              file_type=parsed_args.return_type, 
+                                              file_append=False, 
+                              pull_type=parsed_args.seq_type, 
+                              specimenNum=specimen_nums_list,
+                              sequenceName=parsed_args.sequence_name,
+                              sampleName=parsed_args.sample_name,
+                              regionName=parsed_args.gene_region_name,
+                              projectName=parsed_args.project_name,
+                              collectionCode=parsed_args.collection_code,
+                              pubRefSeq=parsed_args.pub_ref_seqs,
+                              taxonomyRank=parsed_args.tax_rank,
+                              taxonomyValue=parsed_args.tax_value)
+  
+        
+"""
+def retrieve_write_raw_sequences_file(seqdbWS, pull_type, 
                                       file_name, file_type, file_append,
                                       specimenNum=None, 
                                       sequenceName=None,
@@ -278,18 +300,37 @@ def retrieve_write_raw_sequences_file(seqdbWS,
     else:
         output_file = open(file_name, 'w')
 
-    #TODO: implement offsetting and increase the limit
-    fasta_seqs = seqdbWS.getRawSequencesFastaWithOffset(specimenNum=specimenNum, 
-                                                          sequenceName=sequenceName,
-                                                          sampleName=sampleName, 
-                                                          pubRefSeq=pubRefSeq,
-                                                          regionName=regionName,
-                                                          projectName=projectName,
-                                                          collectionCode=collectionCode,
-                                                          taxonomyRank=taxonomyRank, 
-                                                          taxonomyValue=taxonomyValue,
-                                                          offset=0)
-    output_file.write(fasta_seqs)                
+    seq_num = seqdbWS.getRawSeqNum(
+                        specimenNum=specimenNum, 
+                        sequenceName=sequenceName,
+                        sampleName=sampleName, 
+                        pubRefSeq=pubRefSeq,
+                        regionName=regionName,
+                        projectName=projectName,
+                        collectionCode=collectionCode,
+                        taxonomyRank=taxonomyRank, 
+                        taxonomyValue=taxonomyValue)
+    limit = 40
+    curr_offset = 0
+    
+    while curr_offset < seq_num:
+        
+        sequence_str = seqdbWS.getRawSequencesWithOffset(
+                                offset=curr_offset,
+                                limit=limit,
+                                sequence_format=file_type,
+                                specimenNum=specimenNum, 
+                                sequenceName=sequenceName,
+                                sampleName=sampleName, 
+                                pubRefSeq=pubRefSeq,
+                                regionName=regionName,
+                                projectName=projectName,
+                                collectionCode=collectionCode,
+                                taxonomyRank=taxonomyRank, 
+                                taxonomyValue=taxonomyValue)
+        output_file.write(sequence_str)                
+        curr_offset = curr_offset + limit
+        
     output_file.close()
          
          
@@ -456,8 +497,7 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
 
 
     
-def main():
-    ''' Retrieves ITS sequenes from SeqDB '''
+def main(input_args, output_file_name=output_file_name, output_taxonomy_file_name=output_taxonomy_file_name):
     
     ### Load main configuration file and set up logging for the script
     
@@ -474,7 +514,7 @@ def main():
     
     ### Parse sript's input arguments
     
-    parsed_args = parse_input_args(sys.argv[1:])
+    parsed_args = parse_input_args(input_args)
     
     if parsed_args.config_file:
         tool_config = tools_helper.load_config(parsed_args.config_file)
@@ -507,25 +547,24 @@ def main():
             specimen_nums_list = parsed_args.specimen_nums.replace(" ","").split(",") 
 
         seq_ids = get_seq_ids(seqdbWS=seqdbWS, 
-                              pull_type=parsed_args.seq_type, 
-                              specimen_nums=specimen_nums_list,
-                              sequence_name=parsed_args.sequence_name,
-                              sample_name=parsed_args.sample_name,
-                              region_name=parsed_args.gene_region_name,
-                              project_name=parsed_args.project_name,
-                              collection_code=parsed_args.collection_code,
-                              pub_ref_seqs=parsed_args.pub_ref_seqs,
-                              taxonomy_rank=parsed_args.tax_rank,
-                              taxonomy_value=parsed_args.tax_value)
-   
-    success_seq_ids = write_sequence_file(seqdbWS, seq_ids, output_file_name, parsed_args.return_type)
+                           pull_type=parsed_args.seq_type, 
+                           specimen_nums=specimen_nums_list,
+                           sequence_name=parsed_args.sequence_name,
+                           sample_name=parsed_args.sample_name,
+                           region_name=parsed_args.gene_region_name,
+                           project_name=parsed_args.project_name,
+                           collection_code=parsed_args.collection_code,
+                           pub_ref_seqs=parsed_args.pub_ref_seqs,
+                           taxonomy_rank=parsed_args.tax_rank,
+                           taxonomy_value=parsed_args.tax_value)
+
+        success_seq_ids = write_sequence_file(seqdbWS, seq_ids, output_file_name, parsed_args.return_type)
     if (parsed_args.output_taxonomy_file):
         write_taxonomy_file(seqdbWS, seq_ids, output_taxonomy_file_name)
         print("Taxonomy file is written to a file: '%s'" % output_taxonomy_file_name)
 
     
     ### Post-execution: messages and logging
-    
     print("Number of sequences retrieved from Sequence Dababase:  %s" % len(success_seq_ids)) 
     print("Sequences are written to a file: '%s'" % output_file_name + str(parsed_args.return_type))
     #print("Execution log is written to a file: '%s'" % user_log.getFileName())
@@ -535,7 +574,7 @@ def main():
     user_log.close()
     
     logging.info(tools_helper.log_msg_execEnded)
-    
+
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

@@ -28,8 +28,8 @@ class TestSeqdbWebService(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
-        self.fixture = seqdbWebService.seqdbWebService(api_key=config['seqdb_api_key'],
-                                                   base_url=config['seqdb_api_url'])
+        self.fixture = seqdbWebService.seqdbWebService(api_key=config['seqdb']['api_key'],
+                                                   base_url=config['seqdb']['api_url'])
     
     def testRetrieve(self):
         # Test faulty connection
@@ -58,7 +58,7 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
     
     def testGetFastaSequencesWithOffset(self):
-        actual = self.fixture.getRawSequencesFastaWithOffset(0, specimenNum=4405)
+        actual = self.fixture.getRawSequencesWithOffset(offset=0, limit=30, sequence_format="fasta", specimenNum=4405)
         self.assertTrue(actual, "No Sequences returned.")
         self.assertIn(">seqdb|27755", actual,"Expecting that fasta return will contain id 27755.")
         self.assertNotIn(">seqdb|358301", actual, "Fasta return is not expected to have sequence 358301, since it is consensus.")

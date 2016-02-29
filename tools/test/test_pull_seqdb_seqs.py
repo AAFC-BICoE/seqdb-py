@@ -3,21 +3,39 @@ Created on Oct 16, 2015
 
 @author: korolo
 '''
+import os.path
 import unittest
+
 import yaml
 
-from tools import pull_seqdb_seqs
 from api.seqdbWebService import seqdbWebService
 from config import config_root
+from tools import pull_seqdb_seqs
+
 
 class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
-        self.fixture = seqdbWebService(api_key=config['seqdb_api_key'],
-                                                   base_url=config['seqdb_api_url'])        
-            
+        self.fixture = seqdbWebService(api_key=config['seqdb']['api_key'],
+                                                   base_url=config['seqdb']['api_url'])
+        self.output_file_name = "test_output_file."
+        self.output_fasta_file_name = self.output_file_name + "fasta"
+        self.output_fastq_file_name = self.output_file_name + "fastq"
+        self.output_taxon_file_name = "test_output_taxonomy.txt"    
+
+    @classmethod
+    def tearDownClass(self):
+        if os.path.isfile(self.output_taxon_file_name):
+            os.remove(self.output_taxon_file_name) 
+        
+        if os.path.isfile(self.output_fasta_file_name):
+            os.remove(self.output_fasta_file_name) 
+        
+        if os.path.isfile(self.output_fastq_file_name):
+            os.remove(self.output_fastq_file_name) 
+        
     '''    
     def test_get_ITS_seq_ids(self): 
         # time: 1117.424s    
@@ -33,16 +51,31 @@ class Test(unittest.TestCase):
     """
         
     def test_get_seq_ids_consensus(self):
-        # time: 15.324s 
+        # time: 8.395s 
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus")
         self.assertEqual(5555 , len(seq_ids), "Expected 5,555 consensus sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
     
     def test_get_seq_ids_raw(self):
+        # time: stopped
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw")
         self.assertEquals(480088, len(seq_ids), "Expected 480,088 raw sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
+        
+    def test_main_consensus(self):
+        # time: 124.221s
+        pull_seqdb_seqs.main(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus"], 
+                             self.output_file_name, self.output_taxon_file_name)
+        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
+        
+    def test_main_raw(self):
+        # time: 13.751s
+        # time with optimization: 5.143s
+        pull_seqdb_seqs.main(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
+                             self.output_file_name, self.output_taxon_file_name)
+        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
+
              
     def test_get_seq_ids_specimen(self):  
-        # time: 14.322s
+        # time: 13.833s
         
         # consensus  
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, "consensus", [4405])  
@@ -68,7 +101,7 @@ class Test(unittest.TestCase):
         self.assertEqual(23, len(seq_ids), "Expected 23 sequences, but got {}.".format(len(seq_ids)))
 
     def test_get_seq_ids_sequenceName(self):  
-        # time: 11.840s
+        # time: 8.732s
         
         # consensus  
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", sequence_name="Pyt_arrhenomanes_")  
@@ -83,7 +116,7 @@ class Test(unittest.TestCase):
         self.assertEqual(2, len(seq_ids), "Expected 2 sequences, but got %i" % len(seq_ids))
         
     def test_get_ids_sampleName(self):
-        #time: 12.737s
+        #time: 9.368s
         
         # consensus
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", sample_name="LEV4183")
@@ -98,7 +131,7 @@ class Test(unittest.TestCase):
         self.assertEquals(61, len(seq_ids), "Expected 61 sequences, but got %i. " % len(seq_ids))
 
     def test_get_seq_ids_regionName(self): 
-        # time: 78.108s
+        # time: 61.073s
         
         # consensus
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", region_name="28s")  
@@ -113,7 +146,7 @@ class Test(unittest.TestCase):
         self.assertEqual(1041, len(seq_ids), "Expected 1,041 sequences, but got %i. " % len(seq_ids))
 
     def test_get_seq_ids_projectName(self):  
-        # time: 94.259s 
+        # time: 63.894s 
         
         # consensus 
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", project_name="grdi")  
@@ -129,7 +162,7 @@ class Test(unittest.TestCase):
         self.assertEqual(4373, len(seq_ids), "Expected 4,373 sequences, but got %i." % len(seq_ids))
 
     def test_get_seq_ids_colletionCode(self): 
-        # time: 2.164s
+        # time: 1.508s
         
         # consensus
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", collection_code="lev")  
@@ -144,7 +177,7 @@ class Test(unittest.TestCase):
         self.assertEqual(25, len(seq_ids), "Expected 25 sequences, but got %i." % len(seq_ids))
 
     def test_get_seq_ids_taxonomy(self):    
-        # time: 45.438s
+        # time: 31.726s
         
         # consensus
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus", taxonomy_rank="species", taxonomy_value="megasperma")  
@@ -158,6 +191,7 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, pull_type="all", taxonomy_rank="species", taxonomy_value="megasperma")
         self.assertEqual(218, len(seq_ids), "Expected 218 sequences, but got %i." % len(seq_ids))
      
+    """
     def test_write_sequence_file(self):
         # time 19.587ss
         
@@ -179,7 +213,7 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all", sample_name="LEV6103")
         success_ids = pull_seqdb_seqs.write_sequence_file(self.fixture, seq_ids, file_name="test_4_seqdb_sequences.", file_type="fasta")
         self.assertEqual(61, len(success_ids), "The output file was created. It is expected to contain 61 sequence, but contains %i." % len(success_ids))
-    
+    """
  
 if __name__ == "__main__":
     unittest.main()
