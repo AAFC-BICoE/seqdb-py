@@ -15,7 +15,6 @@ import tools_helper
 
 
 output_file_name = "delete_failed_feature_ids.txt"
-user_log = tools_helper.SimpleLog("seqdb_delete.log")
 delete_types_dict = {"feature":"features", "determination":"taxonomy"}
 
 
@@ -124,7 +123,6 @@ def main():
     logging.config.dictConfig(main_conf['logging'])
 
     logging.info("Script executed with the following command and arguments: %s" % sys.argv)
-    user_log.info(tools_helper.log_msg_execStarted_simple)
     
     parsed_args = parse_input_args(sys.argv[1:])
     
@@ -137,13 +135,11 @@ def main():
         api_key = parsed_args.api_key 
     
     logging.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
-    user_log.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
     
     seqdbWS = seqdbWebService(api_key, api_url)
              
     log_msg = "Deleting items from SeqDB. File name with SeqDB ids to be deleted: %s" % parsed_args.features_file_name
     logging.info(log_msg)    
-    user_log.info(log_msg)
         
         
     success_ids,fail_ids = delete_from_seqdb(seqdbWS=seqdbWS, 
@@ -159,13 +155,8 @@ def main():
     print("Number of items which failed to be deleted:   %i " % len(fail_ids))
     logging.info("IDs, which failed to be deleted are written to a file: '%s'" % output_file_name)
    
-
-
-    print("Execution log is written to a file: '%s'" % user_log.getFileName())
     print(tools_helper.log_msg_execEnded)
     
-    user_log.info(tools_helper.log_msg_execEnded)
-    user_log.close()
     
     logging.info(tools_helper.log_msg_execEnded)
 

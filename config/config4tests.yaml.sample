@@ -6,5 +6,6 @@
 #			groups that API Key user is subscribed to, so they may fail	
 #			first. You'd need to change the expected values for some tests.
 
-seqdb_api_url: "http://<SeqDB url>/api/v1/"       # e.g. "http://localhost:2002/seqdb.web/api/v1/"
-seqdb_api_key: ""
+seqdb:
+    api_url: "http://<SeqDB url>/api/v1/"       # e.g. "http://localhost:2002/seqdb.web/api/v1/"
+    api_key: ""
