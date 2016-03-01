@@ -59,7 +59,7 @@ def parse_input_args(argv):
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
     parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)
-    parser.add_argument('-r', help="Reurn file type: fasta (default) or fastq", dest="return_type", required=False)    
+    parser.add_argument('-r', help="Return file type: fasta (default) or fastq", dest="return_type", required=False)    
     parser.add_argument('-t', help="Output taxonomy file as well as sequence file", dest="output_taxonomy_file", action='store_true', required=False)
     parser.add_argument('--specNums', help="Specimen number(s). If multiple, separate by comma.", dest="specimen_nums", required=False)    
     parser.add_argument('--seqName', help="Sequence name (keyword)", dest="sequence_name", required=False)
