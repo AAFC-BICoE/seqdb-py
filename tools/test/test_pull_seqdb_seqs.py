@@ -13,7 +13,7 @@ from config import config_root
 from tools import pull_seqdb_seqs
 
 
-class Test(unittest.TestCase):
+class TestPullSeqdbSeqs(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
@@ -61,16 +61,16 @@ class Test(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="raw")
         self.assertEquals(480088, len(seq_ids), "Expected 480,088 raw sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
     """    
-    def test_main_consensus(self):
+    def test_execute_script_consensus(self):
         # time: 124.221s
-        pull_seqdb_seqs.main(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus"], 
+        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         
-    def test_main_raw(self):
+    def test_execute_script_raw(self):
         # time: 13.751s
         # time with optimization: 5.143s
-        pull_seqdb_seqs.main(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
+        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
 

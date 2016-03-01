@@ -395,7 +395,7 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
 
 
     
-def main(input_args, output_file_name=output_file_name, output_taxonomy_file_name=output_taxonomy_file_name):
+def execute_script(input_args, output_file_name=output_file_name, output_taxonomy_file_name=output_taxonomy_file_name):
     
     ### Load main configuration file and set up logging for the script
     
@@ -466,6 +466,12 @@ def main(input_args, output_file_name=output_file_name, output_taxonomy_file_nam
     
     logging.info(tools_helper.log_msg_execEnded)
 
+def main():
+    ''' This method has to have no arguments to create entry point to the egg.
+        execute_script method was extracted so that we can create the unit 
+        tests for the whole script execution.
+    '''
+    execute_script(sys.argv[1:])
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
