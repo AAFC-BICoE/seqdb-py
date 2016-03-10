@@ -459,7 +459,7 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
 
     
     ### Post-execution: messages and logging
-    print("Number of sequences retrieved from Sequence Dababase:  {}".format(len(success_seq_ids))) 
+    print("Number of sequences retrieved from Sequence Database:  {}".format(len(success_seq_ids))) 
     print("Sequences are written to a file: {}".format(output_file_name + parsed_args.return_type))
     print("Execution complete.")
 
