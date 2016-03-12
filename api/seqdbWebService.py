@@ -229,6 +229,7 @@ class seqdbWebService(object):
     def createSequenceParamsStr(self, 
                          specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -245,6 +246,9 @@ class seqdbWebService(object):
     
         if sequenceName:
             params = params + "filterName=sequence.name&filterValue=%s&filterWildcard=true&" %sequenceName
+            
+        if sampleName:
+            params = params + "filterName=sample.name&filterValue=%s&filterWildcard=true&" %sampleName
             
         if pubRefSeq:
             params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
@@ -277,6 +281,7 @@ class seqdbWebService(object):
     
     def getRawSeqNum(self, specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -287,6 +292,7 @@ class seqdbWebService(object):
         '''
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
@@ -325,19 +331,25 @@ class seqdbWebService(object):
         return sequence_ids, result_offset
 
        
-    def getRawSequencesFastaWithOffset(self, offset, 
-                         specimenNum=None,
-                         sequenceName=None,
-                         pubRefSeq=None,
-                         genBankGI=None,
-                         regionName=None,
-                         projectName=None,
-                         collectionCode=None,
-                         taxonomyRank=None, taxonomyValue=None):
+    def getRawSequencesWithOffset(self, 
+                                  offset, 
+                                  limit,
+                                  sequence_format,
+                                 specimenNum=None,
+                                 sequenceName=None,
+                                 sampleName=None,
+                                 pubRefSeq=None,
+                                 genBankGI=None,
+                                 regionName=None,
+                                 projectName=None,
+                                 collectionCode=None,
+                                 taxonomyRank=None, taxonomyValue=None):
         ''' Returns raw sequences in fasta format, limited by the specified filter parameters
         Agrs:
-            params: string with API parameters, to be apended to the request URL
             offset: the number of records from which to load the next set of fasta sequences
+            limit: number of sequences returned at one query
+            sequence_format: either fasta or fastq
+            ...: various filters for the sequence
         Returns:
             a list of seqdb sequences in fasta format
         Raises:
@@ -346,9 +358,14 @@ class seqdbWebService(object):
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
+        available_sequence_formats = {"fasta","fastq"}
+        if sequence_format not in available_sequence_formats:
+            raise SystemError(
+                "Incorrect sequence format value. Sequence format value can be one of the following: {}".format(available_sequence_formats))
         
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
@@ -356,7 +373,9 @@ class seqdbWebService(object):
                          collectionCode=collectionCode,
                          taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
         
-        resp = self.retrieve(self.base_url + "/sequence.fasta", params=params)
+        params = params + "limit={}&offset={}&".format(limit,offset)
+        
+        resp = self.retrieve("{}/sequence.{}".format(self.base_url,sequence_format), params=params)
         
         fasta_resp = resp.content
         #fasta_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence.fasta", params=params, offset=offset)
@@ -371,6 +390,7 @@ class seqdbWebService(object):
     def getRawSequenceIds(self, 
                          specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -382,6 +402,7 @@ class seqdbWebService(object):
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
+            sampleName: name to identify the sample
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
             regionName: gene region name
@@ -398,14 +419,17 @@ class seqdbWebService(object):
             UnexpectedContent
         '''
         
+        
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
                          projectName=projectName,
                          collectionCode=collectionCode,
                          taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+          
           
         seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params)
         while resultOffset:
@@ -601,14 +625,17 @@ class seqdbWebService(object):
 
         return jsn_seq
 
-    def getFastaSeq(self, seq_id):
-        ''' Gets sequence in fasta format (SeqDB fasta request)
+    def getFormattedSeq(self, seq_id, format_type):
+        ''' Gets sequence in fasta or fastq format 
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout
             requests.exceptions.HTTPError
         '''
-        url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
+        if format_type not in {"fasta", "fastq"}:
+            raise SystemError("Sequences can only be in fasta or fastq format.")
+        
+        url = self.base_url + "/sequence/" + str(seq_id) + "." + format_type
         response = self.retrieve(url)
         return response.content
 
@@ -660,6 +687,7 @@ class seqdbWebService(object):
     
     def getConsensusSeqNum(self, specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -670,6 +698,7 @@ class seqdbWebService(object):
         '''
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
@@ -685,6 +714,7 @@ class seqdbWebService(object):
     def getConsensusSequenceIds(self, 
                                   specimenNum=None,
                                   sequenceName=None,
+                                  sampleName=None,
                                   pubRefSeq=None,
                                   genBankGI=None,
                                   regionName=None,
@@ -696,6 +726,7 @@ class seqdbWebService(object):
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
+            sampleName: name to identify the sample
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
             regionName: gene region name
@@ -711,8 +742,10 @@ class seqdbWebService(object):
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
+        
         params = self.createSequenceParamsStr(specimenNum=specimenNum,
                          sequenceName=sequenceName,
+                         sampleName=sampleName,
                          pubRefSeq=pubRefSeq,
                          genBankGI=genBankGI,
                          regionName=regionName,
@@ -720,6 +753,7 @@ class seqdbWebService(object):
                          collectionCode=collectionCode,
                          taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
                
+
         seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params)
         while resultOffset:
             more_seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params,

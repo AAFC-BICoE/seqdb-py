@@ -28,8 +28,8 @@ class TestSeqdbWebService(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
-        self.fixture = seqdbWebService.seqdbWebService(api_key=config['seqdb_api_key'],
-                                                   base_url=config['seqdb_api_url'])
+        self.fixture = seqdbWebService.seqdbWebService(api_key=config['seqdb']['api_key'],
+                                                   base_url=config['seqdb']['api_url'])
     
     def testRetrieve(self):
         # Test faulty connection
@@ -58,7 +58,7 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
     
     def testGetFastaSequencesWithOffset(self):
-        actual = self.fixture.getRawSequencesFastaWithOffset(0, specimenNum=4405)
+        actual = self.fixture.getRawSequencesWithOffset(offset=0, limit=30, sequence_format="fasta", specimenNum=4405)
         self.assertTrue(actual, "No Sequences returned.")
         self.assertIn(">seqdb|27755", actual,"Expecting that fasta return will contain id 27755.")
         self.assertNotIn(">seqdb|358301", actual, "Fasta return is not expected to have sequence 358301, since it is consensus.")
@@ -70,6 +70,7 @@ class TestSeqdbWebService(unittest.TestCase):
         self.assertEqual(22, len(actual),"Expecting 22 sequences associated with this specimen.")
         self.assertIn(27755, actual, "Sequence id 27755 is expected to be associated with specimen 4405.")
         self.assertNotIn(358301, actual, "Sequence id 358301 is not expected to be in results, since it is consensus.")  
+
 
     def testCreateChromatSequence_wrong_path(self):
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "data/")
@@ -96,9 +97,14 @@ class TestSeqdbWebService(unittest.TestCase):
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete feature type.")     
         
     def testGetFastaSeq(self):
-        actual = self.fixture.getFastaSeq("1")
+        actual = self.fixture.getFormattedSeq("1", "fasta")
         self.assertTrue(actual, "Fasta sequence is empty.")
         self.assertIn(">", actual, "Fasta does not contain >.")        
+    
+    def testGetFastqSeq(self):
+        actual = self.fixture.getFormattedSeq("1", "fastq")
+        self.assertTrue(actual, "Fastq sequence is empty.")
+        self.assertIn("@seqdb", actual, "Fastq does not contain @seqdb.")        
 
     def testGetFastaSeqPlus(self):
         # "http://localhost:2002/seqdb\/api/v1/sequence/1"

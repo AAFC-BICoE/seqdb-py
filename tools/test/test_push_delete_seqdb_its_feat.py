@@ -16,8 +16,8 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
-        self.fixture = seqdbWebService(api_key=config['seqdb_api_key'],
-                                                   base_url=config['seqdb_api_url'])
+        self.fixture = seqdbWebService(api_key=config['seqdb']['api_key'],
+                                                   base_url=config['seqdb']['api_url'])
 
     def testMain(self):    
         """ This test needs to be re-implemented
