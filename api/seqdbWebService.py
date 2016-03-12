@@ -1366,6 +1366,7 @@ class seqdbWebService(object):
 
 
     # TODO Not tested
+    # Not used
     def updateSpecimen(self, specimenId, params):
         resp = self.update(
             self.base_url + "/specimen/" + str(specimenId),
@@ -1378,7 +1379,7 @@ class seqdbWebService(object):
 
         return jsn_resp['result'], jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']
 
-
+    # Not used
     def deleteSpecimen(self, specimenId):
         ''' Deletes a Feature
         Args:
@@ -1415,7 +1416,7 @@ class seqdbWebService(object):
 
         return jsn_resp
 
-
+    # used in seqdb_gb_insert.py
     def getJsonSpecimenIdsByOtherIds(self, code, identifier):
         params = {'filterName': 'otherIds',
                   'filterValue': code + identifier,
@@ -1423,7 +1424,8 @@ class seqdbWebService(object):
                   'filterWildcard': 'true'}
 
         return self.getJsonSpecimenIds(params)
-
+    
+    # used in seqdb_gb_insert.py
     def getJsonSpecimenIdsBySpecimenId(self, code, identifier):
         params = {'filterName': ['biologicalCollection.name', 'number'],
                   'filterValue': [code, identifier],

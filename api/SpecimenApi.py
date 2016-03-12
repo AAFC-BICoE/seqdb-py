@@ -26,7 +26,11 @@ class SpecimenApi(BaseApiEntity):
         self.__otherIdsFilter = code + identifier
         
     def getParamsStr(self):
-        params = "filterName=otherIds&filterValue={}&filterWildcard=false&".format(self.__otherIdsFilter)
+        params = ''
+        if self.__otherIdsFilter:
+            params = "filterName=otherIds&filterValue={}&filterWildcard=false&".format(self.__otherIdsFilter)
         
         return params
     
+    def clearAllFilters(self):
+        self.__otherIdsFilter = None

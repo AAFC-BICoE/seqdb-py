@@ -34,8 +34,8 @@ class TestSeqdbWebService(unittest.TestCase):
     def testRetrieve(self):
         # Test faulty connection
         self.assertRaises(requests.exceptions.ConnectionError, self.fixture.retrieve, "http://jibberish")
-        # TODO: test wrong api key
-              
+    
+           
     def testGetEntity(self):
         actual = self.fixture.getEntity(1234)
         self.assertTrue(actual, "No Specimen returned.")
