@@ -13,8 +13,8 @@ from api.BaseSeqdbApi import UnexpectedContent
 
 class ProjectTagApi(BaseApiEntity):
 
-    def __init__(self, api_key, base_url, request_url):
-        super(BaseApiEntity, self).__init__(api_key, base_url, request_url="projectTag")
+    def __init__(self, api_key, base_url):
+        super(ProjectTagApi, self).__init__(api_key=api_key, base_url=base_url, request_url="projectTag")
         
         
     @property

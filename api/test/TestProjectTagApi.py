@@ -37,16 +37,18 @@ class TestSeqdbWebService(unittest.TestCase):
         # TODO: test wrong api key
         
     def testRetrieveJson(self):
-        actual = self.fixture.retrieveJson("/projectTag/1234")
+        actual = self.fixture.retrieveJson("/projectTag/12")
         self.assertTrue(actual, "retrieveJson: no result was returned.")
+        #self.assertIn("Cranberry", actual, "Expecting a Cranberry project tag.")
+        #Cranberry 
         
     def testGetEntity(self):
-        actual = self.fixture.getEntity(1234)
+        actual = self.fixture.getEntity(12)
         self.assertTrue(actual, "No Project Tag returned.")
-        self.assertIn("some text", actual,"Expecting .")
+        self.assertIn("Cranberry", actual,"Expecting Cranberry project tag.")
         
     def testGetIdsWithOffset(self):
-        self.fixture.setNameFilter("someProjectTagName")
+        self.fixture.setNameFilter("a")
         actual = self.fixture.getIdsWithOffset(0);
         self.assertEquals(10, actual.size(), "Expecting 10 ids.")
                 

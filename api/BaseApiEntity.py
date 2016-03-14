@@ -42,7 +42,8 @@ class BaseApiEntity(BaseSeqdbApi):
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        jsn_resp = self.retrieveJson(self.request_url + str(entityId))
+        new_request_url = self.request_url + str(entityId)
+        jsn_resp = self.retrieveJson(request_url=new_request_url)
 
         if jsn_resp:
             return jsn_resp['result']
