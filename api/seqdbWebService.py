@@ -29,7 +29,7 @@ class UnexpectedContent(requests.exceptions.RequestException):
 
 # CRUD (create, retrieve, update, delete)
 
-class seqdbWebService:
+class seqdbWebService(object):
 
     def __init__(self, api_key, base_url):
         self.api_key = api_key
@@ -225,13 +225,90 @@ class seqdbWebService:
     ###########################################################################
     # Sequence
     ###########################################################################
+    
+    def createSequenceParamsStr(self, 
+                         specimenNum=None,
+                         sequenceName=None,
+                         sampleName=None,
+                         pubRefSeq=None,
+                         genBankGI=None,
+                         regionName=None,
+                         projectName=None,
+                         collectionCode=None,
+                         taxonomyRank=None, taxonomyValue=None):
+        ''' Method that combines sequence api parameters into one string, 
+            which will be appended to the sequence / consensus sequence call
+        '''            
+        params = ""
+        
+        if specimenNum:
+            params = params + "filterName=specimen.number&filterValue=%s&filterWildcard=false&" %specimenNum
+    
+        if sequenceName:
+            params = params + "filterName=sequence.name&filterValue=%s&filterWildcard=true&" %sequenceName
+            
+        if sampleName:
+            params = params + "filterName=sample.name&filterValue=%s&filterWildcard=true&" %sampleName
+            
+        if pubRefSeq:
+            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
+
+        if genBankGI:
+            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterWildcard=false&" %genBankGI
+        
+        if regionName:
+            params = params + "filterName=region.name&filterValue=%s&filterWildcard=true&" %regionName
+            
+        if projectName:
+            project_ids = self.getProjectTagIds(projectName)
+            
+            if len(project_ids) == 1:
+                params = params + "tagId=%s&" %project_ids[0]
+                
+            elif len(project_ids) > 1:
+                raise "More than one project is associated with the name '%s'. Currently sequences can only be filtered on one project only. Please refine your search."
+            
+        if collectionCode:
+            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterWildcard=false&" %collectionCode
+            
+        if taxonomyRank:
+            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomyRank)
+            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomyValue)
+
+            
+        return params
+
+    
+    def getRawSeqNum(self, specimenNum=None,
+                         sequenceName=None,
+                         sampleName=None,
+                         pubRefSeq=None,
+                         genBankGI=None,
+                         regionName=None,
+                         projectName=None,
+                         collectionCode=None,
+                         taxonomyRank=None, taxonomyValue=None):
+        ''' Returns number of raw sequences, depending on the filters specified.
+        '''
+        params = self.createSequenceParamsStr(specimenNum=specimenNum,
+                         sequenceName=sequenceName,
+                         sampleName=sampleName,
+                         pubRefSeq=pubRefSeq,
+                         genBankGI=genBankGI,
+                         regionName=regionName,
+                         projectName=projectName,
+                         collectionCode=collectionCode,
+                         taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+        jsn_resp = self.retrieveJson("/sequence", params)
+        result_num = int(jsn_resp['metadata']['resultCount'])
+        
+        return result_num
+
 
     def getSequenceIdsWithOffset(self, params=None, offset=0):
-        ''' Returns sequence ids, limited by the specified filter parameters
+        ''' Returns raw sequence ids, limited by the specified filter parameters
         Agrs:
-            specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
-            sequenceName: keyword in the sequence name (i.e. not a direct match)
-            pubRefSeq: whether the sequence is a public reference sequence
+            params: string with API parameters, to be apended to the request URL
             offset: nothing if it is a first query, then number of records from which to load the next set of ids
         Returns:
             a list of seqdb sequence ids 
@@ -252,11 +329,68 @@ class seqdbWebService:
             sequence_ids = jsn_resp['result']
         
         return sequence_ids, result_offset
+
+       
+    def getRawSequencesWithOffset(self, 
+                                  offset, 
+                                  limit,
+                                  sequence_format,
+                                 specimenNum=None,
+                                 sequenceName=None,
+                                 sampleName=None,
+                                 pubRefSeq=None,
+                                 genBankGI=None,
+                                 regionName=None,
+                                 projectName=None,
+                                 collectionCode=None,
+                                 taxonomyRank=None, taxonomyValue=None):
+        ''' Returns raw sequences in fasta format, limited by the specified filter parameters
+        Agrs:
+            offset: the number of records from which to load the next set of fasta sequences
+            limit: number of sequences returned at one query
+            sequence_format: either fasta or fastq
+            ...: various filters for the sequence
+        Returns:
+            a list of seqdb sequences in fasta format
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        available_sequence_formats = {"fasta","fastq"}
+        if sequence_format not in available_sequence_formats:
+            raise SystemError(
+                "Incorrect sequence format value. Sequence format value can be one of the following: {}".format(available_sequence_formats))
+        
+        params = self.createSequenceParamsStr(specimenNum=specimenNum,
+                         sequenceName=sequenceName,
+                         sampleName=sampleName,
+                         pubRefSeq=pubRefSeq,
+                         genBankGI=genBankGI,
+                         regionName=regionName,
+                         projectName=projectName,
+                         collectionCode=collectionCode,
+                         taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+        
+        params = params + "limit={}&offset={}&".format(limit,offset)
+        
+        resp = self.retrieve("{}/sequence.{}".format(self.base_url,sequence_format), params=params)
+        
+        fasta_resp = resp.content
+        #fasta_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence.fasta", params=params, offset=offset)
+        
+        
+        if fasta_resp and fasta_resp[0]!=">":
+            raise UnexpectedContent("Response is not in fasta format.")
+        
+        return fasta_resp
        
 
-    def getAllSequenceIds(self, 
+    def getRawSequenceIds(self, 
                          specimenNum=None,
                          sequenceName=None,
+                         sampleName=None,
                          pubRefSeq=None,
                          genBankGI=None,
                          regionName=None,
@@ -264,10 +398,11 @@ class seqdbWebService:
                          collectionCode=None,
                          taxonomyRank=None, taxonomyValue=None,
                          offset=0):
-        ''' Returns sequence ids, limited by the specified filter parameters
+        ''' Returns raw sequence ids, limited by the specified filter parameters
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
+            sampleName: name to identify the sample
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
             regionName: gene region name
@@ -284,42 +419,21 @@ class seqdbWebService:
             UnexpectedContent
         '''
         
-        params = ""
-             
-        if specimenNum:
-            params = "%sfilterName=specimen.number&filterValue=%s&filterOperator=and&filterWildcard=false&" %(params,specimenNum)
-    
-        if sequenceName:
-            params = "%sfilterName=sequence.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %(params,sequenceName)
-            
-        if pubRefSeq:
-            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterOperator=and&filterWildcard=false"
         
-        if genBankGI:
-            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterOperator=and&filterWildcard=false&" %genBankGI
-        
-        if regionName:
-            params = params + "filterName=region.name&filterValue=%s&filterOperator=and&filterWildcard=true&" %regionName
-            
-        if projectName:
-            project_ids = self.getAllProjectTagIds(projectName)
-            
-            if len(project_ids) == 1:
-                params = params + "tagId=%s&" %project_ids[0]
-                
-            elif len(project_ids) > 1:
-                raise "More than one project is associated with the name '%s'. Currently sequences can only be filtered on one project only. Please refine your search."
-            
-        if collectionCode:
-            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterWildcard=false&" %collectionCode
-            
-        if taxonomyRank:
-            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomyRank)
-            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomyValue)
-        
-        seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params)
+        params = self.createSequenceParamsStr(specimenNum=specimenNum,
+                         sequenceName=sequenceName,
+                         sampleName=sampleName,
+                         pubRefSeq=pubRefSeq,
+                         genBankGI=genBankGI,
+                         regionName=regionName,
+                         projectName=projectName,
+                         collectionCode=collectionCode,
+                         taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+          
+          
+        seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params)
         while resultOffset:
-            more_seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params,
+            more_seq_ids, resultOffset = self.getSequenceIdsWithOffset(params=params,
                                                           offset=resultOffset)
             seq_ids.extend(more_seq_ids)
         
@@ -336,7 +450,7 @@ class seqdbWebService:
         return seq_ids
 
    
-    def getSequenceIdsByRegionWithOffset(self, region_id, offset=0):
+    def getRawSequenceIdsByRegionWithOffset(self, region_id, offset=0):
         ''' Given a region id, return sequence ids, belonging to this region
         Returns:
             a list of seqdb sequence ids for the created sequences OR empty
@@ -450,7 +564,7 @@ class seqdbWebService:
                 blob=blob, dest_file_name=dest_file_name,
                 notes=notes, trace_file_path=trace_file_path)
 
-    def deleteSequence(self, seq_id):
+    def deleteRawSequence(self, seq_id):
         ''' Deletes a SeqDB sequence
         Args:
             seq_id: id of the sequence to be deleted
@@ -468,7 +582,7 @@ class seqdbWebService:
 
         return jsn_resp
 
-    def bulkDeleteSequence(self, seq_ids):
+    def bulkDeleteRawSequence(self, seq_ids):
         ''' Deletes a list of SeqDB sequences
         Args:
             seq_ids: list of seqdb sequence ids to be deleted
@@ -479,7 +593,7 @@ class seqdbWebService:
             UnexpectedContent
         '''
         for seq_id in seq_ids:
-            self.deleteSequence(seq_id)
+            self.deleteRawSequence(seq_id)
 
     def updateSeqSource(self, sequenceId, params):
         resp = self.update(
@@ -511,6 +625,20 @@ class seqdbWebService:
 
         return jsn_seq
 
+    def getFormattedSeq(self, seq_id, format_type):
+        ''' Gets sequence in fasta or fastq format 
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+        '''
+        if format_type not in {"fasta", "fastq"}:
+            raise SystemError("Sequences can only be in fasta or fastq format.")
+        
+        url = self.base_url + "/sequence/" + str(seq_id) + "." + format_type
+        response = self.retrieve(url)
+        return response.content
+
     def getFastaSeqPlus(self, seq_id):
         ''' Gets sequence from SeqDB and returns it in a fasta format with a
             unique header. Note, the fasta formatting is done here, instead of
@@ -528,16 +656,6 @@ class seqdbWebService:
             str(seq_id) + '\n' + jsn_seq['seq'] + '\n'
         return fasta_seq
 
-    def getFastaSeq(self, seq_id):
-        ''' Gets sequence in fasta format (SeqDB fasta request)
-        Raises:
-            requests.exceptions.ConnectionError
-            requests.exceptions.ReadTimeout
-            requests.exceptions.HTTPError
-        '''
-        url = self.base_url + "/sequence/" + str(seq_id) + ".fasta"
-        response = self.retrieve(url)
-        return response.content
 
 
     ###########################################################################
@@ -567,10 +685,36 @@ class seqdbWebService:
 
         return jsn_resp
     
-    
-    def getAllConsensusSequenceIds(self, 
+    def getConsensusSeqNum(self, specimenNum=None,
+                         sequenceName=None,
+                         sampleName=None,
+                         pubRefSeq=None,
+                         genBankGI=None,
+                         regionName=None,
+                         projectName=None,
+                         collectionCode=None,
+                         taxonomyRank=None, taxonomyValue=None):
+        ''' Returns number of raw sequences, depending on the filters specified.
+        '''
+        params = self.createSequenceParamsStr(specimenNum=specimenNum,
+                         sequenceName=sequenceName,
+                         sampleName=sampleName,
+                         pubRefSeq=pubRefSeq,
+                         genBankGI=genBankGI,
+                         regionName=regionName,
+                         projectName=projectName,
+                         collectionCode=collectionCode,
+                         taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+        jsn_resp = self.retrieveJson("/consensus", params)
+        result_num = int(jsn_resp['metadata']['resultCount'])
+        
+        return result_num
+
+
+    def getConsensusSequenceIds(self, 
                                   specimenNum=None,
                                   sequenceName=None,
+                                  sampleName=None,
                                   pubRefSeq=None,
                                   genBankGI=None,
                                   regionName=None,
@@ -582,6 +726,7 @@ class seqdbWebService:
         Agrs:
             specimenNum: specimen number (identifier) for which sequence IDs will be retrieved
             sequenceName: keyword in the sequence name (i.e. not a direct match)
+            sampleName: name to identify the sample
             pubRefSeq: whether the sequence is a public reference sequence
             genBankGI: genBank GI (identifier) for those sequences that are in genBank
             regionName: gene region name
@@ -597,39 +742,18 @@ class seqdbWebService:
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        params = ''
-        if specimenNum:
-            params = params + "filterName=specimen.number&filterValue=%s&filterWildcard=false&" %specimenNum
-            
-        if sequenceName:
-            params = params + "filterName=sequence.name&filterValue=%s&filterWildcard=true&" %sequenceName
         
-        if pubRefSeq:
-            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
-            
-        if genBankGI:
-            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterWildcard=false&" %genBankGI
-        
-        if regionName:
-            params = params + "filterName=region.name&filterValue=%s&filterWildcard=true&" %regionName
+        params = self.createSequenceParamsStr(specimenNum=specimenNum,
+                         sequenceName=sequenceName,
+                         sampleName=sampleName,
+                         pubRefSeq=pubRefSeq,
+                         genBankGI=genBankGI,
+                         regionName=regionName,
+                         projectName=projectName,
+                         collectionCode=collectionCode,
+                         taxonomyRank=taxonomyRank, taxonomyValue=taxonomyValue)  
+               
 
-        if projectName:
-            project_ids = self.getAllProjectTagIds(projectName)
-            
-            if len(project_ids) == 1:
-                params = params + "tagId=%s&" %project_ids[0]
-                
-            elif len(project_ids) > 1:
-                raise "More than one project is associated with the name '%s'. Currently sequences can only be filtered on one project only. Please refine your search."
-            
-       
-        if collectionCode:
-            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterWildcard=false&" %collectionCode
-            
-        if taxonomyRank:
-            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomyRank)
-            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomyValue)
-        
         seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params)
         while resultOffset:
             more_seq_ids, resultOffset = self.getConsensusSequenceIdsWithOffset(params=params,
@@ -733,7 +857,28 @@ class seqdbWebService:
             return jsn_resp['result']
         else:
             return ''
+        
+        
+    def getAcceptedSpecimenDetermination(self, sequence_id):
+        ''' Returns an accepted determination of a SPECIMEN, which is associated with this sequence
+        '''
 
+        jsn_resp = self.retrieveJson("/sequence/{}/acceptedSpecimenDetermination".format(sequence_id))
+        
+        if jsn_resp:
+            return jsn_resp['result']
+        else:
+            return None
+        
+        """
+        spec_jsn = self.getSpecimen(1322)
+        for determ_id in spec_jsn["identification"]:
+            determ_jsn = self.getDetermination(spec_jsn["identification"][determ_id])
+            if determ_jsn["accepted"]:
+                return determ_jsn
+        
+        return None
+        """
     
     # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
     # Keys are seqdb taxonomy ranks, and values are NCBI
@@ -1162,7 +1307,7 @@ class seqdbWebService:
         return tag_ids, result_offset
 
 
-    def getAllProjectTagIds(self, name=None):
+    def getProjectTagIds(self, name=None):
         ''' Companion method to getProjectTagWithOffset. Returns all the results, iterating with offset.
         '''
         
@@ -1199,7 +1344,6 @@ class seqdbWebService:
         logging.warn("createSpecimen not yet implemented")
 
 
-    # TODO Not tested
     # TODO get/retrieve - review for consistency
     def getSpecimen(self, specimenId):
         ''' Retrieves a Specimen

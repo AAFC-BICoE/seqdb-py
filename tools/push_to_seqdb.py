@@ -28,10 +28,6 @@ import tools_helper
 
 ### Values below are used in Galaxy wrappers, so make sure you know what 
 ### you're doing if you're changing any of them 
-# This log will provide users of Galaxy with extra information on the tool 
-# execution sysem statements should not go here, since full log is configured
-# in yaml
-user_log = tools_helper.SimpleLog("seqdb_push.log")
 # Values for the types of sequences this script downloads. I.e. "its" loads 
 # ITS sequences. Note that raw sequences are not implemented in SeqDB yet. "raw":"raw",
 push_types_dict = {"its":"itsx_features", "taxonomy":"findLCA_taxonomy"}
@@ -83,7 +79,6 @@ def open_file(file_name):
     except IOError as e:
         if e.errno == 2:
             error_msg = "Could not open file: %s." % file_name
-            user_log.error(error_msg)
             logging.error(error_msg)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
@@ -94,7 +89,6 @@ def open_file(file_name):
 
 def log_error(error_msg):
     ''' Logs the message to user and developer logs'''
-    user_log.error(error_msg)
     logging.error(error_msg)
     
 def report_log_error(error_msg):
@@ -104,7 +98,6 @@ def report_log_error(error_msg):
 
 def log_info(msg):
     ''' Logs the message to user and developer logs'''
-    user_log.info(msg)
     logging.info(msg)
     
 def report_log_info(msg):
@@ -214,23 +207,19 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
                                                                   notes=notes)
             determinationIds.append(determinationId)
         except requests.exceptions.ConnectionError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_httpError)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
-            user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
             logging.error(tools_helper.log_msg_apiResponseFormat)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except:
             warning_msg = "Unexpected error writing determination"
-            user_log.info(warning_msg)
             logging.info(warning_msg)
 
     
@@ -383,23 +372,19 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
                 fid = seqdbWS.insertFeature(feature_location_pair[0], feature_type_id, location, sequenceId, description=feature_description)
                 created_feature_ids.append(fid)
             except requests.exceptions.ConnectionError as e:
-                user_log.error("%s %s" % (tools_helper.log_msg_noDbConnection, tools_helper.log_msg_sysAdmin))
                 logging.error(tools_helper.log_msg_noDbConnection)
                 logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
             except requests.exceptions.HTTPError as e:
-                user_log.error("%s %s" % (tools_helper.log_msg_httpError, tools_helper.log_msg_sysAdmin))
                 logging.error(tools_helper.log_msg_httpError)
                 logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
             except UnexpectedContent as e:
-                user_log.error("%s %s" % (tools_helper.log_msg_apiResponseFormat, tools_helper.log_msg_sysAdmin))
                 logging.error(tools_helper.log_msg_apiResponseFormat)
                 logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
             except:
                 warning_msg = "File token '%s' is not in the expected format of <feature name>:<position>. Ignoring." % itsx_feature_token
-                user_log.info(warning_msg)
                 logging.info(warning_msg)
 
     info_file_handler.close()
@@ -433,7 +418,6 @@ def main():
     logging.config.dictConfig(main_conf['logging'])
     
     logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
-    user_log.info(tools_helper.log_msg_execStarted_simple)
     
     ### Parse sript's input arguments
     
@@ -471,11 +455,9 @@ def main():
     ### Post-execution: messages and logging
     
     
-    print("Execution log is written to a file: '%s'" % user_log.getFileName())
     print(tools_helper.log_msg_execEnded)
 
     log_info(tools_helper.log_msg_execEnded)
-    user_log.close()
     
     
 
