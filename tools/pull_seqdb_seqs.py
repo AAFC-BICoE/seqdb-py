@@ -113,22 +113,22 @@ def get_ITS_seq_ids(seqdbWS):
             its_seq_ids.update(curr_seq_ids)    
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
             logging.error(tools_helper.log_msg_slowConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
             logging.error(tools_helper.log_msg_httpError)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
             logging.error(tools_helper.log_msg_apiResponseFormat)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except Exception as e:
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
     
     msg_numITSseqs = "Number of ITS sequences retrieved:"
@@ -222,22 +222,22 @@ def get_seq_ids(seqdbWS, pull_type,
                 log_msg = "Number of raw sequences retrieved:"
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
             logging.error(tools_helper.log_msg_slowConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
             logging.error(tools_helper.log_msg_httpError)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
             logging.error(tools_helper.log_msg_apiResponseFormat)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except Exception as e:
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         
         logging.info("%s %i " % (log_msg, len(seq_ids)))
@@ -264,22 +264,22 @@ def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
             success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
             logging.error(tools_helper.log_msg_slowConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
             logging.error(tools_helper.log_msg_httpError)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
             logging.error(tools_helper.log_msg_apiResponseFormat)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except Exception as e:
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
      
     output_file.close()   
@@ -366,22 +366,22 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
                 success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
             logging.error(tools_helper.log_msg_slowConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
             logging.error(tools_helper.log_msg_httpError)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
             logging.error(tools_helper.log_msg_apiResponseFormat)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except Exception as e:
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
      
     output_file.close()   

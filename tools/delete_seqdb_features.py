@@ -59,7 +59,7 @@ def delete_from_seqdb(seqdbWS, seqdb_ids_file_name, delete_type):
     except IOError as e:
         if e.errno == 2:
             logging.error("Could not open file <%s>." % seqdb_ids_file_name)
-            logging.error(e.message)
+            logging.error(str(e))
             print "Could not open seqdb ids file. See log file for details."
             sys.exit(1)
         else:

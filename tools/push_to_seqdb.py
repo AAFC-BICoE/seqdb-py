@@ -17,6 +17,8 @@ import argparse
 import logging.config
 import sys 
 #import time
+#stream: ext://sys.stdout
+
 
 import requests.exceptions
 
@@ -80,30 +82,30 @@ def open_file(file_name):
         if e.errno == 2:
             error_msg = "Could not open file: %s." % file_name
             logging.error(error_msg)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         else:
             raise
 
     return file_handler
 
-def log_error(error_msg):
-    ''' Logs the message to user and developer logs'''
-    logging.error(error_msg)
+#def log_error(error_msg):
+#    ''' Logs the message to user and developer logs'''
+#    logging.error(error_msg)
     
-def report_log_error(error_msg):
-    ''' Logs the message to user and developer logs and prints the message to stdout'''
-    log_error(error_msg)
-    print error_msg
+#def report_log_error(error_msg):
+#    ''' Logs the message to user and developer logs and prints the message to stdout'''
+#    log_error(error_msg)
+#    print error_msg
 
-def log_info(msg):
-    ''' Logs the message to user and developer logs'''
-    logging.info(msg)
+#def log_info(msg):
+#    ''' Logs the message to user and developer logs'''
+#    logging.info(msg)
     
-def report_log_info(msg):
-    ''' Logs the message to user and developer logs and prints the message to stdout'''
-    log_info(msg)
-    print msg
+#def report_log_info(msg):
+#    ''' Logs the message to user and developer logs and prints the message to stdout'''
+#    log_info(msg)
+#    print msg
 
 
 def get_lieage_taxids(tax_parent_ids, taxon_id, lineage=None):
@@ -138,7 +140,7 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
         with open(info_file_name, "r") as info_file_handler:
             
             msg_inputFile = "Find LCA results file: %s" % info_file_name
-            log_info(msg_inputFile)
+            logging.info(msg_inputFile)
     
             for line in info_file_handler:
                 error_msg = "%s Found line: \n%s\n Example of an expected line: \n%s" %(
@@ -148,14 +150,14 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
                 
                 # Do basic file format verification:
                 if len(line_tokens) != 10 and len(line_tokens) != 2:
-                    report_log_error("%s Example of an expected line:\n%s" % (
+                    logging.error("%s Example of an expected line:\n%s" % (
                             tools_helper.log_msg_wrongFileFormat, input_file_line_example))
                     sys.exit(tools_helper.log_msg_sysExitFile)
         
                 try:
                     token1 = line_tokens[0].split(': ')
                     if token1[0] != "Query":
-                        report_log_error(error_msg)
+                        logging.error(error_msg)
                         sys.exit(tools_helper.log_msg_sysExitFile)
         
                     sequenceId = token1[1].split("|")[1]
@@ -171,14 +173,14 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
                         
                     
                 except:
-                    report_log_error(error_msg)
+                    logging.error(error_msg)
                     sys.exit(tools_helper.log_msg_sysExitFile)
         
     except IOError as e:
         if e.errno == 2:
             error_msg = "Could not open input file '%s'." % info_file_name
-            log_error(error_msg)
-            logging.error(e.message)
+            logging.error(error_msg)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         else:
             raise
@@ -208,15 +210,15 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
             determinationIds.append(determinationId)
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
             logging.error(tools_helper.log_msg_httpError)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
             logging.error(tools_helper.log_msg_apiResponseFormat)
-            logging.error(e.message)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         except:
             warning_msg = "Unexpected error writing determination"
@@ -231,8 +233,8 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
   
     log_msg1 = "Number of determinations written to Sequence Dababase:   %i " % len(determinationIds)
     log_msg2 = "Created determination ids are written to a file: '%s'" % output_file_name
-    report_log_info(log_msg1)
-    report_log_info(log_msg2)
+    logging.info(log_msg1)
+    logging.info(log_msg2)
     
     logging.info("Determination IDs, written to SeqDB: %s" % determinationIds)
    
@@ -288,7 +290,7 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
     match_strand = {}
     if extraction_results_file_name:
         msg_inputFile = "ITSx extraction results file (.extraction.results): %s" % extraction_results_file_name
-        log_info(msg_inputFile)
+        logging.info(msg_inputFile)
     
         try:
             with open(extraction_results_file_name, "r") as detailed_results_file:
@@ -302,8 +304,8 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
         except IOError as e:
             if e.errno == 2:
                 error_msg = "Could not open input file '%s'." % extraction_results_file_name
-                log_error(error_msg)
-                logging.error(e.message)
+                logging.error(error_msg)
+                logging.error(str(e))
                 sys.exit(tools_helper.log_msg_sysExit)
             else:
                 raise
@@ -311,7 +313,7 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
     ## Parse the .positions.txt file and insert each found feature to SeqDB
     
     msg_inputFile = "ITSx feature positions file (.positions.txt): %s" % features_file_name
-    log_info(msg_inputFile)
+    logging.info(msg_inputFile)
     
     
     info_file_handler = ''
@@ -320,8 +322,8 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
     except IOError as e:
         if e.errno == 2:
             error_msg = "Could not open input file '%s'." % features_file_name
-            log_error(error_msg)
-            logging.error(e.message)
+            logging.error(error_msg)
+            logging.error(str(e))
             sys.exit(tools_helper.log_msg_sysExit)
         else:
             raise
@@ -334,19 +336,19 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
             sequenceId = int(sequenceId)
         except:
             error_msg = "Input file error. Could not extract sequence id from the input file. Example of an expected line:\n%s\n" % input_file_line_example
-            report_log_error(error_msg)
+            logging.error(error_msg)
             sys.exit(tools_helper.log_msg_sysExit)
         
         try:
             itsx_features = line_tokens[2:7]
         except IndexError as e:
             error_msg = "Could not extract ITS features from the input file. Example of an expected line:\n%s\n" % input_file_line_example
-            report_log_error(error_msg)
+            logging.error(error_msg)
             sys.exit(tools_helper.log_msg_sysExit)
         
         if not sequenceId or not itsx_features:
             error_msg = "Input file not in the correct format. Example of an expected line:\n%s\n" % input_file_line_example
-            report_log_error(error_msg)
+            logging.error(error_msg)
             sys.exit(tools_helper.log_msg_sysExit)
             
         ## Strand information is read from .extraction.results file (above)
@@ -373,15 +375,15 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
                 created_feature_ids.append(fid)
             except requests.exceptions.ConnectionError as e:
                 logging.error(tools_helper.log_msg_noDbConnection)
-                logging.error(e.message)
+                logging.error(str(e))
                 sys.exit(tools_helper.log_msg_sysExit)
             except requests.exceptions.HTTPError as e:
                 logging.error(tools_helper.log_msg_httpError)
-                logging.error(e.message)
+                logging.error(str(e))
                 sys.exit(tools_helper.log_msg_sysExit)
             except UnexpectedContent as e:
                 logging.error(tools_helper.log_msg_apiResponseFormat)
-                logging.error(e.message)
+                logging.error(str(e))
                 sys.exit(tools_helper.log_msg_sysExit)
             except:
                 warning_msg = "File token '%s' is not in the expected format of <feature name>:<position>. Ignoring." % itsx_feature_token
@@ -397,8 +399,8 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
   
     log_msg1 = "Number of features written to Sequence Dababase:   %i " % len(created_feature_ids)
     log_msg2 = "Created feature ids are written to a file: '%s'" % output_file_name
-    report_log_info(log_msg1)
-    report_log_info(log_msg2)
+    logging.info(log_msg1)
+    logging.info(log_msg2)
         
     return created_feature_ids
         
@@ -431,7 +433,7 @@ def main():
         api_url = parsed_args.api_url 
         api_key = parsed_args.api_key 
     
-    log_info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
+    logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
     
     ### Script execution
     
@@ -440,13 +442,13 @@ def main():
     if push_types_dict["its"] == parsed_args.push_type:
         #sys.exit("Not yet implemented")
         log_msg = "Writing ITS features to SeqDB."
-        log_info(log_msg) 
+        logging.info(log_msg) 
         success_feat_ids = push_its_features(seqdbWS, parsed_args.itsx_positions_file, parsed_args.itsx_extraction_file)
             
         
     elif push_types_dict["taxonomy"] == parsed_args.push_type:
         log_msg = "Writing taxonomy lineage information to SeqDB."
-        log_info(log_msg) 
+        logging.info(log_msg) 
         
         push_taxonomy_data(seqdbWS, parsed_args.lca_results_file, main_conf['galaxy']['ncbi_taxonomy_dir'])
 
@@ -457,7 +459,7 @@ def main():
     
     print(tools_helper.log_msg_execEnded)
 
-    log_info(tools_helper.log_msg_execEnded)
+    logging.info(tools_helper.log_msg_execEnded)
     
     
 
