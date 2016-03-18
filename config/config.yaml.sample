@@ -21,7 +21,7 @@ logging:
         console:
             class: logging.StreamHandler
             formatter: simpleFormatter
-            level: WARN
+            level: DEBUG
             stream: ext://sys.stdout
         file:
             class : logging.FileHandler
