@@ -58,7 +58,7 @@ def set_up_logging():
     
     logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
     
-set_up_logging()    
+
 
 # Parses command line arguments 
 # Returns seqdb api_key and base url to use for web services requests
@@ -114,9 +114,7 @@ def __init__(self, api_url, api_key):
 
 def get_ITS_seq_ids(seqdbWS):
     ''' Get all sequence ids, which are associated with the ITS regions '''
-    
-    #set_up_logging()
-    
+
     ### Get sequence IDs for the ITS regions
     its_seq_ids = set()
     its_region_names = ["18s", "its", "28s",  "ssu", "16s", "5.8s", "lsu", "23s", "25s", "internal transcribed spacer"]
@@ -165,8 +163,6 @@ def get_seq_ids(seqdbWS, pull_type,
         pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
         specimen_nums: if specified, list of specimen numbers for which the sequence ids will be retrieved
     '''
-    #set_up_logging()
-    
     if pull_type not in pull_types_dict.values():
         msg = "Value for pull_type should be one of the following: %s" %pull_types_dict.values()
         logging.error(msg)
@@ -261,9 +257,6 @@ def get_seq_ids(seqdbWS, pull_type,
 
          
 def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
-    
-    #set_up_logging()
-    
     # Get fasta sequences based on ids and write to a file 
     output_file = open(file_name + file_type, 'w')
     
@@ -312,9 +305,6 @@ def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
     
 
 def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
-    
-    #set_up_logging()
-    
     # Get fasta sequences based on ids and write to a file 
     output_file = open(output_file_name, 'w')
     
@@ -418,7 +408,7 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     
     ### Load main configuration file and set up logging for the script
     
-    #set_up_logging()
+    set_up_logging()
     
     ### Parse sript's input arguments
     
