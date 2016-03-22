@@ -82,7 +82,7 @@ def open_file(file_name):
         if e.errno == 2:
             error_msg = "Could not open file: %s." % file_name
             logging.error(error_msg)
-            logging.error(str(e))
+            logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         else:
             raise
@@ -180,7 +180,7 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
         if e.errno == 2:
             error_msg = "Could not open input file '%s'." % info_file_name
             logging.error(error_msg)
-            logging.error(str(e))
+            logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         else:
             raise
@@ -210,15 +210,15 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
             determinationIds.append(determinationId)
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
-            logging.error(str(e))
+            logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
             logging.error(tools_helper.log_msg_httpError)
-            logging.error(str(e))
+            logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except UnexpectedContent as e:
             logging.error(tools_helper.log_msg_apiResponseFormat)
-            logging.error(str(e))
+            logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         except:
             warning_msg = "Unexpected error writing determination"
@@ -305,7 +305,7 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
             if e.errno == 2:
                 error_msg = "Could not open input file '%s'." % extraction_results_file_name
                 logging.error(error_msg)
-                logging.error(str(e))
+                logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
             else:
                 raise
@@ -323,7 +323,7 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
         if e.errno == 2:
             error_msg = "Could not open input file '%s'." % features_file_name
             logging.error(error_msg)
-            logging.error(str(e))
+            logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
         else:
             raise
@@ -375,15 +375,15 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
                 created_feature_ids.append(fid)
             except requests.exceptions.ConnectionError as e:
                 logging.error(tools_helper.log_msg_noDbConnection)
-                logging.error(str(e))
+                logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
             except requests.exceptions.HTTPError as e:
                 logging.error(tools_helper.log_msg_httpError)
-                logging.error(str(e))
+                logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
             except UnexpectedContent as e:
                 logging.error(tools_helper.log_msg_apiResponseFormat)
-                logging.error(str(e))
+                logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
             except:
                 warning_msg = "File token '%s' is not in the expected format of <feature name>:<position>. Ignoring." % itsx_feature_token
