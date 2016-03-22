@@ -16,9 +16,6 @@ Other arguments:
 import argparse
 import logging.config
 import sys 
-#import time
-#stream: ext://sys.stdout
-
 
 import requests.exceptions
 
