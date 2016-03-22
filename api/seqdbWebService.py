@@ -15,6 +15,15 @@ import os
 
 import requests
 
+#import httplib
+#httplib.HTTPConnection.debuglevel = 1
+
+#logging.basicConfig()
+#logging.getLogger().setLevel(logging.DEBUG)
+#requests_log = logging.getLogger("requests.packages.urllib3")
+#requests_log.setLevel(logging.DEBUG)
+#requests_log.propagate = True
+
 
 class UnexpectedContent(requests.exceptions.RequestException):
     error_msg = "Unexpected content of the Web Services response: "
@@ -51,6 +60,8 @@ class seqdbWebService(object):
         req_header = { 'apikey': self.api_key }
         
         resp = requests.get(request_url, headers=req_header, params=params)
+        logging.debug("Request: %s %s %s" % (resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: %i" % (resp.status_code))
         #resp.content: str {"count":288,"limit":20,"message":"Query completed successfully","offset":0,"result":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"sortColumn":"regionId","sortOrder":1,"statusCode":200}
         
         if resp.status_code == 404:
