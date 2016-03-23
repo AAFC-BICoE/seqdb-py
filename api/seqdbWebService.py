@@ -95,6 +95,7 @@ class seqdbWebService(object):
                     
         return resp
     
+    
     def retrieveJsonWithOffset(self, request_url, params=None, offset=0):
         ''' Submits a request to SeqDB web services with offset to handle paginated results
         Args:
@@ -161,6 +162,8 @@ class seqdbWebService(object):
         req_header = {
             'apikey': self.api_key, 'Content-Type': 'application/json'}
         resp = requests.put(request_url, headers=req_header, data=json_data)
+        logging.debug("Request: %s %s %s" % (resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: %i" % (resp.status_code))
 
         try:
             resp.raise_for_status()
@@ -185,6 +188,8 @@ class seqdbWebService(object):
             'apikey': self.api_key, 'Content-Type': 'application/json'}
         # (url, data, json)
         resp = requests.post(request_url, headers=req_header, data=json_data)
+        logging.debug("Request: %s %s %s" % (resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: %i" % (resp.status_code))
 
         try:
             resp.raise_for_status()
@@ -209,7 +214,9 @@ class seqdbWebService(object):
 
         req_header = {'apikey': self.api_key}
         resp = requests.delete(request_url, headers=req_header)
-
+        logging.debug("Request: %s %s %s" % (resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: %i" % (resp.status_code))
+        
         # Will raise HTTPError exception if response status was not ok
         try:
             resp.raise_for_status()
