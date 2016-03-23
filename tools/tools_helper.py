@@ -30,11 +30,13 @@ log_msg_execEnded = "Execution complete."
 log_msg_apiUrl = "Base URL for web services is:"
 log_msg_errorSeeLog = "Execution was not successful. See log for details."
 
-log_msg_ITSLoad="Loading ITS sequences."
-log_msg_ConsensusLoad="Loading consensus sequences."
-log_msg_RawLoad="Loading raw sequences for specimen: "
+log_msg_ITSLoad = "Loading ITS sequences."
+log_msg_ConsensusLoad = "Loading consensus sequences."
+log_msg_RawLoad = "Loading raw sequences for specimen: "
 
-log_msg_wrongFileFormat="Supplied file is not in the required format. "
+log_msg_deletion = "Deleting items from SeqDB. File name with SeqDB ids to be deleted:"
+
+log_msg_wrongFileFormat = "Supplied file is not in the required format. "
 
 
 def load_config(config_file):
