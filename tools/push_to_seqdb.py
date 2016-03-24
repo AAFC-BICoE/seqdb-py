@@ -86,24 +86,6 @@ def open_file(file_name):
 
     return file_handler
 
-#def log_error(error_msg):
-#    ''' Logs the message to user and developer logs'''
-#    logging.error(error_msg)
-    
-#def report_log_error(error_msg):
-#    ''' Logs the message to user and developer logs and prints the message to stdout'''
-#    log_error(error_msg)
-#    print error_msg
-
-#def log_info(msg):
-#    ''' Logs the message to user and developer logs'''
-#    logging.info(msg)
-    
-#def report_log_info(msg):
-#    ''' Logs the message to user and developer logs and prints the message to stdout'''
-#    log_info(msg)
-#    print msg
-
 
 def get_lieage_taxids(tax_parent_ids, taxon_id, lineage=None):
     ''' Finds a taxonomic lineage for taxon_id.
@@ -236,7 +218,6 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
     logging.info("Determination IDs, written to SeqDB: %s" % determinationIds)
    
     return determinationIds
-
 
 
 # B15_17_SH817_ITS_ITS5    622 bp.    SSU: Not found    ITS1: 1-241    5.8S: 242-399    ITS2: 400-557    LSU: 558-622
@@ -401,7 +382,6 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
         
     return created_feature_ids
         
-
     
 def main():
     ''' Write provided information to SeqDB '''
@@ -459,13 +439,10 @@ def main():
     logging.info(tools_helper.log_msg_execEnded)
     
     
-
 if __name__ == '__main__':
 # Usage exmaple for ITS features:
 #-c user_config.yaml itsx_features --itsx_positions_file ./test/data/test.positions.txt --itsx_extraction_file ./test/data/test.extraction.results
 
 # Usage exmaple for LCA:
 #-c user_config.yaml findLCA_taxonomy --lca_results_file ./test/data/LCA_Results.tabular
-
-
     main()
