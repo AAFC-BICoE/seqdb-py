@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
         self.fixture = seqdbWebService(api_key=config['seqdb']['api_key'],
                                                    base_url=config['seqdb']['api_url'])
         self.itsx_positions_file_name = "data/test.positions.txt"
-        self.output_file_name = "seqdb_feature_ids.txt"
+        self.push_to_seqdb_output_file_name = "seqdb_feature_ids.txt"
         self.failed_ids_output_file_name = "delete_failed_feature_ids.txt"
         
     
@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.itsx_positions_file_name), "ITSx positions file was not opened")    
 
 
-    def test_delete_from_seqdb(self):
+    def test_create_delete_features_from_seqdb(self):
         # time: 1.477s
         
         created_feature_ids = push_to_seqdb.push_its_features(self.fixture, self.itsx_positions_file_name)
