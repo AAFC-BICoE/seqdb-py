@@ -51,6 +51,8 @@ class seqdbWebService(object):
         req_header = { 'apikey': self.api_key }
         
         resp = requests.get(request_url, headers=req_header, params=params)
+        logging.debug("Request: %s %s %s" % (resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: %i" % (resp.status_code))
         #resp.content: str {"count":288,"limit":20,"message":"Query completed successfully","offset":0,"result":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"sortColumn":"regionId","sortOrder":1,"statusCode":200}
         
         if resp.status_code == 404:
@@ -92,6 +94,7 @@ class seqdbWebService(object):
                 raise UnexpectedContent(response=jsn_resp)
                     
         return resp
+    
     
     def retrieveJsonWithOffset(self, request_url, params=None, offset=0):
         ''' Submits a request to SeqDB web services with offset to handle paginated results
@@ -148,8 +151,6 @@ class seqdbWebService(object):
         
         return jsn_resp, result_offset
        
-    
-
 
     def update(self, request_url, json_data):
         ''' Updates a SeqDB entity
@@ -161,6 +162,8 @@ class seqdbWebService(object):
         req_header = {
             'apikey': self.api_key, 'Content-Type': 'application/json'}
         resp = requests.put(request_url, headers=req_header, data=json_data)
+        logging.debug("Request: %s %s %s" % (resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: %i" % (resp.status_code))
 
         try:
             resp.raise_for_status()
@@ -185,6 +188,8 @@ class seqdbWebService(object):
             'apikey': self.api_key, 'Content-Type': 'application/json'}
         # (url, data, json)
         resp = requests.post(request_url, headers=req_header, data=json_data)
+        logging.debug("Request: %s %s %s" % (resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: %i" % (resp.status_code))
 
         try:
             resp.raise_for_status()
@@ -198,6 +203,7 @@ class seqdbWebService(object):
         
         return resp
 
+
     def delete(self, request_url):
         ''' Creates a SeqDB entity
         Raises:
@@ -208,7 +214,9 @@ class seqdbWebService(object):
 
         req_header = {'apikey': self.api_key}
         resp = requests.delete(request_url, headers=req_header)
-
+        logging.debug("Request: %s %s %s" % (resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: %i" % (resp.status_code))
+        
         # Will raise HTTPError exception if response status was not ok
         try:
             resp.raise_for_status()
@@ -473,7 +481,6 @@ class seqdbWebService(object):
         return sequence_ids, result_offset
 
 
-    
     def importChromatSequences(
             self, blob, dest_file_name,
             notes="", trace_file_path=""):
@@ -522,6 +529,7 @@ class seqdbWebService(object):
 
         return result
 
+
     def importChromatSequencesFromFile(
             self, chromat_file, notes="",
             trace_file_path="", dest_file_name=""):
@@ -564,6 +572,7 @@ class seqdbWebService(object):
                 blob=blob, dest_file_name=dest_file_name,
                 notes=notes, trace_file_path=trace_file_path)
 
+
     def deleteRawSequence(self, seq_id):
         ''' Deletes a SeqDB sequence
         Args:
@@ -582,6 +591,7 @@ class seqdbWebService(object):
 
         return jsn_resp
 
+
     def bulkDeleteRawSequence(self, seq_ids):
         ''' Deletes a list of SeqDB sequences
         Args:
@@ -594,6 +604,7 @@ class seqdbWebService(object):
         '''
         for seq_id in seq_ids:
             self.deleteRawSequence(seq_id)
+
 
     def updateSeqSource(self, sequenceId, params):
         resp = self.update(
@@ -625,6 +636,7 @@ class seqdbWebService(object):
 
         return jsn_seq
 
+
     def getFormattedSeq(self, seq_id, format_type):
         ''' Gets sequence in fasta or fastq format 
         Raises:
@@ -638,6 +650,7 @@ class seqdbWebService(object):
         url = self.base_url + "/sequence/" + str(seq_id) + "." + format_type
         response = self.retrieve(url)
         return response.content
+
 
     def getFastaSeqPlus(self, seq_id):
         ''' Gets sequence from SeqDB and returns it in a fasta format with a
@@ -684,6 +697,7 @@ class seqdbWebService(object):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
+    
     
     def getConsensusSeqNum(self, specimenNum=None,
                          sequenceName=None,
@@ -909,11 +923,13 @@ class seqdbWebService(object):
         
         return vettedTaxonomy
     
+    
     def convertNcbiToSeqdbTaxRank(self, tax_rank):
         for seqdb_tax_rank in self._seqdb_to_ncbi_taxonomy:
             if self._seqdb_to_ncbi_taxonomy[seqdb_tax_rank] == tax_rank:
                 return seqdb_tax_rank
         return "No matches found."
+    
     
     def insertSequenceDetermination(self, sequenceId, taxonomy, isAccepted=False, ncbiTaxonId=None, notes=None):
         ''' Creates a determination for a sequence
@@ -948,7 +964,6 @@ class seqdbWebService(object):
 
         return jsn_resp['result']
 
-    
     
     def deleteDetermination(self, determinationId):
         ''' Deletes a Determination
@@ -1088,6 +1103,7 @@ class seqdbWebService(object):
 
         return jsn_resp['result']
 
+
     def deleteRegion(self, regionId):
         ''' Deletes a region
         Args:
@@ -1130,6 +1146,7 @@ class seqdbWebService(object):
         else:
             return ''
 
+
     def insertFeature(
             self, name, featureTypeId, featureLocations,
             sequenceId, description='', featureDefault=False, parentId=None):
@@ -1165,6 +1182,7 @@ class seqdbWebService(object):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
+
 
     def deleteFeature(self, featureId):
         ''' Deletes a Feature
@@ -1250,6 +1268,7 @@ class seqdbWebService(object):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp['result']
+
 
     def deleteFeatureType(self, featureTypeId):
         ''' Deletes a FeatureType
@@ -1425,6 +1444,7 @@ class seqdbWebService(object):
                   'filterWildcard': 'true'}
 
         return self.getJsonSpecimenIds(params)
+
 
     def getJsonSpecimenIdsBySpecimenId(self, code, identifier):
         params = {'filterName': ['biologicalCollection.name', 'number'],
