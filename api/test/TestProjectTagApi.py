@@ -45,12 +45,12 @@ class TestSeqdbWebService(unittest.TestCase):
     def testGetEntity(self):
         actual = self.fixture.getEntity(12)
         self.assertTrue(actual, "No Project Tag returned.")
-        self.assertIn("Cranberry", actual,"Expecting Cranberry project tag.")
+        self.assertIn("Cranberry", actual["name"],"Expecting Cranberry project tag.")
         
     def testGetIdsWithOffset(self):
-        self.fixture.setNameFilter("a")
-        actual = self.fixture.getIdsWithOffset(0);
-        self.assertEquals(10, actual.size(), "Expecting 10 ids.")
+        self.fixture.nameFilter="a"
+        actualEntityIds, offset = self.fixture.getIdsWithOffset(0);
+        self.assertEquals(2, len(actualEntityIds), "Expecting 10 ids, but got {}.".format(len(actualEntityIds)))
                 
 if __name__ == "__main__":
     unittest.main()

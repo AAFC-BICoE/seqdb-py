@@ -42,9 +42,9 @@ class TestSeqdbWebService(unittest.TestCase):
         self.assertIn("some text", actual,"Expecting .")
         
     def testGetIdsWithOffset(self):
-        self.fixture.setNameFilter("someSpecimenName")
-        actual = self.fixture.getIdsWithOffset(0);
-        self.assertEquals(10, actual.size(), "Expecting 10 ids.")
+        self.fixture.otherIds="someSpecimenName"
+        actualEntityIds, offset = self.fixture.getIdsWithOffset(0);
+        self.assertEquals(10, actualEntityIds.size(), "Expecting 10 ids.")
         
                 
 if __name__ == "__main__":

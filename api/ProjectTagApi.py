@@ -28,7 +28,7 @@ class ProjectTagApi(BaseApiEntity):
     def getParamsStr(self):
         params = ''
         if self.__nameFilter:
-            params = "filterName=name&filterValue={}&filterWildcard=false&".format(self.__nameFilter)
+            params = "filterName=name&filterValue={}&filterWildcard=true&".format(self.__nameFilter)
         
         return params
     
