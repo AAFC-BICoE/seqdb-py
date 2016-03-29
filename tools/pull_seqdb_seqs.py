@@ -46,6 +46,19 @@ taxonomy_ranks = {"species", "genus", "family", "order", "class", "phylum"}
 
 ###
 
+def set_up_logging():
+    ''' Loads main configuration file and sets up logging for the script '''
+    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
+
+    if not main_conf:
+        logging.error(tools_helper.log_msg_noConfig)
+        sys.exit(tools_helper.log_msg_sysExit)
+    
+    logging.config.dictConfig(main_conf['logging'])
+    
+    logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
+    
+
 
 # Parses command line arguments 
 # Returns seqdb api_key and base url to use for web services requests
@@ -97,12 +110,11 @@ def parse_input_args(argv):
 
 def __init__(self, api_url, api_key):
     self.api_url = api_url
-    self.api_key = api_key 
-
+    self.api_key = api_key
 
 def get_ITS_seq_ids(seqdbWS):
     ''' Get all sequence ids, which are associated with the ITS regions '''
-    
+
     ### Get sequence IDs for the ITS regions
     its_seq_ids = set()
     its_region_names = ["18s", "its", "28s",  "ssu", "16s", "5.8s", "lsu", "23s", "25s", "internal transcribed spacer"]
@@ -151,7 +163,6 @@ def get_seq_ids(seqdbWS, pull_type,
         pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
         specimen_nums: if specified, list of specimen numbers for which the sequence ids will be retrieved
     '''
-    
     if pull_type not in pull_types_dict.values():
         msg = "Value for pull_type should be one of the following: %s" %pull_types_dict.values()
         logging.error(msg)
@@ -391,23 +402,13 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
     
 
     return success_ids
-    
-
 
     
 def execute_script(input_args, output_file_name=output_file_name, output_taxonomy_file_name=output_taxonomy_file_name):
     
     ### Load main configuration file and set up logging for the script
     
-    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
-
-    if not main_conf:
-        logging.error(tools_helper.log_msg_noConfig)
-        sys.exit(tools_helper.log_msg_sysExit)
-    
-    logging.config.dictConfig(main_conf['logging'])
-    
-    logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
+    set_up_logging()
     
     ### Parse sript's input arguments
     

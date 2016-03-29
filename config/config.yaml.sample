@@ -21,14 +21,9 @@ logging:
         console:
             class: logging.StreamHandler
             formatter: simpleFormatter
-            level: WARN
+            level: INFO
             stream: ext://sys.stdout
         file:
-            class : logging.FileHandler
-            formatter: simpleFormatter
-            level: INFO
-            filename: seqdb_tools.log
-        debug:
             class : logging.FileHandler
             formatter: simpleFormatter
             level: DEBUG
@@ -36,4 +31,4 @@ logging:
 
     root:
         level: INFO # Not producing debug info by default
-        handlers: [console, file, debug]
+        handlers: [console, file]

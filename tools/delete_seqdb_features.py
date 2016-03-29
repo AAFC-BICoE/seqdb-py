@@ -17,6 +17,18 @@ import tools_helper
 output_file_name = "delete_failed_feature_ids.txt"
 delete_types_dict = {"feature":"features", "determination":"taxonomy"}
 
+def set_up_logging():
+    ''' Loads main configuration file and sets up logging for the script '''
+    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
+
+    if not main_conf:
+        logging.error(tools_helper.log_msg_noConfig)
+        sys.exit(tools_helper.log_msg_sysExit)
+    
+    logging.config.dictConfig(main_conf['logging'])
+
+    logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
+
 
 def parse_input_args(argv):
     ''' Parses command line arguments '''
@@ -52,7 +64,7 @@ def delete_from_seqdb(seqdbWS, seqdb_ids_file_name, delete_type):
         success_ids: list of ids that where successfully deleted from SeqDB
         fail_ids: list of ids that failed to be deleted from SeqDB
     '''
-    
+
     ids_file = ''
     try:
         ids_file = open(seqdb_ids_file_name,"r")
@@ -111,20 +123,16 @@ def delete_from_seqdb(seqdbWS, seqdb_ids_file_name, delete_type):
     return success_ids, fail_ids
     
     
-def main():
+def execute_script(input_args, output_file_name=output_file_name):
     ''' Deletes items from SeqDB. '''
     
-    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
+    ### Loads main configuration file and sets up logging for the script
 
-    if not main_conf:
-        logging.error(tools_helper.log_msg_noConfig)
-        sys.exit(tools_helper.log_msg_sysExit)
+    set_up_logging()
     
-    logging.config.dictConfig(main_conf['logging'])
-
-    logging.info("Script executed with the following command and arguments: %s" % sys.argv)
+    ### Parse script's input arguments
     
-    parsed_args = parse_input_args(sys.argv[1:])
+    parsed_args = parse_input_args(input_args)
     
     if parsed_args.config_file:
         tool_config = tools_helper.load_config(parsed_args.config_file)
@@ -136,10 +144,11 @@ def main():
     
     logging.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, api_url))
     
+    ### Script execution
+    
     seqdbWS = seqdbWebService(api_key, api_url)
              
-    log_msg = "Deleting items from SeqDB. File name with SeqDB ids to be deleted: %s" % parsed_args.features_file_name
-    logging.info(log_msg)    
+    logging.info("%s %s" % (tools_helper.log_msg_deletion, parsed_args.features_file_name))    
         
         
     success_ids,fail_ids = delete_from_seqdb(seqdbWS=seqdbWS, 
@@ -160,9 +169,9 @@ def main():
     
     logging.info(tools_helper.log_msg_execEnded)
 
+def main():
+    execute_script(sys.argv[1:])
     
     
-
 if __name__ == '__main__':
-    main()
-    
+    main()   

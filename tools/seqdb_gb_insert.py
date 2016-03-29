@@ -552,11 +552,26 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
                             seqdb_ws, seqdb_id, jsn_resp['result'][0])
 
 
-def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature):
+def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, taxon_id, organism, feature):
     """Associate the sequence with a Taxa in the SeqDB Taxonomy based on the
        GBQualifier "organism" value"""
 
-    logging.warn("Taxonomy linking not yet implemented")
+    taxon_id_value = taxon_id.split(":")
+    org_split = organism.split(" ")
+
+    taxonomy = {
+        "genus":org_split[0],
+        "species":org_split[1]
+    }
+
+    determinationId = seqdb_ws.insertSequenceDetermination(isAccepted="true", 
+                                                           sequenceId=seqdb_id, 
+                                                           taxonomy=taxonomy,
+                                                           ncbiTaxonId=taxon_id_value[1],
+                                                           notes="here are notes",
+                                                           )
+  
+    logging.info("Sequence determination: %s" % organism)
 
 
 def seqdb_update_seqsource_region(seqdb_ws, seqdb_id, seqdb_region_id):
@@ -838,13 +853,22 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
                 break
 
         # supplement description (prepend key value pairs to base description)
+
+        taxon_id = None;
+        organism_name = None;
+
         description_keys = [
             'db_xref', 'protein_id', 'locus_tag', 'note',
-            'rpt_type', 'gene', 'product']
+            'rpt_type', 'gene', 'product', 'organism']
         for key in description_keys:
             if key in feature['qualifiers']:
                 for value in feature['qualifiers'][key]:
                     description = key + ": " + value + "; " + description
+                    #logging.warn("description: %s" % description)
+                    if key =='db_xref':
+                        taxon_id = value
+                    if key =='organism':
+                        organism_name = value
 
         # currently unsupported features that I've encountered
         #    1  STS
@@ -918,7 +942,7 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
 
         elif feature['feature_key'] == 'source':
             # seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature)
-            seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, feature)
+            seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, taxon_id, organism_name, feature)
 
         else:
             logging.warn("Unsupported feature type: %s" %
@@ -966,7 +990,7 @@ def process_entrez_entry(
     logging.debug("Checking for gi:%s in SeqDB" % (genbank_id))
 
     #result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
-    seq_ids = seqdb_ws.getAllConsensusSequenceIdsWithOffset(genBankGI=genbank_id)
+    seq_ids = seqdb_ws.getAllConsensusSequenceIds(genBankGI=genbank_id)
 
     if seq_ids and delete:
         logging.info(
@@ -1033,6 +1057,8 @@ def main():
     Raises:
         None
     """
+    print("loading configuration file: %s" % config_root.path()+ '/config.yaml')
+    print("loading tools configuration file: %s" %  os.path.dirname(__file__) + '/seqdb_gb_insert_config.yaml')
     main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
     if not main_conf:
         logging.error(tools_helper.log_msg_noConfig)
