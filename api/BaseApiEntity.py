@@ -1,7 +1,7 @@
 '''
 Created on Feb 16, 2016
 
-@author: korolo
+@author: Oksana Korol
 
 Class that extracts common functionality for all SeqDB API entities
 '''
