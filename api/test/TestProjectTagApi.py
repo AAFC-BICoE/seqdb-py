@@ -14,7 +14,7 @@ Before running the tests:
      to local instance of SeqDB
     - Make sure that local instance of SeqDB is running
 
-@author: korolo
+@author: Oksana Korol
 '''
 import requests
 import unittest 

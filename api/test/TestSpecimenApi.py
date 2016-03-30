@@ -14,7 +14,7 @@ Before running the tests:
      to local instance of SeqDB
     - Make sure that local instance of SeqDB is running
 
-@author: korolo
+@author: Oksana Korol
 '''
 import requests
 import unittest 
@@ -29,7 +29,7 @@ class TestSeqdbWebService(unittest.TestCase):
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
         self.fixture = SpecimenApi.SpecimenApi(api_key=config['seqdb']['api_key'],
-                                                   base_url=config['seqdb']['api_url'])
+                                                base_url=config['seqdb']['api_url'])
     
     def testRetrieve(self):
         # Test faulty connection
@@ -37,15 +37,17 @@ class TestSeqdbWebService(unittest.TestCase):
     
            
     def testGetEntity(self):
-        actual = self.fixture.getEntity(1234)
+        actual = self.fixture.getEntity(6601)
         self.assertTrue(actual, "No Specimen returned.")
-        self.assertIn("some text", actual,"Expecting .")
-        
+        self.assertEqual(6601, actual["id"],"Expecting specimen 6601.")
+          
     def testGetIdsWithOffset(self):
-        self.fixture.otherIds="someSpecimenName"
+        #TODO: fix this test
+        #self.fixture.otherIds="|CV-F:CV547|"
+        self.fixture.otherIdsFilter = "M."
         actualEntityIds, offset = self.fixture.getIdsWithOffset(0);
-        self.assertEquals(10, actualEntityIds.size(), "Expecting 10 ids.")
-        
+        self.assertEquals(2, len(actualEntityIds), "Expecting 10 ids, but got {}.".format(len(actualEntityIds)))
+    
                 
 if __name__ == "__main__":
     unittest.main()
