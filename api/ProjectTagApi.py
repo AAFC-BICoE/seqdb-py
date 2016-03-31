@@ -19,18 +19,18 @@ class ProjectTagApi(BaseApiEntity):
         
     @property
     def nameFilter(self):
-        return self.__nameFilter
+        return self.nameFilter
     
     @nameFilter.setter
     def nameFilter(self, name):
-        self.__nameFilter = name
+        self.nameFilter = name
         
     def getParamsStr(self):
         params = ''
-        if self.__nameFilter:
-            params = "filterName=name&filterValue={}&filterWildcard=true&".format(self.__nameFilter)
+        if self.nameFilter:
+            params = "filterName=name&filterValue={}&filterWildcard=true&".format(self.nameFilter)
         
         return params
     
     def clearAllFilters(self):
-        self.__nameFilter = None
+        self.nameFilter = None

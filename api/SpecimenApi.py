@@ -19,20 +19,20 @@ class SpecimenApi(BaseApiEntity):
         
     @property
     def otherIdsFilter(self):
-        return self.__nameFilter
+        return self.otherIdsFilter
     
     @otherIdsFilter.setter
     def otherIdsFilter(self, otherIdsFilter):
         ''' otherIdsFilter = code + identifier
         '''
-        self.__otherIdsFilter = otherIdsFilter
+        self.otherIdsFilter = otherIdsFilter
         
     def getParamsStr(self):
         params = ''
-        if self.__otherIdsFilter:
-            params = "filterName=otherIds&filterValue={}&filterWildcard=true&".format(self.__otherIdsFilter)
+        if self.otherIdsFilter:
+            params = "filterName=otherIds&filterValue={}&filterWildcard=true&".format(self.otherIdsFilter)
         
         return params
     
     def clearAllFilters(self):
-        self.__otherIdsFilter = None
+        self.otherIdsFilter = None

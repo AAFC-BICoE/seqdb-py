@@ -8,6 +8,7 @@ Class that extracts common functionality for all SeqDB API entities
 
 from api.BaseSeqdbApi import BaseSeqdbApi
 from api.BaseSeqdbApi import UnexpectedContent
+from wsgiref.util import request_uri
 
 
 class BaseApiEntity(BaseSeqdbApi):
@@ -49,7 +50,16 @@ class BaseApiEntity(BaseSeqdbApi):
             return jsn_resp['result']
         else:
             return ''
-            
+    
+    def getEntityNum(self):
+        ''' Returns a number of entities
+        '''
+        # Problem here is that param str is not defined at this level, and only defined at the subclass level
+        jsn_resp = self.retrieveJson(request_url=request_uri, params=self.getParamsStr())
+        result_num = int(jsn_resp['metadata']['resultCount'])
+        
+        return result_num
+        
 
     def deleteEntity(self, entityId):
         ''' Deletes a Determination
