@@ -24,7 +24,7 @@ from api import SpecimenApi
 from config import config_root
 
 
-class TestSeqdbWebService(unittest.TestCase):
+class TestSpecimenApi(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        

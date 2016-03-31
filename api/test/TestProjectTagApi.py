@@ -24,7 +24,7 @@ from api import ProjectTagApi
 from config import config_root
 
 
-class TestSeqdbWebService(unittest.TestCase):
+class TestProjectTagApi(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
