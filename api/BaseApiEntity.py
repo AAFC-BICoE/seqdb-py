@@ -6,9 +6,11 @@ Created on Feb 16, 2016
 Class that extracts common functionality for all SeqDB API entities
 '''
 
+from abc import abstractmethod
+from wsgiref.util import request_uri
+
 from api.BaseSeqdbApi import BaseSeqdbApi
 from api.BaseSeqdbApi import UnexpectedContent
-from wsgiref.util import request_uri
 
 
 class BaseApiEntity(BaseSeqdbApi):
@@ -25,12 +27,14 @@ class BaseApiEntity(BaseSeqdbApi):
         super(BaseApiEntity, self).__init__(api_key,base_url)
         self.request_url = request_url
     
+    @abstractmethod
     def getParamsStr(self):
         ''' Based on the object specified filter parameters, create a parameter
             string, which will be added to the request
         '''
-        return None
+        raise NotImplementedError("Must override getParamStr")
     
+        
     def getEntity(self, entityId):
         ''' Retrieves an entity
         Args:
@@ -51,17 +55,18 @@ class BaseApiEntity(BaseSeqdbApi):
         else:
             return ''
     
-    def getEntityNum(self):
+    def getNumber(self):
         ''' Returns a number of entities
         '''
         # Problem here is that param str is not defined at this level, and only defined at the subclass level
-        jsn_resp = self.retrieveJson(request_url=request_uri, params=self.getParamsStr())
+        paramStr = self.getParamsStr()
+        jsn_resp = self.retrieveJson(request_url=request_uri, params=paramStr)
         result_num = int(jsn_resp['metadata']['resultCount'])
         
         return result_num
         
 
-    def deleteEntity(self, entityId):
+    def delete(self, entityId):
         ''' Deletes a Determination
         Args:
             determinationId: id of the determination to be deleted
@@ -73,7 +78,7 @@ class BaseApiEntity(BaseSeqdbApi):
             UnexpectedContent
         '''
         request_url = self.request_url + "/" + str(entityId)
-        jsn_resp = self.delete(self.base_url + request_url).json()
+        jsn_resp = super.delete(self.base_url + request_url).json()
 
         if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
@@ -81,7 +86,7 @@ class BaseApiEntity(BaseSeqdbApi):
         return jsn_resp
 
     
-    def getIdsWithOffset(self, offset=0):
+    def getIdsWithOffset(self, offset=0, limit=0):
         ''' Get entity IDs with offset, filtered by specified filter parameters
         Args: 
             offset: nothing if it is a first query, then number of records from which to load the next set of ids
@@ -95,9 +100,11 @@ class BaseApiEntity(BaseSeqdbApi):
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        params = self.getParamsStr()
-        
-        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url=self.request_url, params=params, offset=offset)
+        paramStr = self.getParamsStr()
+        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url=self.request_url, 
+                                                              params=paramStr, 
+                                                              offset=offset, 
+                                                              limit=limit)
         
         entity_ids = ""
         
@@ -111,11 +118,11 @@ class BaseApiEntity(BaseSeqdbApi):
         ''' Returns all entity ids, that correspond to the set filters
         Companion method to getProjectTagWithOffset. Returns all the results, iterating with offset.
         '''
-        
-        tag_ids, offset = self.getProjectTagIdsWithOffset()
+        result_limit = 50
+        tag_ids, offset = self.getIdsWithOffset(offset=0, limit=result_limit)
         
         while offset:
-            curr_tag_ids, offset = self.getProjectTagIdsWithOffset(offset)
+            curr_tag_ids, offset = self.getIdsWithOffset(offset=offset, limit=result_limit)
             tag_ids.extend(curr_tag_ids)
         
         return tag_ids

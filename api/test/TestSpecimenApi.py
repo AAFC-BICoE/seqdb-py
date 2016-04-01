@@ -45,7 +45,7 @@ class TestSpecimenApi(unittest.TestCase):
         #TODO: fix this test
         #self.fixture.otherIds="|CV-F:CV547|"
         self.fixture.otherIdsFilter = "M."
-        actualEntityIds, offset = self.fixture.getIdsWithOffset(0);
+        actualEntityIds = self.fixture.getIds();
         self.assertEquals(2, len(actualEntityIds), "Expecting 10 ids, but got {}.".format(len(actualEntityIds)))
     
                 

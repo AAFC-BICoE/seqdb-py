@@ -89,7 +89,7 @@ class BaseSeqdbApi(object):
                     
         return resp
     
-    def retrieveJsonWithOffset(self, request_url, params=None, offset=0):
+    def retrieveJsonWithOffset(self, request_url, params=None, offset=0, limit=0):
         ''' Submits a request to SeqDB web services with offset to handle paginated results
         Args:
             request_url: part of the API url, specific to the requests (i.e. "/sequences")
@@ -118,7 +118,10 @@ class BaseSeqdbApi(object):
             raise "seqdbWebServices.retrieveJsonWithOffset: Parameters to api should not contain 'offset=' in this method"
 
         if offset:
-            params ="%s&offset=%s&" %(params,offset)
+            params ="{}&offset={}&".format(params,offset)
+        
+        if limit:
+            params ="{}&limit={}&".format(params,limit)
                        
         jsn_resp = self.retrieveJson(request_url, params)
         
