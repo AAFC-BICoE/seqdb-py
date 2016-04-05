@@ -67,6 +67,24 @@ class TestSequenceApi(unittest.TestCase):
         delete_jsn_resp = self.fixture.delete(seq_id)
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete feature type.")
 
+    def testCreateDeleteChromatSequenceGz_valid(self):
+        """ Test creating a sequence with a zipped binary file (chromatogram) i.e. ab1.gz """
+        seq_id = self.fixture.importChromatSequencesFromFile(chromat_file = "data/blob_db.ab1.gz")
+        self.assertTrue(seq_id, "Persisting chromatogram did not return an id.")
+        
+        # Delete
+        delete_jsn_resp = self.fixture.delete(seq_id)
+        self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete feature type.")     
+    
+    def testGetFastaSeq(self):
+        actual = self.fixture.getFormattedSeq("1", "fasta")
+        self.assertTrue(actual, "Fasta sequence is empty.")
+        self.assertIn(">", actual, "Fasta does not contain >.")        
+    
+    def testGetFastqSeq(self):
+        actual = self.fixture.getFormattedSeq("1", "fastq")
+        self.assertTrue(actual, "Fastq sequence is empty.")
+        self.assertIn("@seqdb", actual, "Fastq does not contain @seqdb.")        
     
 
 if __name__ == "__main__":

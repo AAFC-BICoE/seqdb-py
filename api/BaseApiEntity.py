@@ -67,9 +67,9 @@ class BaseApiEntity(BaseSeqdbApi):
         
 
     def delete(self, entityId):
-        ''' Deletes a Determination
+        ''' Deletes an entity from SeqDB
         Args:
-            determinationId: id of the determination to be deleted
+            entityId: id of the entity to be deleted
         Returns:
             json response
         Raises:
@@ -84,6 +84,21 @@ class BaseApiEntity(BaseSeqdbApi):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
+    
+    def bulkDelete(self, entityIds):
+        ''' Deletes a list of entities from SeqDB
+        Args:
+            entityIds: list of seqdb entity ids to be deleted
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        for entityId in entityIds:
+            self.delete(entityId)
+
+
 
     
     def getIdsWithOffset(self, offset=0, limit=0):
