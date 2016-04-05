@@ -7,9 +7,6 @@ Class that extracts common functionality for all SeqDB API entities
 '''
 
 from api.BaseApiEntity import BaseApiEntity
-from api.BaseSeqdbApi import BaseSeqdbApi
-from api.BaseSeqdbApi import UnexpectedContent
-
 
 class ProjectTagApi(BaseApiEntity):
 

@@ -15,6 +15,7 @@ import os
 
 from api.BaseApiEntity import BaseApiEntity
 from api.BaseSeqdbApi import UnexpectedContent
+from api.ProjectTagApi import ProjectTagApi
 
 
 class BaseSequenceEntity(BaseApiEntity):
@@ -41,7 +42,7 @@ class BaseSequenceEntity(BaseApiEntity):
     
     @property
     def sampleNameFilter(self):
-        return self.__specimenNumFilter
+        return self.__sampleNameFilter
     
     @sampleNameFilter.setter
     def sampleNameFilter(self, sampleName):
@@ -75,6 +76,22 @@ class BaseSequenceEntity(BaseApiEntity):
     def regionNameFilter(self, regionName):
         self.__regionNameFilter = regionName
     
+    @property
+    def projectNameFilter(self):
+        return self.__projectNameFilter
+    
+    @projectNameFilter.setter
+    def projectNameFilter(self, projectName):
+        self.__projectNameFilter = projectName
+    
+    @property
+    def collectionCodeFilter(self):
+        return self.__collectionCodeFilter
+    
+    @collectionCodeFilter.setter
+    def collectionCodeFilter(self, collectionCode):
+        self.__collectionCodeFilter = collectionCode
+    
         
     def getParamsStr(self):
         params = ''
@@ -86,20 +103,21 @@ class BaseSequenceEntity(BaseApiEntity):
             params = params + "filterName=sequence.name&filterValue={}&filterWildcard=true&".format(self.sequenceNameFilter)
             
         if self.sampleNameFilter:
-            params = params + "filterName=sample.name&filterValue=%s&filterWildcard=true&".format(self.sampleNameFilter)
+            params = params + "filterName=sample.name&filterValue={}&filterWildcard=true&".format(self.sampleNameFilter)
             
         if self.pubRefSeqFilter:
-            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
+            params = params + "filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false&"
 
         if self.genBankGIFilter:
-            params = params + "filterName=sequence.genBankGI&filterValue=%s&filterWildcard=false&".format(self.genBankGIFilter)
+            params = params + "filterName=sequence.genBankGI&filterValue={}&filterWildcard=false&".format(self.genBankGIFilter)
         
         if self.regionNameFilter:
-            params = params + "filterName=region.name&filterValue=%s&filterWildcard=true&".format(self.regionNameFilter)
+            params = params + "filterName=region.name&filterValue={}&filterWildcard=true&".format(self.regionNameFilter)
             
-        '''    
         if self.projectNameFilter:
-            project_ids = self.getProjectTagIds(projectName)
+            projectTag = ProjectTagApi(api_key=self.api_key, base_url=self.base_url)
+            projectTag.nameFilter = self.projectNameFilter
+            project_ids = projectTag.getIds()
             
             if len(project_ids) == 1:
                 params = params + "tagId=%s&" %project_ids[0]
@@ -107,12 +125,13 @@ class BaseSequenceEntity(BaseApiEntity):
             elif len(project_ids) > 1:
                 raise "More than one project is associated with the name '%s'. Currently sequences can only be filtered on one project only. Please refine your search."
             
-        if collectionCodeFilter:
-            params = params + "filterName=biologicalCollection.name&filterValue=%s&filterWildcard=false&".format(self.collectionCode
+        if self.collectionCodeFilter:
+            params = params + "filterName=biologicalCollection.name&filterValue={}&filterWildcard=false&".format(self.collectionCodeFilter)
             
+        '''    
         if taxonomyRankFilter:
             filter_name = self.convertNcbiToSeqdbTaxRank(taxonomyRank)
-            params = params + "filterName=specimen.identification.taxonomy.%s&filterValue=%s&filterOperator=and&filterWildcard=true&" %(filter_name, taxonomyValue)
+            params = params + "filterName=specimen.identification.taxonomy.{}&filterValue={}&filterOperator=and&filterWildcard=true&".format(filter_name, taxonomyValue)
         '''
         
         return params
@@ -124,6 +143,8 @@ class BaseSequenceEntity(BaseApiEntity):
         self.pubRefSeqFilter = None
         self.genBankGIFilter = None
         self.regionNameFilter = None
+        self.projectNameFilter = None
+        self.collectionCodeFilter = None
     
     '''    
     def getNumber(self):

@@ -27,6 +27,56 @@ class TestRawSequenceApi(unittest.TestCase):
     def tearDown(self):
         pass
     
+    def testFilters(self):
+        # specimenNumber - tested below, skipping
+        # sequenceName
+        self.fixture.sequenceNameFilter = "SH-254"
+        self.assertEqual([13808,65268], self.fixture.getIds(), "Expecting 2 raw sequences filtered by sequenceName = SH-254")
+        self.fixture.clearAllFilters()
+        
+        # sampleNameFilter
+        self.fixture.sampleNameFilter = "LEV4277"
+        self.assertEqual(15, self.fixture.getNumber(), 
+                         "Expecting 15 raw sequences filtered by sampleName = LEV4277, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+        
+        # pubRefSeqFilter
+        #TODO
+        '''
+        self.fixture.pubRefSeqFilter = True
+        #TODO: this fails, i.e. curl -H "apikey: ***REMOVED***" "***REMOVED***/sequence?filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
+        # Investigate why
+        va = self.fixture.getNumber()
+        self.assertEqual(15, self.fixture.getNumber(), 
+                         "Expecting 15 raw sequences filtered by pubRefSeq = , but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+        '''
+        
+        # genBankGIFilter
+        #TODO: fix this test
+        '''
+        self.fixture.genBankGIFilter = "gi_"
+        self.assertEqual(15, self.fixture.getNumber(), 
+                         "Expecting 15 raw sequences filtered by genBankGI = LEV4277, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+        '''
+        
+        # regionNameFilter
+        self.fixture.regionNameFilter = "ITS/LR6"
+        self.assertEqual(58, self.fixture.getNumber(), 
+                         "Expecting 58 raw sequences filtered by regionName = ITS/LR6, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+        
+        # collectionCodeFilter
+        self.fixture.collectionCodeFilter = "lev"
+        self.assertEqual(32799, self.fixture.getNumber(), 
+                         "Expecting 32799 raw sequences filtered by collectionCode = lev, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+        
+        # taxonomyRankFilter
+        
+        # TODO: test combinations of filters
+        
     def testGetFastaSequencesWithOffset(self):
         self.fixture.specimenNumFilter = 4405
         # This filter should have 22 raw sequences associated with it. Therefore there should
