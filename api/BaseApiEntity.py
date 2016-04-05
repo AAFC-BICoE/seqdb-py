@@ -78,7 +78,7 @@ class BaseApiEntity(BaseSeqdbApi):
             UnexpectedContent
         '''
         request_url = self.request_url + "/" + str(entityId)
-        jsn_resp = super.delete(self.base_url + request_url).json()
+        jsn_resp = super(BaseApiEntity, self).delete(self.base_url + request_url).json()
 
         if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)

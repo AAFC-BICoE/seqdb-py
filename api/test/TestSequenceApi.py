@@ -57,7 +57,16 @@ class TestSequenceApi(unittest.TestCase):
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "zzz/non-existent.ab1")
 
     def testCreateDeleteChromatSequence(self):
-        pass
+        """ Test creating a sequence with binary .abi or .ab1 file (chromatogram) """
+        seq_id = self.fixture.importChromatSequencesFromFile(chromat_file = "data/GRDI_test_seq.ab1", notes="This is a test upload.", 
+                    trace_file_path="test_path",dest_file_name="test.ab1",)
+        
+        self.assertTrue(seq_id, "Persisting chromatogram did not return an id.")
+    
+        # Delete
+        delete_jsn_resp = self.fixture.delete(seq_id)
+        self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete feature type.")
+
     
 
 if __name__ == "__main__":
