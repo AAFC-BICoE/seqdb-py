@@ -7,16 +7,16 @@ import unittest
 
 import yaml
 
-from api.SequenceApi import SequenceApi
+from api.RawSequenceApi import RawSequenceApi
 from config import config_root
 
 
-class TestSequenceApi(unittest.TestCase):
+class TestRawSequenceApi(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
-        self.fixture = SequenceApi(api_key=config['seqdb']['api_key'],
+        self.fixture = RawSequenceApi(api_key=config['seqdb']['api_key'],
                                                    base_url=config['seqdb']['api_url'])
     
 
