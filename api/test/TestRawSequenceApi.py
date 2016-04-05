@@ -74,6 +74,12 @@ class TestRawSequenceApi(unittest.TestCase):
         self.fixture.clearAllFilters()
         
         # taxonomyRankFilter
+        self.fixture.taxonomyRankFilter = "species"
+        self.fixture.taxonomyValueFilter = "megasperma"
+        self.assertEqual(215, self.fixture.getNumber(), 
+                         "Expecting 215 raw sequences filtered by taxonomy, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+        
         
         # TODO: test combinations of filters
         

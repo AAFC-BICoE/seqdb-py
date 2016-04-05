@@ -92,6 +92,22 @@ class BaseSequenceEntity(BaseApiEntity):
     def collectionCodeFilter(self, collectionCode):
         self.__collectionCodeFilter = collectionCode
     
+    @property
+    def taxonomyRankFilter(self):
+        return self.__taxonomyRankFilter
+    
+    @taxonomyRankFilter.setter
+    def taxonomyRankFilter(self, taxonomyRank):
+        self.__taxonomyRankFilter = taxonomyRank
+    
+    @property
+    def taxonomyValueFilter(self):
+        return self.__taxonomyValueFilter
+    
+    @taxonomyValueFilter.setter
+    def taxonomyValueFilter(self, taxonomyValue):
+        self.__taxonomyValueFilter = taxonomyValue
+    
         
     def getParamsStr(self):
         params = ''
@@ -128,11 +144,9 @@ class BaseSequenceEntity(BaseApiEntity):
         if self.collectionCodeFilter:
             params = params + "filterName=biologicalCollection.name&filterValue={}&filterWildcard=false&".format(self.collectionCodeFilter)
             
-        '''    
-        if taxonomyRankFilter:
-            filter_name = self.convertNcbiToSeqdbTaxRank(taxonomyRank)
-            params = params + "filterName=specimen.identification.taxonomy.{}&filterValue={}&filterOperator=and&filterWildcard=true&".format(filter_name, taxonomyValue)
-        '''
+        if self.taxonomyRankFilter and self.taxonomyValueFilter:
+            filter_name = self.convertNcbiToSeqdbTaxRank(self.taxonomyRankFilter)
+            params = params + "filterName=specimen.identification.taxonomy.{}&filterValue={}&filterOperator=and&filterWildcard=true&".format(filter_name, self.taxonomyValueFilter)
         
         return params
     
@@ -145,6 +159,8 @@ class BaseSequenceEntity(BaseApiEntity):
         self.regionNameFilter = None
         self.projectNameFilter = None
         self.collectionCodeFilter = None
+        self.taxonomyRankFilter = None
+        self.taxonomyValueFilter = None
     
     '''    
     def getNumber(self):
@@ -331,3 +347,44 @@ class BaseSequenceEntity(BaseApiEntity):
         return self.importChromatSequences(
                 blob=blob, dest_file_name=dest_file_name,
                 notes=notes, trace_file_path=trace_file_path)
+        
+        
+    ########################################################################
+    #                     Taxonomy Helpers
+    ########################################################################
+    
+    # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
+    # Keys are seqdb taxonomy ranks, and values are NCBI
+    _seqdb_to_ncbi_taxonomy = {'kingdom':'kingdom', 
+                              'phylum':'phylum', 
+                              'taxanomicClass':'class',
+                              'taxanomicOrder':'order',
+                              'family':'family',
+                              'genus':'genus', 
+                              'subgenera':'subgenus', 
+                              'species':'species', 
+                              'variety':'varietas',
+                            }
+    # NOTE that following SeqDB taxonomic ranks currently do not have equivalent in NCBI taxonomy:
+    # 'strain','authors','division','synonym','typeSpecimen','taxanomicGroup','commonName','state'
+    
+    
+    def vetTaxonomy(self, taxonomy):
+        ''' Checks taxonomy dictionary and returns it in the format that can be accepted by 
+            seqDB (i.e. appropriate ranks)
+        '''
+        vettedTaxonomy = dict()
+        if taxonomy:
+            for seqdb_rank in self._seqdb_to_ncbi_taxonomy:
+                ncbi_rank = self._seqdb_to_ncbi_taxonomy[seqdb_rank]
+                if ncbi_rank in taxonomy:
+                    vettedTaxonomy[seqdb_rank] = taxonomy[ncbi_rank]
+        
+        return vettedTaxonomy
+    
+    
+    def convertNcbiToSeqdbTaxRank(self, tax_rank):
+        for seqdb_tax_rank in self._seqdb_to_ncbi_taxonomy:
+            if self._seqdb_to_ncbi_taxonomy[seqdb_tax_rank] == tax_rank:
+                return seqdb_tax_rank
+        return "No matches found."
