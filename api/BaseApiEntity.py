@@ -58,9 +58,9 @@ class BaseApiEntity(BaseSeqdbApi):
     def getNumber(self):
         ''' Returns a number of entities
         '''
-        # Problem here is that param str is not defined at this level, and only defined at the subclass level
         paramStr = self.getParamsStr()
-        jsn_resp = self.retrieveJson(request_url=request_uri, params=paramStr)
+        #jsn_resp = self.retrieveJson(request_url=request_uri, params=paramStr)
+        jsn_resp = self.retrieveJson(request_url=self.request_url, params=paramStr)
         result_num = int(jsn_resp['metadata']['resultCount'])
         
         return result_num

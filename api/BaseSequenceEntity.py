@@ -14,7 +14,6 @@ import mimetypes
 import os
 
 from api.BaseApiEntity import BaseApiEntity
-from api.BaseSeqdbApi import BaseSeqdbApi
 from api.BaseSeqdbApi import UnexpectedContent
 
 
@@ -125,6 +124,7 @@ class BaseSequenceEntity(BaseApiEntity):
         self.pubRefSeqFilter = None
         self.genBankGIFilter = None
         self.regionNameFilter = None
+    
     '''    
     def getNumber(self):
         return super(BaseSequenceEntity, self).getNumber(self.getParamsStr())
@@ -132,6 +132,58 @@ class BaseSequenceEntity(BaseApiEntity):
     def getIds(self):
         return super(BaseSequenceEntity, self).getIds(self.getParamsStr())
     '''
+    
+    def getFastaSequencesWithOffset(self, offset, limit):
+        return self.__getSequencesWithOffset(offset, limit, "fasta")
+    
+    def getFastqSequencesWithOffset(self, offset, limit):
+        #TODO: Only raw sequences? Then move this method to SequenceApi
+        return self.__getSequencesWithOffset(offset, limit, "fastq")
+    
+    def __getSequencesWithOffset(self, offset, limit, sequence_format):
+        
+        if offset < 0:
+            raise "Negative offset: either you've retrieved all sequences or the method usage is incorrect."
+        
+        #TODO: refactor this method so that the api call to get number of sequences
+        #    is not called eache time this method is called
+        # Define a global var for total number of sequences to avoid calling the 
+        # api method every time __getSequencesWithOffset is called
+        '''
+        global globalSequenceNumber
+        if not globalSequenceNumber:
+            globalSequenceNumber = self.getNumber()
+        '''
+        
+        params = self.getParamsStr() + "limit={}&offset={}&".format(limit,offset)
+        
+        resp = self.retrieve("{}/sequence.{}".format(self.base_url,sequence_format), params=params)
+        
+        """
+        jsn_response, result_offset = self.retrieveJsonWithOffset(request_url=self.request_url + ".fasta", 
+                                                   params=self.getParamsStr(), 
+                                                   offset=offset, 
+                                                   limit=limit)
+        """
+        
+        fasta_resp = resp.content
+        #fasta_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence.fasta", params=params, offset=offset)
+        
+        if fasta_resp and fasta_resp[0]!=">":
+            raise UnexpectedContent("Response is not in fasta format.")
+        
+        # Calculate the new offset
+        result_offset = -1
+        #TODO: refactor for efficiency, see TODO above.
+        result_total_num = self.getNumber()
+        result_returned_so_far =  limit + offset
+        if (result_total_num > result_returned_so_far):    
+            result_offset = result_returned_so_far 
+        
+        return fasta_resp, result_offset
+         
+
+    
     def importChromatSequences(
             self, blob, dest_file_name,
             notes="", trace_file_path=""):

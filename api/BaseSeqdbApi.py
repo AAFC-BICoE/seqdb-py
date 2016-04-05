@@ -79,7 +79,7 @@ class BaseSeqdbApi(object):
             requests.exceptions.HTTPError
             UnexpectedContent
         '''
-        resp = self.retrieve(self.base_url + request_url, params=params)
+        resp = self.retrieve("{}{}".format(self.base_url, request_url), params=params)
         if resp:
             jsn_resp =  json.loads(resp.text)
             resp = jsn_resp
@@ -97,8 +97,9 @@ class BaseSeqdbApi(object):
             offset: 0 for the firsst query, number of results returned for the subsequent queries
         Returns:
             json formatted object 
-            offset of results. If 0 then all/last set of results have been retrieved, if > 0,
-                then the function has to be called again with this offset to retrieve more results
+            offset of results. If 0 then all/last set of results have been retrieved, if >= 0,
+                then the function has to be called again with this offset to retrieve more results.
+                When the request is exhausted, offset will be -1
         Raises:
             requests.exceptions.ConnectionError
             requests.exceptions.ReadTimeout

@@ -27,13 +27,21 @@ class TestSequenceApi(unittest.TestCase):
     def tearDown(self):
         pass
     
-    '''
     def testGetFastaSequencesWithOffset(self):
-        actual = self.fixture.getRawSequencesWithOffset(offset=0, limit=30, sequence_format="fasta", specimenNum=4405)
-        self.assertTrue(actual, "No Sequences returned.")
-        self.assertIn(">seqdb|27755", actual,"Expecting that fasta return will contain id 27755.")
-        self.assertNotIn(">seqdb|358301", actual, "Fasta return is not expected to have sequence 358301, since it is consensus.")
-    '''
+        self.fixture.specimenNumFilter = 4405
+        # This filter should have 22 raw sequences associated with it. Therefore there should
+        # be 2 calls with limit 15
+        actual_fasta, result_offset = self.fixture.getFastaSequencesWithOffset(offset=0, limit=15)
+        self.assertTrue(actual_fasta, "No Sequences returned.")
+        self.assertIn(">seqdb|27755", actual_fasta,"Expecting that fasta return will contain id 27755.")
+        self.assertNotIn(">seqdb|358301", actual_fasta, "Fasta return is not expected to have sequence 358301, since it is consensus.")
+        self.assertEquals(result_offset, 15, "First offset should be 15 (there are 22 raw sequences for specimenNum=4405).")
+        
+        actual_fasta, result_offset = self.fixture.getFastaSequencesWithOffset(offset=result_offset, limit=15)
+        self.assertTrue(actual_fasta, "No Sequences returned.")
+        self.assertIn(">seqdb|160946", actual_fasta,"Expecting that fasta return will contain id 160946.")
+        self.assertNotIn(">seqdb|358301", actual_fasta, "Fasta return is not expected to have sequence 358301, since it is consensus.")
+        self.assertEquals(result_offset, -1, "Second offset should be -1, since there are no more sequences to retrieve.")
         
     def testGetSequenceIds(self):
         self.fixture.specimenNumFilter = 4405
@@ -43,13 +51,14 @@ class TestSequenceApi(unittest.TestCase):
         self.assertIn(27755, actual, "Sequence id 27755 is expected to be associated with specimen 4405.")
         self.assertNotIn(358301, actual, "Sequence id 358301 is not expected to be in results, since it is consensus.")  
 
+    
     def testCreateChromatSequence_wrong_path(self):
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "data/")
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "zzz/non-existent.ab1")
 
     def testCreateDeleteChromatSequence(self):
         pass
-
+    
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
