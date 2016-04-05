@@ -134,16 +134,29 @@ class BaseSequenceEntity(BaseApiEntity):
     '''
     
     def getFastaSequencesWithOffset(self, offset, limit):
-        return self.__getSequencesWithOffset(offset, limit, "fasta")
+        fasta_resp, result_offset = self._getSequencesWithOffset(offset, limit, "fasta")
+        if fasta_resp and fasta_resp[0]!=">":
+            raise UnexpectedContent("Response is not in fasta format.")
+        
+        return fasta_resp, result_offset
+        
     
     def getFastqSequencesWithOffset(self, offset, limit):
         #TODO: Only raw sequences? Then move this method to SequenceApi
-        return self.__getSequencesWithOffset(offset, limit, "fastq")
+        fastq_resp, result_offset = self._getSequencesWithOffset(offset, limit, "fastq")
+        if fastq_resp and fastq_resp[0]!="@":
+            raise UnexpectedContent("Response is not in fastq format.")
+        
+        return fastq_resp, result_offset
+        
     
-    def __getSequencesWithOffset(self, offset, limit, sequence_format):
+    def _getSequencesWithOffset(self, offset, limit, sequence_format):
         
         if offset < 0:
             raise "Negative offset: either you've retrieved all sequences or the method usage is incorrect."
+        
+        if sequence_format not in {"fasta", "fastq"}:
+            raise SystemError("Sequences can only be in fasta or fastq format.")
         
         #TODO: refactor this method so that the api call to get number of sequences
         #    is not called eache time this method is called
@@ -167,10 +180,6 @@ class BaseSequenceEntity(BaseApiEntity):
         """
         
         fasta_resp = resp.content
-        #fasta_resp, result_offset = self.retrieveJsonWithOffset(request_url="/sequence.fasta", params=params, offset=offset)
-        
-        if fasta_resp and fasta_resp[0]!=">":
-            raise UnexpectedContent("Response is not in fasta format.")
         
         # Calculate the new offset
         result_offset = -1
@@ -182,6 +191,33 @@ class BaseSequenceEntity(BaseApiEntity):
         
         return fasta_resp, result_offset
          
+    def getFastaSequence(self, seqId):
+        ''' Returns a sequence in a fasta format.
+            Note that to get multiple fasta sequences it is bests to use 
+            getFastaSequencesWithOffset() method, to avoid multiple call to the SeqDB API.
+        '''
+        return self._getFormattedSeq(seqId, "fasta")
+
+    def getFastqSequence(self, seqId):
+        ''' Returns a sequence in a fasta format.
+            Note that to get multiple fasta sequences it is bests to use 
+            getFastaSequencesWithOffset() method, to avoid multiple call to the SeqDB API.
+        '''
+        return self._getFormattedSeq(seqId, "fastq")
+    
+    def _getFormattedSeq(self, seq_id, sequence_format):
+        ''' Gets sequence in fasta or fastq format 
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+        '''
+        if sequence_format not in {"fasta", "fastq"}:
+            raise SystemError("Sequences can only be in fasta or fastq format.")
+        
+        url = "{}/{}/{}.{}".format(self.base_url, self.request_url, str(seq_id), sequence_format)
+        response = self.retrieve(url)
+        return response.content
 
     
     def importChromatSequences(

@@ -42,6 +42,22 @@ class TestSequenceApi(unittest.TestCase):
         self.assertIn(">seqdb|160946", actual_fasta,"Expecting that fasta return will contain id 160946.")
         self.assertNotIn(">seqdb|358301", actual_fasta, "Fasta return is not expected to have sequence 358301, since it is consensus.")
         self.assertEquals(result_offset, -1, "Second offset should be -1, since there are no more sequences to retrieve.")
+    
+    def testGetFastqSequencesWithOffset(self):
+        self.fixture.specimenNumFilter = 4405
+        # This filter should have 22 raw sequences associated with it. Therefore there should
+        # be 2 calls with limit 15
+        actual_fastq, result_offset = self.fixture.getFastqSequencesWithOffset(offset=0, limit=15)
+        self.assertTrue(actual_fastq, "No Sequences returned.")
+        self.assertIn("@seqdb|27755", actual_fastq,"Expecting that fasta return will contain id 27755.")
+        self.assertNotIn("@seqdb|358301", actual_fastq, "Fasta return is not expected to have sequence 358301, since it is consensus.")
+        self.assertEquals(result_offset, 15, "First offset should be 15 (there are 22 raw sequences for specimenNum=4405).")
+
+        actual_fastq, result_offset = self.fixture.getFastqSequencesWithOffset(offset=result_offset, limit=15)
+        self.assertTrue(actual_fastq, "No Sequences returned.")
+        self.assertIn("@seqdb|160946", actual_fastq,"Expecting that fasta return will contain id 160946.")
+        self.assertNotIn("@seqdb|358301", actual_fastq, "Fasta return is not expected to have sequence 358301, since it is consensus.")
+        self.assertEquals(result_offset, -1, "Second offset should be -1, since there are no more sequences to retrieve.")
         
     def testGetSequenceIds(self):
         self.fixture.specimenNumFilter = 4405
@@ -77,14 +93,14 @@ class TestSequenceApi(unittest.TestCase):
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete feature type.")     
     
     def testGetFastaSeq(self):
-        actual = self.fixture.getFormattedSeq("1", "fasta")
+        actual = self.fixture.getFastaSequence("1")
         self.assertTrue(actual, "Fasta sequence is empty.")
-        self.assertIn(">", actual, "Fasta does not contain >.")        
+        self.assertIn(">seqdb|1", actual, "Fasta does not contain >.")        
     
     def testGetFastqSeq(self):
-        actual = self.fixture.getFormattedSeq("1", "fastq")
+        actual = self.fixture.getFastqSequence("1")
         self.assertTrue(actual, "Fastq sequence is empty.")
-        self.assertIn("@seqdb", actual, "Fastq does not contain @seqdb.")        
+        self.assertIn("@seqdb|1", actual, "Fastq does not contain @seqdb.")        
     
 
 if __name__ == "__main__":
