@@ -176,17 +176,7 @@ class BaseSequenceEntity(BaseApiEntity):
             raise UnexpectedContent("Response is not in fasta format.")
         
         return fasta_resp, result_offset
-        
-    
-    def getFastqSequencesWithOffset(self, offset, limit):
-        #TODO: Only raw sequences? Then move this method to SequenceApi
-        fastq_resp, result_offset = self._getSequencesWithOffset(offset, limit, "fastq")
-        if fastq_resp and fastq_resp[0]!="@":
-            raise UnexpectedContent("Response is not in fastq format.")
-        
-        return fastq_resp, result_offset
-        
-    
+            
     def _getSequencesWithOffset(self, offset, limit, sequence_format):
         
         if offset < 0:
