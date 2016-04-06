@@ -162,13 +162,6 @@ class BaseSequenceEntity(BaseApiEntity):
         self.taxonomyRankFilter = None
         self.taxonomyValueFilter = None
     
-    '''    
-    def getNumber(self):
-        return super(BaseSequenceEntity, self).getNumber(self.getParamsStr())
-    
-    def getIds(self):
-        return super(BaseSequenceEntity, self).getIds(self.getParamsStr())
-    '''
     
     def getFastaSequencesWithOffset(self, offset, limit):
         fasta_resp, result_offset = self._getSequencesWithOffset(offset, limit, "fasta")
@@ -337,6 +330,30 @@ class BaseSequenceEntity(BaseApiEntity):
         return self.importChromatSequences(
                 blob=blob, dest_file_name=dest_file_name,
                 notes=notes, trace_file_path=trace_file_path)
+    
+    
+    def getSequenceIdsByRegionWithOffset(self, region_id, offset=0):
+        ''' Given a region id, return sequence ids, belonging to this region
+        Returns:
+            a list of seqdb sequence ids for the created sequences OR empty
+            list id created failed
+        Raises:
+            requests.exceptions.ConnectionError
+            requests.exceptions.ReadTimeout
+            requests.exceptions.HTTPError
+            UnexpectedContent
+        '''
+        
+        region_request_url = "/region/" + str(region_id) + "/" + self.request_url
+        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url=region_request_url, offset=offset)
+        
+        sequence_ids = ""
+        
+        if jsn_resp:            
+            sequence_ids = jsn_resp['result']            
+        
+        return sequence_ids, result_offset
+
         
         
     ########################################################################

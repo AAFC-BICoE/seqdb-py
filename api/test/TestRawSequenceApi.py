@@ -156,7 +156,12 @@ class TestRawSequenceApi(unittest.TestCase):
     def testGetFastqSeq(self):
         actual = self.fixture.getFastqSequence("1")
         self.assertTrue(actual, "Fastq sequence is empty.")
-        self.assertIn("@seqdb|1", actual, "Fastq does not contain @seqdb.")        
+        self.assertIn("@seqdb|1", actual, "Fastq does not contain @seqdb.")    
+        
+    def testSequenceIdsByRegion(self):
+        actual_seq_ids, result_offset = self.fixture.getSequenceIdsByRegionWithOffset(97)    
+        self.assertTrue(actual_seq_ids, "No sequence ids returned for region id=97.")
+        self.assertEquals(20, len(actual_seq_ids), "Expecting 20 sequences, returned in the first offset query and asssociated with region id=97 , but got {}.".format(len(actual_seq_ids)))    
     
 
 if __name__ == "__main__":
