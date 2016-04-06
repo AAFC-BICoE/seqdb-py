@@ -190,6 +190,10 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
+            if repr(e.args[0].args[1]) == tools_helper.seqdbConnection_error_msg:
+                logging.error(tools_helper.log_msg_seqDBConnection)
+            if repr(e.args[0].args[1]) == tools_helper.invalidURL_error_msg:
+                logging.error(tools_helper.log_msg_invalidURL)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.HTTPError as e:
             logging.error(tools_helper.log_msg_httpError)
@@ -354,6 +358,10 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
             except requests.exceptions.ConnectionError as e:
                 logging.error(tools_helper.log_msg_noDbConnection)
                 logging.error(e.message)
+                if repr(e.args[0].args[1]) == tools_helper.seqdbConnection_error_msg:
+                    logging.error(tools_helper.log_msg_seqDBConnection)
+                if repr(e.args[0].args[1]) == tools_helper.invalidURL_error_msg:
+                    logging.error(tools_helper.log_msg_invalidURL)
                 sys.exit(tools_helper.log_msg_sysExit)
             except requests.exceptions.HTTPError as e:
                 logging.error(tools_helper.log_msg_httpError)
