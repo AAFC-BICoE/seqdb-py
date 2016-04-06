@@ -57,13 +57,14 @@ class TestSeqdbWebService(unittest.TestCase):
     # Sequence
     ###########################################################################
     
+    # Refactored
     def testGetFastaSequencesWithOffset(self):
         actual = self.fixture.getRawSequencesWithOffset(offset=0, limit=30, sequence_format="fasta", specimenNum=4405)
         self.assertTrue(actual, "No Sequences returned.")
         self.assertIn(">seqdb|27755", actual,"Expecting that fasta return will contain id 27755.")
         self.assertNotIn(">seqdb|358301", actual, "Fasta return is not expected to have sequence 358301, since it is consensus.")
     
-        
+    # Refactored    
     def testGetSequenceIds(self):
         actual = self.fixture.getRawSequenceIds(specimenNum=4405)
         self.assertTrue(actual, "No Sequence ids returned.")
@@ -71,11 +72,12 @@ class TestSeqdbWebService(unittest.TestCase):
         self.assertIn(27755, actual, "Sequence id 27755 is expected to be associated with specimen 4405.")
         self.assertNotIn(358301, actual, "Sequence id 358301 is not expected to be in results, since it is consensus.")  
 
-
+    # Refactored
     def testCreateChromatSequence_wrong_path(self):
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "data/")
         self.assertRaises(IOError, self.fixture.importChromatSequencesFromFile, "zzz/non-existent.ab1")
 
+    # Refactored
     def testCreateDeleteChromatSequence(self):
         """ Test creating a sequence with binary .abi or .ab1 file (chromatogram) """
         seq_id = self.fixture.importChromatSequencesFromFile(chromat_file = "data/GRDI_test_seq.ab1", notes="This is a test upload.", 
@@ -87,6 +89,7 @@ class TestSeqdbWebService(unittest.TestCase):
         delete_jsn_resp = self.fixture.deleteRawSequence(seq_id)
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete feature type.")
     
+    # Refactored
     def testCreateDeleteChromatSequenceGz_valid(self):
         """ Test creating a sequence with a zipped binary file (chromatogram) i.e. ab1.gz """
         seq_id = self.fixture.importChromatSequencesFromFile(chromat_file = "data/blob_db.ab1.gz")
@@ -96,16 +99,19 @@ class TestSeqdbWebService(unittest.TestCase):
         delete_jsn_resp = self.fixture.deleteRawSequence(seq_id)
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete feature type.")     
         
+    # Refactored
     def testGetFastaSeq(self):
         actual = self.fixture.getFormattedSeq("1", "fasta")
         self.assertTrue(actual, "Fasta sequence is empty.")
         self.assertIn(">", actual, "Fasta does not contain >.")        
     
+    # Refactored
     def testGetFastqSeq(self):
         actual = self.fixture.getFormattedSeq("1", "fastq")
         self.assertTrue(actual, "Fastq sequence is empty.")
         self.assertIn("@seqdb", actual, "Fastq does not contain @seqdb.")        
-
+    
+    # Refactoring: Not carrying this method forward
     def testGetFastaSeqPlus(self):
         # "http://localhost:2002/seqdb\/api/v1/sequence/1"
         actual = self.fixture.getFastaSeqPlus("1")

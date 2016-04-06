@@ -234,6 +234,7 @@ class seqdbWebService(object):
     # Sequence
     ###########################################################################
     
+    #Refactored - now properties in RawSequenceApi
     def createSequenceParamsStr(self, 
                          specimenNum=None,
                          sequenceName=None,
@@ -287,6 +288,7 @@ class seqdbWebService(object):
         return params
 
     
+    # Refactored - BaseApiEntity
     def getRawSeqNum(self, specimenNum=None,
                          sequenceName=None,
                          sampleName=None,
@@ -312,7 +314,7 @@ class seqdbWebService(object):
         
         return result_num
 
-
+    # Refactored - BaseApiEntity
     def getSequenceIdsWithOffset(self, params=None, offset=0):
         ''' Returns raw sequence ids, limited by the specified filter parameters
         Agrs:
@@ -338,7 +340,7 @@ class seqdbWebService(object):
         
         return sequence_ids, result_offset
 
-       
+    #Refactored   
     def getRawSequencesWithOffset(self, 
                                   offset, 
                                   limit,
@@ -394,7 +396,7 @@ class seqdbWebService(object):
         
         return fasta_resp
        
-
+    #Refactored - BaseApi
     def getRawSequenceIds(self, 
                          specimenNum=None,
                          sequenceName=None,
@@ -457,7 +459,7 @@ class seqdbWebService(object):
         
         return seq_ids
 
-   
+    # Refactored, not used
     def getRawSequenceIdsByRegionWithOffset(self, region_id, offset=0):
         ''' Given a region id, return sequence ids, belonging to this region
         Returns:
@@ -480,7 +482,7 @@ class seqdbWebService(object):
         
         return sequence_ids, result_offset
 
-
+    #Refactored
     def importChromatSequences(
             self, blob, dest_file_name,
             notes="", trace_file_path=""):
@@ -529,7 +531,7 @@ class seqdbWebService(object):
 
         return result
 
-
+    #Refactored
     def importChromatSequencesFromFile(
             self, chromat_file, notes="",
             trace_file_path="", dest_file_name=""):
@@ -572,7 +574,7 @@ class seqdbWebService(object):
                 blob=blob, dest_file_name=dest_file_name,
                 notes=notes, trace_file_path=trace_file_path)
 
-
+    #Refactored - BaseSeqdbApi
     def deleteRawSequence(self, seq_id):
         ''' Deletes a SeqDB sequence
         Args:
@@ -591,7 +593,7 @@ class seqdbWebService(object):
 
         return jsn_resp
 
-
+    #Refactored - BaseSeqdbApi
     def bulkDeleteRawSequence(self, seq_ids):
         ''' Deletes a list of SeqDB sequences
         Args:
@@ -605,7 +607,7 @@ class seqdbWebService(object):
         for seq_id in seq_ids:
             self.deleteRawSequence(seq_id)
 
-
+    #Refactored - SeqSourceApi
     def updateSeqSource(self, sequenceId, params):
         resp = self.update(
             self.base_url + "/sequence/" + str(sequenceId) + "/seqSource",
@@ -618,13 +620,13 @@ class seqdbWebService(object):
 
         return jsn_resp['result'], jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']
 
-
+    #Refactored - SeqSourceApi
     def getJsonSeqSource(self, sequenceId):
         jsn_resp = self.retrieveJson("/sequence/" + str(sequenceId) + "/seqSource")
 
         return jsn_resp
 
-
+    #Refactored: RawSequenceApi.retrieveJson
     def getJsonSequence(self, seq_id, params=None):
         jsn_resp = self.retrieveJson("/sequence/" + str(seq_id), params)
         if not jsn_resp['result']:
@@ -636,7 +638,7 @@ class seqdbWebService(object):
 
         return jsn_seq
 
-
+    #Refactored
     def getFormattedSeq(self, seq_id, format_type):
         ''' Gets sequence in fasta or fastq format 
         Raises:
@@ -651,7 +653,7 @@ class seqdbWebService(object):
         response = self.retrieve(url)
         return response.content
 
-
+    #Refactor: not carrying forward
     def getFastaSeqPlus(self, seq_id):
         ''' Gets sequence from SeqDB and returns it in a fasta format with a
             unique header. Note, the fasta formatting is done here, instead of
@@ -893,7 +895,7 @@ class seqdbWebService(object):
         
         return None
         """
-    
+    #Refactored to BaseSequenceEntity
     # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
     # Keys are seqdb taxonomy ranks, and values are NCBI
     _seqdb_to_ncbi_taxonomy = {'kingdom':'kingdom', 
@@ -909,7 +911,7 @@ class seqdbWebService(object):
     # NOTE that following SeqDB taxonomic ranks currently do not have equivalent in NCBI taxonomy:
     # 'strain','authors','division','synonym','typeSpecimen','taxanomicGroup','commonName','state'
     
-    
+    #Refactored to BaseSequenceEntity
     def vetTaxonomy(self, taxonomy):
         ''' Checks taxonomy dictionary and returns it in the format that can be accepted by 
             seqDB (i.e. appropriate ranks)
@@ -923,7 +925,7 @@ class seqdbWebService(object):
         
         return vettedTaxonomy
     
-    
+    #Refactored to BaseSequenceEntity
     def convertNcbiToSeqdbTaxRank(self, tax_rank):
         for seqdb_tax_rank in self._seqdb_to_ncbi_taxonomy:
             if self._seqdb_to_ncbi_taxonomy[seqdb_tax_rank] == tax_rank:
