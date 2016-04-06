@@ -124,12 +124,13 @@ class TestSeqdbWebService(unittest.TestCase):
     # Consensus Sequence
     ###########################################################################
     
+    #Refactored
     def testGetConsensusSequenceIds(self):
         actual = self.fixture.getConsensusSequenceIds(specimenNum=4405)
         self.assertTrue(actual, "No Sequence ids returned.")
         self.assertEqual(1, len(actual),"Expecting 1 consensus sequence associated with this specimen.")
         self.assertIn(358301, actual, "Sequence id 358301 is expected to be associated with specimen 4405.")
-    
+    #Refactored
     def testCreateGetDeleteSequence(self):
         # create
         seqId, errCod, msg = self.fixture.createConsensusSequence(name="Test", sequence="ACGTCTGATCGATC")

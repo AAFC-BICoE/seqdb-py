@@ -676,7 +676,8 @@ class seqdbWebService(object):
     ###########################################################################
     # Consensus Sequence
     ###########################################################################
-
+    
+    #Refactoring: not used, so not carrying forward.
     def getJsonConsensusSequenceIds(self, params=None):
         ''' Gets Json api response object with sequence ids of all consensus sequences.
             Note: be sure to handle pagination, since first api query may not return all 
@@ -700,7 +701,7 @@ class seqdbWebService(object):
 
         return jsn_resp
     
-    
+    #Refactored ConsensusSequenceApi.getNumber()
     def getConsensusSeqNum(self, specimenNum=None,
                          sequenceName=None,
                          sampleName=None,
@@ -726,7 +727,7 @@ class seqdbWebService(object):
         
         return result_num
 
-
+    #Refactored: ConsensusSequenceApi.getIds()
     def getConsensusSequenceIds(self, 
                                   specimenNum=None,
                                   sequenceName=None,
@@ -784,7 +785,7 @@ class seqdbWebService(object):
         
         return seq_ids
 
-
+    #Refactored: ConsensusSequenceApi.getIdsWithOffset()
     def getConsensusSequenceIdsWithOffset(self, params=None, offset=0):        
         ''' Returns sequence ids, limited by the specified filter parameters and offset
         Agrs:
@@ -810,7 +811,7 @@ class seqdbWebService(object):
             
         return sequence_ids, result_offset
 
-
+    #Refactored: ConsensusSequenceApi.create()
     # TODO verify which payload values are required by the SeqDB WS API
     def createConsensusSequence(
             self, name, sequence, qualities=None,
@@ -840,7 +841,7 @@ class seqdbWebService(object):
 
         return jsn_resp['result'], jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']
 
-
+    #Refactored: ConsensusSequenceApi.delete()
     def deleteConsensusSequence(self, consensus_id):
         request_url = "/consensus/" + str(consensus_id)
         jsn_resp = self.delete(self.base_url + request_url).json()

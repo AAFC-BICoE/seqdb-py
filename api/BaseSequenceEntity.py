@@ -6,12 +6,6 @@ Created on Feb 16, 2016
 Class that extracts common functionality for all SeqDB API entities
 '''
 
-import base64
-import gzip
-import json
-import logging
-import mimetypes
-import os
 
 from api.BaseApiEntity import BaseApiEntity
 from api.BaseSeqdbApi import UnexpectedContent
@@ -163,7 +157,7 @@ class BaseSequenceEntity(BaseApiEntity):
         self.taxonomyValueFilter = None
     
     
-    def getFastaSequencesWithOffset(self, offset, limit):
+    def getFastaSequencesWithOffset(self, offset, limit=20):
         fasta_resp, result_offset = self._getSequencesWithOffset(offset, limit, "fasta")
         if fasta_resp and fasta_resp[0]!=">":
             raise UnexpectedContent("Response is not in fasta format.")
@@ -190,7 +184,7 @@ class BaseSequenceEntity(BaseApiEntity):
         
         params = self.getParamsStr() + "limit={}&offset={}&".format(limit,offset)
         
-        resp = self.retrieve("{}/sequence.{}".format(self.base_url,sequence_format), params=params)
+        resp = self.retrieve("{}/{}.{}".format(self.base_url, self.request_url, sequence_format), params=params)
         
         """
         jsn_response, result_offset = self.retrieveJsonWithOffset(request_url=self.request_url + ".fasta", 
@@ -217,13 +211,6 @@ class BaseSequenceEntity(BaseApiEntity):
             getFastaSequencesWithOffset() method, to avoid multiple call to the SeqDB API.
         '''
         return self._getFormattedSeq(seqId, "fasta")
-
-    def getFastqSequence(self, seqId):
-        ''' Returns a sequence in a fasta format.
-            Note that to get multiple fasta sequences it is bests to use 
-            getFastaSequencesWithOffset() method, to avoid multiple call to the SeqDB API.
-        '''
-        return self._getFormattedSeq(seqId, "fastq")
     
     def _getFormattedSeq(self, seq_id, sequence_format):
         ''' Gets sequence in fasta or fastq format 
@@ -240,120 +227,6 @@ class BaseSequenceEntity(BaseApiEntity):
         return response.content
 
     
-    def importChromatSequences(
-            self, blob, dest_file_name,
-            notes="", trace_file_path=""):
-        ''' Imports a binary blob (i.e. chromatogram) to seqdb
-        Kwargs:
-            dest_file_name name with which the chromatogram will be saved on
-                           sedDB side; i.e. expected to have .ab1 extension
-        Returns:
-            a list of seqdb sequence ids for the created sequences OR empty
-            list if creation failed
-        Raises:
-            UnexpectedContent
-        '''
-
-        chromat_b64 = base64.b64encode(blob)
-
-        post_data = {
-            "sequenceImportPayload": {
-                "base64File": chromat_b64,
-                "fileName": dest_file_name,
-                "plateType": 1,
-                "createLocation": False,
-                "traceFilePath": trace_file_path,
-                "notes": notes
-
-            }
-        }
-
-        resp = self.create(
-            self.base_url + '/sequenceImport', json.dumps(post_data))
-        jsn_resp = resp.json()
-
-        if 'statusCode' and 'message' not in jsn_resp['metadata']:
-            raise UnexpectedContent(response=jsn_resp)
-
-        result = ""
-        if 'result' in jsn_resp:
-            if type(jsn_resp['result']) == list and len(jsn_resp['result']) != 1:
-                raise UnexpectedContent("When creating a chromatogram sequence, response should contain only one result.")
-            result = jsn_resp['result'][0]
-        else:
-            logging.warn(
-                "Importing chromatogram failed with status code: '%s' "
-                "and message: '%s'" % (
-                    jsn_resp['metadata']['statusCode'], jsn_resp['metadata']['message']))
-
-        return result
-
-
-    def importChromatSequencesFromFile(
-            self, chromat_file, notes="",
-            trace_file_path="", dest_file_name=""):
-        ''' Imports a chromatogram from a file
-        Args:
-            chromat_file name of the chromatogram file
-        Returns:
-            list of sequence ids of the sequences that were imported from the
-            chromatogram
-        Raises:
-            IOError
-            UnexpectedContent
-        '''
-
-        if not os.path.isfile(chromat_file):
-            raise IOError("Expecting a file, but got a directory.")
-
-        chromat_file_name = os.path.basename(chromat_file)
-
-        if not dest_file_name:
-            # get just the file name, no extension
-            dest_file_name = os.path.splitext(
-                os.path.basename(chromat_file_name))[0]
-
-        if mimetypes.guess_type(chromat_file_name)[1] == "gzip":
-
-            file_strem = gzip.open(chromat_file, "rb")
-
-            # Remove .gz extension for file name
-            chromat_file_name = chromat_file_name[:-3]
-
-        else:
-            file_strem = open(chromat_file, "r")
-
-        blob = file_strem.read()
-
-        file_strem.close()
-
-        return self.importChromatSequences(
-                blob=blob, dest_file_name=dest_file_name,
-                notes=notes, trace_file_path=trace_file_path)
-    
-    
-    def getSequenceIdsByRegionWithOffset(self, region_id, offset=0):
-        ''' Given a region id, return sequence ids, belonging to this region
-        Returns:
-            a list of seqdb sequence ids for the created sequences OR empty
-            list id created failed
-        Raises:
-            requests.exceptions.ConnectionError
-            requests.exceptions.ReadTimeout
-            requests.exceptions.HTTPError
-            UnexpectedContent
-        '''
-        
-        region_request_url = "/region/" + str(region_id) + "/" + self.request_url
-        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url=region_request_url, offset=offset)
-        
-        sequence_ids = ""
-        
-        if jsn_resp:            
-            sequence_ids = jsn_resp['result']            
-        
-        return sequence_ids, result_offset
-
         
         
     ########################################################################
