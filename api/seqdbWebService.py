@@ -993,7 +993,8 @@ class seqdbWebService(object):
     ###########################################################################
     # Gene Region
     ###########################################################################
-
+    
+    #Refactore: GeneRegionApi.getItsRegionIds
     def getItsRegionIds(self, offset=0):
         ''' Get region IDs of ITS sequences
         Args:
@@ -1032,6 +1033,7 @@ class seqdbWebService(object):
         return self.getRegionIdsWithOffset(params, offset)
 
 
+    #Refactored: GeneRegionApi.getIdsWithOffset with regionName filter set
     def getRegionIdsWithOffset(self, regionName=None, offset=0):
         ''' Get region IDs
         Args:
@@ -1061,7 +1063,7 @@ class seqdbWebService(object):
         
         return region_ids, result_offset
         
-
+    #Refactored: GeneRegionApi.getEntity(id)['name']
     def getRegionName(self, region_id):
         ''' Given a region id, returns region name or empty string if no response
         Raises:
@@ -1076,7 +1078,7 @@ class seqdbWebService(object):
         else:
             return ''
         
-
+    # Refactored: GeneRegionApi.create
     def createRegion(self, name, description, group_id=1):
         ''' Creates a region
         Args:
@@ -1107,7 +1109,7 @@ class seqdbWebService(object):
 
         return jsn_resp['result']
 
-
+    # Refactored: GeneRegionApi.delete
     def deleteRegion(self, regionId):
         ''' Deletes a region
         Args:

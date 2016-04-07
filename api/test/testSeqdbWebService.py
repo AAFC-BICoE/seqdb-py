@@ -184,6 +184,7 @@ class TestSeqdbWebService(unittest.TestCase):
     # Gene Region
     ###########################################################################
     
+    #Refactored
     def testCreateGetDeleteITSRegion(self):
         # create
         create_regId = self.fixture.createRegion("ITS_test", "Test", 168)
