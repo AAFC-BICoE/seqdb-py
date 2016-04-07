@@ -239,6 +239,7 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
     # Feature Type
     ###########################################################################
+    # Refactored
     def testGetFeatureTypes(self):
         # "http://localhost:2002/seqdb\/api/v1/featureType"
         actual = self.fixture.getFeatureTypesWithIds()
@@ -246,6 +247,7 @@ class TestSeqdbWebService(unittest.TestCase):
         self.assertIn("Quality Trim", actual, "No feature type 'Quality Trim' found.")
         
     
+    # Refactored
     def testCreateDeleteFeatureType(self):
         #curl -X POST -H "apikey: ***REMOVED***" -H "Content-Type: application/json" -d '{"featureType":{"featureDescription":"test description 1231q","featureName":"test type 123123"}}' "***REMOVED***/featureType"
         
@@ -258,6 +260,7 @@ class TestSeqdbWebService(unittest.TestCase):
         actual = self.fixture.deleteFeatureType(featureTypeID)
         self.assertEqual(200, actual['metadata']['statusCode'], "Could not delete feature type.")
 
+    # Refactored
     def testCreateDeleteFeatureType_multiple_duplicate(self):
         #self.fixture.deleteFeatureType("8")
         # Create
@@ -283,7 +286,7 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
     # Specimen
     ###########################################################################
-
+    #Refactored
     def testGetSpecimen(self):
         specimen_jsn = self.fixture.getSpecimen("1322")
         self.assertTrue(specimen_jsn, "Specimen was not returned.")

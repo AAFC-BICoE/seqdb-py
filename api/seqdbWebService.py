@@ -1216,7 +1216,7 @@ class seqdbWebService(object):
     # Feature Type
     ###########################################################################
 
-
+    # Refactored: FeatureType.getFeatureTypesWithIds
     def getFeatureTypesWithIds(self):
         ''' 
         Returns:
@@ -1252,7 +1252,7 @@ class seqdbWebService(object):
 
         return feature_types
                 
-
+    # Refactored: FeatureType.create
     def createFeatureType(self, featureTypeName, featureTypeDescription=''):
         ''' Creates a FeatureType
         Returns:
@@ -1277,6 +1277,7 @@ class seqdbWebService(object):
         return jsn_resp['result']
 
 
+    # Refactored: FeatureType.delete
     def deleteFeatureType(self, featureTypeId):
         ''' Deletes a FeatureType
         Returns:
