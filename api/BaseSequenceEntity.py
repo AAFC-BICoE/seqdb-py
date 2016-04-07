@@ -232,6 +232,7 @@ class BaseSequenceEntity(BaseApiEntity):
     ########################################################################
     #                     Taxonomy Helpers
     ########################################################################
+    # Used in this entity, but should they be in DeterminationApi?
     
     # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
     # Keys are seqdb taxonomy ranks, and values are NCBI

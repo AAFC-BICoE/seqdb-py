@@ -8,6 +8,7 @@ from api.test.TestSpecimenApi import TestSpecimenApi
 from api.test.TestProjectTagApi import TestProjectTagApi
 from api.test.TestRawSequenceApi import TestRawSequenceApi
 from api.test.TestConsensusSequenceApi import TestConsensusSequenceApi
+from api.test.TestDeterminationApi import TestDeterminationApi
 
 def test_suite():
     test_suite = unittest.TestSuite()
@@ -15,6 +16,7 @@ def test_suite():
     test_suite.addTest(unittest.makeSuite(TestProjectTagApi))
     test_suite.addTest(unittest.makeSuite(TestRawSequenceApi))
     test_suite.addTest(unittest.makeSuite(TestConsensusSequenceApi))
+    test_suite.addTest(unittest.makeSuite(TestDeterminationApi))
     return test_suite
 
 api_suite = test_suite()

@@ -154,3 +154,15 @@ class RawSequenceApi(BaseSequenceEntity):
             sequence_ids = jsn_resp['result']            
         
         return sequence_ids, result_offset
+    
+    
+    def getAcceptedSpecimenDetermination(self, sequence_id):
+        ''' Returns an accepted determination of a SPECIMEN, which is associated with this sequence
+        '''
+
+        jsn_resp = self.retrieveJson("/{}/{}/acceptedSpecimenDetermination".format(self.request_url, sequence_id))
+        
+        if jsn_resp:
+            return jsn_resp['result']
+        else:
+            return ''

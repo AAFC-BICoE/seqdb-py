@@ -163,6 +163,16 @@ class TestRawSequenceApi(unittest.TestCase):
         self.assertTrue(actual_seq_ids, "No sequence ids returned for region id=97.")
         self.assertEquals(20, len(actual_seq_ids), "Expecting 20 sequences, returned in the first offset query and associated with region id=97 , but got {}.".format(len(actual_seq_ids)))    
         
+    def testGetAcceptedSpecimenDetermination(self):
+        actual = self.fixture.getAcceptedSpecimenDetermination(27755)
+        self.assertTrue(actual, "Expecting accepted determination, but got none.")
+        self.assertEquals("Fungi", actual['taxonomy']['kingdom'], "Expecting kingdom Fungi, but got {}".format(actual['taxonomy']['kingdom']))
+        self.assertEquals("arrhenomanes", actual['taxonomy']['species'], "Expecting species arrhenomanes, but got {}".format(actual['taxonomy']['species']))
+
+        actual = self.fixture.getAcceptedSpecimenDetermination(358301)
+        self.assertTrue(actual, "Expecting accepted determination, but got none.")
+        self.assertEquals("Oomycota", actual['taxonomy']['phylum'], "Expecting phylum Oomycota, but got {}".format(actual['taxonomy']['phylum']))
+        self.assertEquals("Pythiales", actual['taxonomy']['taxanomicOrder'], "Expecting order Pythiales, but got {}".format(actual['taxonomy']['taxanomicOrder']))
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
