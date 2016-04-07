@@ -28,7 +28,7 @@ class TestGeneRegionApi(unittest.TestCase):
         pass
     
     ''' Test not working" "Missing or malformed request object". Following up with Nazir.
-    
+    '''
     def testCreateGetDeleteITSRegion(self):
         # create
         create_regId = self.fixture.create("ITS_test", "Test", 168)
@@ -46,7 +46,6 @@ class TestGeneRegionApi(unittest.TestCase):
         # get
         get_regIds = self.fixture.getItsRegionIds()
         self.assertNotIn(create_regId, get_regIds, "Not expecting this region to be in the results. Region was deleted.")
-    '''    
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

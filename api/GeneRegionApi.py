@@ -16,7 +16,7 @@ class GeneRegionApi(BaseApiEntity):
 
     def __init__(self, api_key, base_url):
         self.clearAllFilters()
-        super(GeneRegionApi, self).__init__(api_key=api_key, base_url=base_url, request_url="determination")
+        super(GeneRegionApi, self).__init__(api_key=api_key, base_url=base_url, request_url="region")
     
     @property
     def nameFilter(self):
@@ -87,7 +87,7 @@ class GeneRegionApi(BaseApiEntity):
                 "name": name}
             }
 
-        resp = super(GeneRegionApi, self).create("{}/{}".format(self.base_url, self.request_url), json.dumps(post_data))
+        resp = super(GeneRegionApi, self).create("{}{}".format(self.base_url, self.request_url), json.dumps(post_data))
         jsn_resp = resp.json()
 
         if 'result' and 'metadata' not in jsn_resp:
