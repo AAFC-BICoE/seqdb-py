@@ -207,6 +207,7 @@ class TestSeqdbWebService(unittest.TestCase):
     ###########################################################################
     # Feature
     ###########################################################################
+    # Refactored
     def testCreateGetDeleteFeature(self):
         
         # Create feature

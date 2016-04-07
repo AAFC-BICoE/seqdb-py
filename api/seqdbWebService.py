@@ -1133,6 +1133,7 @@ class seqdbWebService(object):
     # Feature
     ###########################################################################
 
+    #Refactored: FeatureApi.getEntity
     def getFeature(self, featureId):
         ''' Retrieves a Feature
         Args:
@@ -1152,7 +1153,7 @@ class seqdbWebService(object):
         else:
             return ''
 
-
+    #Refactored: FeatureApi.create
     def insertFeature(
             self, name, featureTypeId, featureLocations,
             sequenceId, description='', featureDefault=False, parentId=None):
@@ -1189,7 +1190,7 @@ class seqdbWebService(object):
 
         return jsn_resp['result']
 
-
+    # Refactored: FeatureApi.delete
     def deleteFeature(self, featureId):
         ''' Deletes a Feature
         Args:
