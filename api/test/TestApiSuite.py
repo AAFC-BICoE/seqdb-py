@@ -11,6 +11,7 @@ from api.test.TestConsensusSequenceApi import TestConsensusSequenceApi
 from api.test.TestDeterminationApi import TestDeterminationApi
 from api.test.TestGeneRegionApi import TestGeneRegionApi
 from api.test.TestFeatureApi import TestFeatureApi
+from api.test.TestFeatureTypeApi import TestFeatureTypeApi
 
 def test_suite():
     test_suite = unittest.TestSuite()
@@ -21,6 +22,7 @@ def test_suite():
     test_suite.addTest(unittest.makeSuite(TestDeterminationApi))
     test_suite.addTest(unittest.makeSuite(TestGeneRegionApi))
     test_suite.addTest(unittest.makeSuite(TestFeatureApi))
+    test_suite.addTest(unittest.makeSuite(TestFeatureTypeApi))
     return test_suite
 
 api_suite = test_suite()

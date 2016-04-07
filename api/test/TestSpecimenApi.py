@@ -46,8 +46,8 @@ class TestSpecimenApi(unittest.TestCase):
         #self.fixture.otherIds="|CV-F:CV547|"
         self.fixture.otherIdsFilter = "M."
         actualEntityIds = self.fixture.getIds();
-        self.assertEquals(2, len(actualEntityIds), "Expecting 10 ids, but got {}.".format(len(actualEntityIds)))
-    
+        self.assertEquals(2, len(actualEntityIds), "Expecting 10 ids, but got {}.".format(len(actualEntityIds)))    
+
                 
 if __name__ == "__main__":
     unittest.main()
