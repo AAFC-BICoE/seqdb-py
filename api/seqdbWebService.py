@@ -856,6 +856,7 @@ class seqdbWebService(object):
     # Determination
     ###########################################################################
     
+    #Refactored: DeterminationApi.getEntity()
     def getDetermination(self, determinationId):
         ''' Retrieves a Determination (taxonomic)
         Args:
@@ -875,7 +876,7 @@ class seqdbWebService(object):
         else:
             return ''
         
-        
+    #Refactored: RawSequenceApi.getAcceptedSpecimenDetermination    
     def getAcceptedSpecimenDetermination(self, sequence_id):
         ''' Returns an accepted determination of a SPECIMEN, which is associated with this sequence
         '''
@@ -896,7 +897,7 @@ class seqdbWebService(object):
         
         return None
         """
-    #Refactored to BaseSequenceEntity
+    #Refactored to DeterminationApi
     # This is a conversion dictionary for NCBI taxonomy to be imported to SeqDB. 
     # Keys are seqdb taxonomy ranks, and values are NCBI
     _seqdb_to_ncbi_taxonomy = {'kingdom':'kingdom', 
@@ -933,7 +934,7 @@ class seqdbWebService(object):
                 return seqdb_tax_rank
         return "No matches found."
     
-    
+    #Refactored: DeterminationApi.createSequenceDetermination
     def insertSequenceDetermination(self, sequenceId, taxonomy, isAccepted=False, ncbiTaxonId=None, notes=None):
         ''' Creates a determination for a sequence
         Args:
@@ -967,7 +968,7 @@ class seqdbWebService(object):
 
         return jsn_resp['result']
 
-    
+    #Refactored: DeterminationApi.delete
     def deleteDetermination(self, determinationId):
         ''' Deletes a Determination
         Args:

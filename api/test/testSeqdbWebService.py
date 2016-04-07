@@ -151,6 +151,7 @@ class TestSeqdbWebService(unittest.TestCase):
     # Determination
     ###########################################################################
     
+    #Refactored
     def testCreateGetDeleteDetermination(self):
         test_taxonomy = {'superkingdom': 'Eukaryota', 'genus': 'Phytophthora', 'species': 'Phytophthora ramorum', 'order': 'Peronosporales'}
         det_id = self.fixture.insertSequenceDetermination(28954, test_taxonomy)
@@ -165,6 +166,7 @@ class TestSeqdbWebService(unittest.TestCase):
         delete_jsn_resp = self.fixture.deleteDetermination(det_id)
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'], "Could not delete determination.")
     
+    #Refactored
     def testGetAcceptedSpecimenDetermination(self):
         actual = self.fixture.getAcceptedSpecimenDetermination(27755)
         self.assertTrue(actual, "Expecting accepted determination, but got none.")
