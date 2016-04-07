@@ -51,7 +51,7 @@ class DeterminationApi(BaseApiEntity):
                 "evidenceNotes": notes}
             }
 
-        resp = super(DeterminationApi, self).create("{}/{}".format(self.base_url, self.request_url), json.dumps(post_data))
+        resp = super(DeterminationApi, self).create("{}{}".format(self.base_url, self.request_url), json.dumps(post_data))
         jsn_resp = resp.json()
         
         if 'result' and 'metadata' not in jsn_resp:
