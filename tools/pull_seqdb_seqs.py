@@ -126,6 +126,10 @@ def get_ITS_seq_ids(seqdbWS):
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
+            if repr(e.args[0].args[1]) == tools_helper.seqdbConnection_error_msg:
+                logging.error(tools_helper.log_msg_seqDBConnection)
+            if repr(e.args[0].args[1]) == tools_helper.invalidURL_error_msg:
+                logging.error(tools_helper.log_msg_invalidURL)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
             logging.error(tools_helper.log_msg_slowConnection)
@@ -234,6 +238,10 @@ def get_seq_ids(seqdbWS, pull_type,
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
+            if repr(e.args[0].args[1]) == tools_helper.seqdbConnection_error_msg:
+                logging.error(tools_helper.log_msg_seqDBConnection)
+            if repr(e.args[0].args[1]) == tools_helper.invalidURL_error_msg:
+                logging.error(tools_helper.log_msg_invalidURL)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
             logging.error(tools_helper.log_msg_slowConnection)
@@ -276,6 +284,10 @@ def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
+            if repr(e.args[0].args[1]) == tools_helper.seqdbConnection_error_msg:
+                logging.error(tools_helper.log_msg_seqDBConnection)
+            if repr(e.args[0].args[1]) == tools_helper.invalidURL_error_msg:
+                logging.error(tools_helper.log_msg_invalidURL)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
             logging.error(tools_helper.log_msg_slowConnection)
@@ -378,6 +390,10 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
+            if repr(e.args[0].args[1]) == tools_helper.seqdbConnection_error_msg:
+                logging.error(tools_helper.log_msg_seqDBConnection)
+            if repr(e.args[0].args[1]) == tools_helper.invalidURL_error_msg:
+                logging.error(tools_helper.log_msg_invalidURL)
             sys.exit(tools_helper.log_msg_sysExit)
         except requests.exceptions.ReadTimeout as e:
             logging.error(tools_helper.log_msg_slowConnection)

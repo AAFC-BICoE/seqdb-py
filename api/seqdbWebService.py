@@ -197,6 +197,8 @@ class seqdbWebService(object):
             error_msg = "Create failed. Request body: \n %s \nRequest URL: %s.\nError message: %s." % (e.request.body, e.request.url, e.response.text)
             e.message = e.message + error_msg
             logging.error(error_msg)
+            if resp.status_code == 401:
+                logging.error("Not sufficient permissions to write information to SeqDB. Please contact SeqDB administrator.")
             #print error_msg
             #raise requests.exceptions.HTTPError(error_msg)  # this will lose the stacktrace
             raise e
@@ -224,6 +226,8 @@ class seqdbWebService(object):
             error_msg = "Delete failed. Request body: \n %s \nRequest URL: %s.\nError message: %s." % (e.request.body, e.request.url, e.response.text)
             e.message = e.message + error_msg
             logging.error(error_msg)
+            if resp.status_code == 401:
+                logging.error("Not sufficient permissions to delete information to SeqDB. Please contact SeqDB administrator.")
             raise e
         
 

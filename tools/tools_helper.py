@@ -15,7 +15,7 @@ import logging
 log_msg_sysAdmin = "Contact your sysadmin for more details."
 log_msg_sysExit = "Script error."
 log_msg_sysExitFile = "Input file error."
-log_msg_noDbConnection = "Could not connect to Sequence DB."
+log_msg_noDbConnection = "Connection to Sequence DB could not be established."
 log_msg_slowConnection = "Connection too slow for getting data from Sequence DB."
 log_msg_httpError = "HTTP error when connecting to Sequence DB."
 log_msg_apiResponseFormat = "Sequence DB API response did not match expected format."
@@ -29,6 +29,8 @@ log_msg_execStarted_simple = "Script execution started."
 log_msg_execEnded = "Execution complete."
 log_msg_apiUrl = "Base URL for web services is:"
 log_msg_errorSeeLog = "Execution was not successful. See log for details."
+log_msg_seqDBConnection = "SeqDB is currently not available. Make sure to run it before executing any script."
+log_msg_invalidURL = "The URL you entered is invalid. Please make sure to type it correctly and try again."
 
 log_msg_ITSLoad = "Loading ITS sequences."
 log_msg_ConsensusLoad = "Loading consensus sequences."
@@ -37,6 +39,9 @@ log_msg_RawLoad = "Loading raw sequences for specimen: "
 log_msg_deletion = "Deleting items from SeqDB. File name with SeqDB ids to be deleted:"
 
 log_msg_wrongFileFormat = "Supplied file is not in the required format. "
+
+seqdbConnection_error_msg = "error(111, 'Connection refused')"
+invalidURL_error_msg = "gaierror(-2, 'Name or service not known')"
 
 
 def load_config(config_file):
