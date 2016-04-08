@@ -198,7 +198,7 @@ class seqdbWebService(object):
             e.message = e.message + error_msg
             logging.error(error_msg)
             if resp.status_code == 401:
-                logging.error("You lack user permissions to push to Sequence DB.")
+                logging.error("Not sufficient permissions to write information to SeqDB. Please contact SeqDB administrator.")
             #print error_msg
             #raise requests.exceptions.HTTPError(error_msg)  # this will lose the stacktrace
             raise e
@@ -227,7 +227,7 @@ class seqdbWebService(object):
             e.message = e.message + error_msg
             logging.error(error_msg)
             if resp.status_code == 401:
-                logging.error("You lack user permissions to delete from Sequence DB.")
+                logging.error("Not sufficient permissions to delete information to SeqDB. Please contact SeqDB administrator.")
             raise e
         
 
