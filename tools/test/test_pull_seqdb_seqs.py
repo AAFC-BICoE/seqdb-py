@@ -19,8 +19,6 @@ class TestPullSeqdbSeqs(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
-        #self.fixture = seqdbWebService(api_key=config['seqdb']['api_key'],
-        #                                           base_url=config['seqdb']['base_url'])
         self.rawSeqFixture = RawSequenceApi(api_key=config['seqdb']['api_key'], base_url=config['seqdb']['base_url'])
         self.consensusSeqFixture = ConsensusSequenceApi(api_key=config['seqdb']['api_key'], base_url=config['seqdb']['base_url'])
         self.output_file_name = "test_output_file."
@@ -36,8 +34,8 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         if os.path.isfile(self.output_fasta_file_name):
             os.remove(self.output_fasta_file_name) 
         
-        #if os.path.isfile(self.output_fastq_file_name):
-            #os.remove(self.output_fastq_file_name) 
+        if os.path.isfile(self.output_fastq_file_name):
+            os.remove(self.output_fastq_file_name) 
         
     ''' 
     def test_get_ITS_seq_ids(self): 
