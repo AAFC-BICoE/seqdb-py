@@ -184,7 +184,7 @@ class BaseSequenceEntity(BaseApiEntity):
         
         params = self.getParamsStr() + "limit={}&offset={}&".format(limit,offset)
         
-        resp = self.retrieve("{}/{}.{}".format(self.base_url, self.request_url, sequence_format), params=params)
+        resp = self.retrieve("{}{}.{}".format(self.base_url, self.request_url, sequence_format), params=params)
         
         """
         jsn_response, result_offset = self.retrieveJsonWithOffset(request_url=self.request_url + ".fasta", 
@@ -222,7 +222,7 @@ class BaseSequenceEntity(BaseApiEntity):
         if sequence_format not in {"fasta", "fastq"}:
             raise SystemError("Sequences can only be in fasta or fastq format.")
         
-        url = "{}/{}/{}.{}".format(self.base_url, self.request_url, str(seq_id), sequence_format)
+        url = "{}{}/{}.{}".format(self.base_url, self.request_url, str(seq_id), sequence_format)
         response = self.retrieve(url)
         return response.content
 
