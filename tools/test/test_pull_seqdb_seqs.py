@@ -204,8 +204,6 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertEqual('>seqdb|4829279', idList[161610], "Expected sequence ID 4829279 is not the same as the ID %s in the file." %idList[161610])
     
     '''
-    Fails. Error message: local variable 'seq_ids' referenced before assignment
-    We are no longer getting sequences based on ids anymore. We are getting them in bulk. This is why it fails.   
     def test_execute_script_consensus_taxonomy(self):    
         #time: 
 
@@ -242,8 +240,8 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertEqual('>seqdb|126059', idList[1838], "Expected sequence ID 126059 is not the same as the ID %s in the file." %idList[1838])
         
     
-    ''' 
-    This test does not fail, but instead of printing to output file JUST fastq sequences, it also prints fasta.    
+    
+    #This test does not fail, but instead of printing to output file JUST fastq sequences, it also prints fasta.    
     def test_execute_script_raw_fastq(self):
         
         # Testing fastq file creation for raw sequences 
@@ -258,12 +256,12 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertEqual('@seqdb|266400', idList[0], "Expected sequence ID 266400 is not the same as the ID %s in the file." %idList[0])
         self.assertEqual('@seqdb|301609', idList[140], "Expected sequence ID 301609 is not the same as the ID %s in the file." %idList[140])
         self.assertEqual('@seqdb|331086', idList[228], "Expected sequence ID 331086 is not the same as the ID %s in the file." %idList[228])
-    '''
+    
         
-    '''
-    Fails. Error message: local variable 'seq_ids' referenced before assignment
-    We are no longer getting sequences based on ids anymore. We are getting them in bulk. This is why it fails.       
+    #TEST IT   
     def test_execute_script_raw_taxonomy(self):
+        #time: 40580.5s
+        
         # Testing taxonomy file creation for raw sequences
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fastq", "raw", "-t", "--sampleName", "LEV6103"], 
                              self.output_file_name, self.output_taxon_file_name)
@@ -277,7 +275,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertEqual('266400' , idList[0], "Expected taxonomy ID 266400 is not the same as the ID %s in the file." %idList[0])
         self.assertEqual('299528' , idList[32], "Expected taxonomy ID 299528 is not the same as the ID %s in the file." %idList[32])
         self.assertEqual('4777769' , idList[59], "Expected taxonomy ID 4777769 is not the same as the ID %s in the file." %idList[59])
-    '''    
+        
         
     def test_execute_script_all_fasta(self):
         # time: 212.517s
@@ -297,8 +295,6 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertEqual('>seqdb|358505', idList[14604], "Expected sequence ID 358505 is not the same as the ID %s in the file." %idList[14604])
       
     '''
-    Fails. Error message: local variable 'seq_ids' referenced before assignment
-    We are no longer getting sequences based on ids anymore. We are getting them in bulk. This is why it fails.       
     def test_execute_script_all_taxonomy(self):
         
         # Testing taxonomy file creation for all sequences
@@ -317,9 +313,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertEqual('358502' , idList[1036], "Expected taxonomy ID 358502 is not the same as the ID %s in the file." %idList[1036])
     '''
     
-    '''
-    Fails. Error message: local variable 'seq_ids' referenced before assignment
-    We are no longer getting sequences based on ids anymore. We are getting them in bulk. This is why it fails.   
+    '''  
     def test_execute_script_taxonomy(self):
         # time: 13.551s
         
