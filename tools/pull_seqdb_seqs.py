@@ -368,7 +368,7 @@ def write_sequence_file(rawSequence, its_seq_ids, file_name, file_type):
 
     return success_ids
     
-#TODO: This method has to change because we no longer get sequences based on IDs.   
+    
 def write_taxonomy_file(rawSequence, seq_ids, output_file_name):
     ''' Gets fasta sequences based on IDs and writes to a file
     Args:
@@ -512,6 +512,8 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     BaseSequenceEntity.taxonomyRankFilter = parsed_args.tax_rank
     BaseSequenceEntity.taxonomyValueFilter = parsed_args.tax_value    
     
+    seq_ids = []
+    
     if pull_types_dict["its"] == parsed_args.seq_type:
         logging.info(tools_helper.log_msg_ITSLoad)
         rawSequence = RawSequenceApi(api_key, base_url)
@@ -529,7 +531,9 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
             while result_offset > 0:
                 result_fasta, result_offset = consensusSequence.getFastaSequencesWithOffset(offset=result_offset)
                 write_to_file(result_fasta, output_file_name, parsed_args.return_type)
-     
+        if (parsed_args.output_taxonomy_file):
+            seq_ids = consensusSequence.getIds()
+            
     #TODO: log number of raw sequences retrieved         
     elif pull_types_dict["raw"] == parsed_args.seq_type:
         rawSequence = RawSequenceApi(api_key, base_url)
@@ -540,15 +544,16 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
             while result_offset > 0:
                 result_fasta, result_offset = rawSequence.getFastaSequencesWithOffset(offset=result_offset)
                 write_to_file(result_fasta, output_file_name, parsed_args.return_type)
-
         
-        #TODO: check output file, because it is also printing fasta sequences     
         if return_types_dict["fastq"] == parsed_args.return_type:
-            result_fasta, result_offset = rawSequence.getFastqSequencesWithOffset(offset=0, limit=20)
-            write_to_file(result_fasta, output_file_name, parsed_args.return_type)
+            result_fastq, result_offset = rawSequence.getFastqSequencesWithOffset(offset=0, limit=20)
+            write_to_file(result_fastq, output_file_name, parsed_args.return_type)
             while result_offset > 0:
-                result_fasta, result_offset = rawSequence.getFastaSequencesWithOffset(offset=result_offset, limit=20)
-                write_to_file(result_fasta, output_file_name, parsed_args.return_type)
+                result_fastq, result_offset = rawSequence.getFastqSequencesWithOffset(offset=result_offset, limit=20)
+                write_to_file(result_fastq, output_file_name, parsed_args.return_type)
+        
+        if (parsed_args.output_taxonomy_file):
+            seq_ids = rawSequence.getIds()
 
     #TODO: log number of all sequences retrieved                 
     elif pull_types_dict["all"] == parsed_args.seq_type:
@@ -567,9 +572,11 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
             while result_offset_raw > 0:
                 result_fasta_raw, result_offset_raw = rawSequence.getFastaSequencesWithOffset(offset=result_offset_raw, limit=20)
                 write_to_file(result_fasta_raw, output_file_name, parsed_args.return_type)
-
-    #TODO: once write_taxonomy_file has been modified, fix this            
-    if (parsed_args.output_taxonomy_file):
+                
+        if (parsed_args.output_taxonomy_file):
+            seq_ids = consensusSequence.getIds().append(rawSequence.getIds())
+          
+    if (parsed_args.output_taxonomy_file) and seq_ids:
         rawSequence = RawSequenceApi(api_key, base_url)
         write_taxonomy_file(rawSequence, seq_ids, output_taxonomy_file_name)
         print("Taxonomy file is written to a file: '%s'" % output_taxonomy_file_name)
