@@ -158,13 +158,13 @@ class BaseSequenceEntity(BaseApiEntity):
     
     
     def getFastaSequencesWithOffset(self, offset, limit=20):
-        fasta_resp, result_offset = self._getSequencesWithOffset(offset, limit, "fasta")
+        fasta_resp, result_offset = self.getSequencesWithOffset(sequence_format="fasta", offset=offset, limit=limit)
         if fasta_resp and fasta_resp[0]!=">":
             raise UnexpectedContent("Response is not in fasta format.")
         
         return fasta_resp, result_offset
             
-    def _getSequencesWithOffset(self, offset, limit, sequence_format):
+    def getSequencesWithOffset(self, sequence_format, offset, limit=20):
         
         if offset < 0:
             raise "Negative offset: either you've retrieved all sequences or the method usage is incorrect."

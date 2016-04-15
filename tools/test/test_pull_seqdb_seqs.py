@@ -49,11 +49,13 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="all")
         self.assertEqual(485643 , len(seq_ids), "Expected 485,643 sequences (total), but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
     """
-        
+    
+    ''' Method removed    
     def test_get_seq_ids_consensus(self):
         # time: 8.395s 
         seq_ids = pull_seqdb_seqs.get_seq_ids(seqdbWS=self.fixture, pull_type="consensus")
         self.assertEqual(5555 , len(seq_ids), "Expected 5,555 consensus sequences, but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
+    '''
     
     """
     def test_get_seq_ids_raw(self):
@@ -101,7 +103,9 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
-        self.assertEqual(138996, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 138996 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        
+        # Very arbitrary test. Better test for the number of sequences in the file
+        #self.assertEqual(138996, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 138996 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
@@ -114,7 +118,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fastq", "raw", "--sampleName", "LEV6103"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
-        self.assertEqual(106623, os.stat(self.output_fastq_file_name).st_size, "File size expected to be 106623 bytes, but is %i." %os.stat(self.output_fastq_file_name).st_size)
+        #self.assertEqual(106623, os.stat(self.output_fastq_file_name).st_size, "File size expected to be 106623 bytes, but is %i." %os.stat(self.output_fastq_file_name).st_size)
         idList = []
         with open(self.output_fastq_file_name) as f:
             for line in f:
@@ -128,7 +132,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
         self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
-        self.assertEqual(8822, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 8822 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
+        #self.assertEqual(8822, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 8822 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
         idList = []
         with open(self.output_taxon_file_name) as f:
             for line in f:
@@ -150,10 +154,11 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
-                idList.append(line.split()[0])        
-        self.assertEqual('>seqdb|6818', idList[0], "Expected sequence ID 6818 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('>seqdb|112673', idList[7794], "Expected sequence ID 112673 is not the same as the ID %s in the file." %idList[7794])
-        self.assertEqual('>seqdb|358505', idList[14604], "Expected sequence ID 358505 is not the same as the ID %s in the file." %idList[14604])
+                if line.startswith('>'):
+                    idList.append(line.split()[0])
+        self.assertIn('>seqdb|6818', idList, "Expected sequence ID 6818 is not found the file." )        
+        self.assertIn('>seqdb|112673', idList, "Expected sequence ID 112673 is not found the file." )        
+        self.assertIn('>seqdb|358505', idList, "Expected sequence ID 358505 is not found the file." )        
         
         # Testing taxonomy file creation for all sequences
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "-t", "all", "--geneRegion", "ACA"], 
@@ -166,9 +171,9 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         with open(self.output_taxon_file_name) as f:
             for line in f:
                 idList.append(line.split()[0])
-        self.assertEqual('6818' , idList[0], "Expected taxonomy ID 6818 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('112600' , idList[547], "Expected taxonomy ID 112600 is not the same as the %s ID in the file." %idList[547])
-        self.assertEqual('358502' , idList[1036], "Expected taxonomy ID 358502 is not the same as the ID %s in the file." %idList[1036])
+        self.assertIn('6818', idList, "Expected sequence ID 6818 is not found the file." )        
+        self.assertIn('112600', idList, "Expected sequence ID 112600 is not found the file." )        
+        self.assertIn('358502', idList, "Expected sequence ID 358502 is not found the file." )        
         
         
     def test_execute_script_taxonomy(self):
@@ -183,10 +188,11 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
-                idList.append(line.split()[0]) 
-        self.assertEqual('>seqdb|358301', idList[0], "Expected sequence ID 358301 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('>seqdb|358381', idList[52], "Expected sequence ID 358381 is not the same as the ID %s in the file." %idList[52])
-        self.assertEqual('>seqdb|358485', idList[61], "Expected sequence ID 358485 is not the same as the ID %s in the file." %idList[61])
+                if line.startswith('>'):
+                    idList.append(line.split()[0]) 
+        self.assertIn('>seqdb|358301', idList, "Expected sequence ID 358301 is not found the file." )        
+        self.assertIn('>seqdb|358381', idList, "Expected sequence ID 358381 is not found the file." )        
+        self.assertIn('>seqdb|358485', idList, "Expected sequence ID 358485 is not found the file." )        
         
         # Testing taxonomy file creation for raw sequences
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "-t", "consensus", "--taxRank", "genus", "--taxValue", "Pythium"], 
@@ -199,11 +205,13 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         with open(self.output_taxon_file_name) as f:
             for line in f:
                 idList.append(line.split()[0])
+        self.assertIn('358301', idList, "Expected sequence ID 358301 is not found the file." )        
         self.assertEqual('358301' , idList[0], "Expected taxonomy ID 358301 is not the same as the ID %s in the file." %idList[0])
         self.assertEqual('358416' , idList[62], "Expected taxonomy ID 358416 is not the same as the ID %s in the file." %idList[62])
         self.assertEqual('1582548' , idList[108], "Expected taxonomy ID 1582548 is not the same as the ID %s in the file." %idList[108])
         
-         
+    
+    """ pull_seqdb_seqs.get_seq_ids is removed. TODO: make sure that the equivalet test exists in api tests for filters
     def test_get_seq_ids_specimen(self):  
         # time: 13.833s
         
@@ -320,7 +328,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         # all
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.fixture, pull_type="all", taxonomy_rank="species", taxonomy_value="megasperma")
         self.assertEqual(218, len(seq_ids), "Expected 218 sequences, but got %i." % len(seq_ids))
-
+    """
  
 if __name__ == "__main__":
     unittest.main()
