@@ -493,25 +493,6 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, base_url))
     
     ### Script execution
-    
-    #TODO: Test when filtering for a list of specimen ids
-    specimen_nums_list = None
-    if not parsed_args.specimen_nums:
-        parsed_args.specimen_nums = [None]
-    elif parsed_args.specimen_nums:
-        specimen_nums_list = parsed_args.specimen_nums.replace(" ", "").split(",")
-        for specimen_num in specimen_nums_list:
-            BaseSequenceEntity.specimenNumFilter = specimen_num
-                
-    BaseSequenceEntity.sequenceNameFilter = parsed_args.sequence_name
-    BaseSequenceEntity.sampleNameFilter = parsed_args.sample_name
-    BaseSequenceEntity.pubRefSeqFilter = parsed_args.pub_ref_seqs
-    BaseSequenceEntity.regionNameFilter = parsed_args.gene_region_name
-    BaseSequenceEntity.projectNameFilter = parsed_args.project_name
-    BaseSequenceEntity.collectionCodeFilter = parsed_args.collection_code
-    BaseSequenceEntity.taxonomyRankFilter = parsed_args.tax_rank
-    BaseSequenceEntity.taxonomyValueFilter = parsed_args.tax_value    
-    
     seq_ids = []
     
     if pull_types_dict["its"] == parsed_args.seq_type:
@@ -524,6 +505,24 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     #TODO: log number of consensus sequences retrieved 
     elif pull_types_dict["consensus"] == parsed_args.seq_type:
         consensusSequence = ConsensusSequenceApi(api_key, base_url)
+        
+        #TODO: Test when filtering for a list of specimen ids
+        specimen_nums_list = None
+        if not parsed_args.specimen_nums:
+            parsed_args.specimen_nums = [None]
+        elif parsed_args.specimen_nums:
+            specimen_nums_list = parsed_args.specimen_nums.replace(" ", "").split(",")
+            for specimen_num in specimen_nums_list:
+                consensusSequence.specimenNumFilter = specimen_num
+                    
+        consensusSequence.sequenceNameFilter = parsed_args.sequence_name
+        consensusSequence.sampleNameFilter = parsed_args.sample_name
+        consensusSequence.pubRefSeqFilter = parsed_args.pub_ref_seqs
+        consensusSequence.regionNameFilter = parsed_args.gene_region_name
+        consensusSequence.projectNameFilter = parsed_args.project_name
+        consensusSequence.collectionCodeFilter = parsed_args.collection_code
+        consensusSequence.taxonomyRankFilter = parsed_args.tax_rank
+        consensusSequence.taxonomyValueFilter = parsed_args.tax_value    
 
         if return_types_dict["fasta"] == parsed_args.return_type: 
             result_fasta, result_offset = consensusSequence.getFastaSequencesWithOffset(offset=0)
@@ -537,6 +536,24 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     #TODO: log number of raw sequences retrieved         
     elif pull_types_dict["raw"] == parsed_args.seq_type:
         rawSequence = RawSequenceApi(api_key, base_url)
+            
+        #TODO: Test when filtering for a list of specimen ids
+        specimen_nums_list = None
+        if not parsed_args.specimen_nums:
+            parsed_args.specimen_nums = [None]
+        elif parsed_args.specimen_nums:
+            specimen_nums_list = parsed_args.specimen_nums.replace(" ", "").split(",")
+            for specimen_num in specimen_nums_list:
+                rawSequence.specimenNumFilter = specimen_num
+                    
+        rawSequence.sequenceNameFilter = parsed_args.sequence_name
+        rawSequence.sampleNameFilter = parsed_args.sample_name
+        rawSequence.pubRefSeqFilter = parsed_args.pub_ref_seqs
+        rawSequence.regionNameFilter = parsed_args.gene_region_name
+        rawSequence.projectNameFilter = parsed_args.project_name
+        rawSequence.collectionCodeFilter = parsed_args.collection_code
+        rawSequence.taxonomyRankFilter = parsed_args.tax_rank
+        rawSequence.taxonomyValueFilter = parsed_args.tax_value    
         
         if return_types_dict["fasta"] == parsed_args.return_type:
             result_fasta, result_offset = rawSequence.getFastaSequencesWithOffset(offset=0)
@@ -559,6 +576,42 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     elif pull_types_dict["all"] == parsed_args.seq_type:
         consensusSequence = ConsensusSequenceApi(api_key, base_url)
         rawSequence = RawSequenceApi(api_key, base_url)
+        
+        #TODO: Test when filtering for a list of specimen ids
+        specimen_nums_list = None
+        if not parsed_args.specimen_nums:
+            parsed_args.specimen_nums = [None]
+        elif parsed_args.specimen_nums:
+            specimen_nums_list = parsed_args.specimen_nums.replace(" ", "").split(",")
+            for specimen_num in specimen_nums_list:
+                consensusSequence.specimenNumFilter = specimen_num
+                    
+        consensusSequence.sequenceNameFilter = parsed_args.sequence_name
+        consensusSequence.sampleNameFilter = parsed_args.sample_name
+        consensusSequence.pubRefSeqFilter = parsed_args.pub_ref_seqs
+        consensusSequence.regionNameFilter = parsed_args.gene_region_name
+        consensusSequence.projectNameFilter = parsed_args.project_name
+        consensusSequence.collectionCodeFilter = parsed_args.collection_code
+        consensusSequence.taxonomyRankFilter = parsed_args.tax_rank
+        consensusSequence.taxonomyValueFilter = parsed_args.tax_value    
+
+        #TODO: Test when filtering for a list of specimen ids
+        specimen_nums_list = None
+        if not parsed_args.specimen_nums:
+            parsed_args.specimen_nums = [None]
+        elif parsed_args.specimen_nums:
+            specimen_nums_list = parsed_args.specimen_nums.replace(" ", "").split(",")
+            for specimen_num in specimen_nums_list:
+                rawSequence.specimenNumFilter = specimen_num
+                    
+        rawSequence.sequenceNameFilter = parsed_args.sequence_name
+        rawSequence.sampleNameFilter = parsed_args.sample_name
+        rawSequence.pubRefSeqFilter = parsed_args.pub_ref_seqs
+        rawSequence.regionNameFilter = parsed_args.gene_region_name
+        rawSequence.projectNameFilter = parsed_args.project_name
+        rawSequence.collectionCodeFilter = parsed_args.collection_code
+        rawSequence.taxonomyRankFilter = parsed_args.tax_rank
+        rawSequence.taxonomyValueFilter = parsed_args.tax_value    
 
         if return_types_dict["fasta"] == parsed_args.return_type:
             result_fasta_consensus, result_offset_consensus = consensusSequence.getFastaSequencesWithOffset(offset=0)
