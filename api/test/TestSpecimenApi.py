@@ -29,7 +29,7 @@ class TestSpecimenApi(unittest.TestCase):
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
         self.fixture = SpecimenApi.SpecimenApi(api_key=config['seqdb']['api_key'],
-                                                base_url=config['seqdb']['api_url'])
+                                                base_url=config['seqdb']['base_url'])
     
     def testRetrieve(self):
         # Test faulty connection
