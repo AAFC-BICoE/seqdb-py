@@ -73,7 +73,7 @@ def parse_input_args(argv):
     parser = argparse.ArgumentParser(description="Load sequences from SeqDB")
     parser.add_argument('seq_type', help="Type of sequences to load", type=str, choices=pull_types_set)
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
-    parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
+    parser.add_argument('-u', help="SeqDB API URL", dest="base_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)
     parser.add_argument('-r', help="Return file type: fasta (default) or fastq", dest="return_type", required=False)    
     parser.add_argument('-t', help="Output taxonomy file as well as sequence file", dest="output_taxonomy_file", action='store_true', required=False)
@@ -98,8 +98,8 @@ def parse_input_args(argv):
         parser.error('Fastq file format is only possible for raw sequences.')
         
         
-    if not (args.config_file or (args.api_url and args.api_key)):
-        parser.error('Either -c <configuration file>, or -u <api_url> -k <api_key> have to be specified')
+    if not (args.config_file or (args.base_url and args.api_key)):
+        parser.error('Either -c <configuration file>, or -u <base_url> -k <api_key> have to be specified')
     
     if args.seq_type == pull_types_dict["its"] and (args.specimen_nums or args.sequence_name or args.pub_ref_seqs):
         parser.error('ITS sequences can not be restricted by filters at the moment. Please do not use --specNum, --seqName or any other additional options.')
@@ -111,8 +111,8 @@ def parse_input_args(argv):
     return args
     
 
-def __init__(self, api_url, api_key):
-    self.api_url = api_url
+def __init__(self, base_url, api_key):
+    self.base_url = base_url
     self.api_key = api_key
 
 def get_ITS_seq_ids(seqdbWS):
@@ -468,18 +468,18 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     
     if parsed_args.config_file:
         tool_config = tools_helper.load_config(parsed_args.config_file)
-        api_url = tool_config['seqdb']['api_url'] 
+        base_url = tool_config['seqdb']['base_url'] 
         api_key = tool_config['seqdb']['api_key'] 
     else:
-        api_url = parsed_args.api_url 
+        base_url = parsed_args.base_url 
         api_key = parsed_args.api_key 
         
-    logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
+    logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, base_url))
     
     
     ### Script execution
     
-    seqdbWS = seqdbWebService(api_key, api_url)
+    seqdbWS = seqdbWebService(api_key, base_url)
     
      
     if pull_types_dict["its"] == parsed_args.seq_type:
@@ -491,7 +491,7 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
         logging.info(log_msg)
         
         
-        sequenceApiObj = BaseSequenceEntity(api_key=api_key,base_url=api_url, request_url=None)
+        sequenceApiObj = BaseSequenceEntity(api_key=api_key,base_url=base_url, request_url=None)
         sequenceApiObj.collectionCodeFilter = parsed_args.collection_code
         #sequenceApiObj.specimenNumFilter = parsed_args.specimen_nums
         sequenceApiObj.sequenceNameFilter = parsed_args.sequence_name
@@ -508,7 +508,7 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
         rawSequenceEntity.__class__ = RawSequenceApi
             # This will reset all the filters, since there is a clearAllFilters() call in the init
             # For this to work, need to specify all the filters in init params
-            #RawSequenceApi.__init__(rawSequenceEntity, api_key, api_url)
+            #RawSequenceApi.__init__(rawSequenceEntity, api_key, base_url)
         rawSequenceEntity.request_url = 'sequence'
 
         consensusSequenceEntity = copy.deepcopy(sequenceApiObj)

@@ -19,7 +19,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
         self.fixture = seqdbWebService(api_key=config['seqdb']['api_key'],
-                                                   base_url=config['seqdb']['api_url'])
+                                                   base_url=config['seqdb']['base_url'])
         self.output_file_name = "test_output_file."
         self.output_fasta_file_name = self.output_file_name + "fasta"
         self.output_fastq_file_name = self.output_file_name + "fastq"
