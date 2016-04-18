@@ -38,6 +38,8 @@ class TestPullSeqdbSeqs(unittest.TestCase):
             os.remove(self.output_fastq_file_name) 
         
     ''' 
+    #Method no longer used
+    
     def test_get_ITS_seq_ids(self): 
         #OK. Time: 237.375s     
         seq_ids = pull_seqdb_seqs.get_ITS_seq_ids(self.rawSeqFixture)
@@ -61,7 +63,11 @@ class TestPullSeqdbSeqs(unittest.TestCase):
     
     
     '''
+    #Method no longer used
+    
     ###TESTING FILTERS
+    
+    ### pull_seqdb_seqs.get_seq_ids is removed. TODO: make sure that the equivalent tests exist in api tests for filters
 
     def test_get_seq_ids_specimen(self):  
         # OK. Time: 4.761s
@@ -183,185 +189,163 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", taxonomy_rank="species", taxonomy_value="megasperma")
         self.assertEqual(218, len(seq_ids), "Expected 218 sequences, but got %i." % len(seq_ids))
     '''
-    
-    ### TESTING SCRIPT EXECUTION  
+    ### TESTING FASTA FILE CREATION 
 
     def test_execute_script_consensus_fasta(self):
-        #OK. Time: 53.53s
+        #OK. Time: 55.56ss
         
-        # Testing fasta file creation for consensus sequences 
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        self.assertEqual(13983492, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 13983492 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        #Better test for the number of sequences in the file
+        #self.assertEqual(13983492, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 13983492 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
-                idList.append(line.split()[0])
-        self.assertEqual('>seqdb|358301', idList[0], "Expected sequence ID 358301 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('>seqdb|4823203', idList[89597], "Expected sequence ID 4823203 is not the same as the ID %s in the file." %idList[89597])
-        self.assertEqual('>seqdb|4829279', idList[161610], "Expected sequence ID 4829279 is not the same as the ID %s in the file." %idList[161610])
+                if line.startswith('>'):
+                    idList.append(line.split()[0])
+        self.assertIn('>seqdb|358301', idList, "Expected sequence ID 358301 is not found in the file")
+        self.assertIn('>seqdb|4823203', idList, "Expected sequence ID 4823203 is not found in the file")
+        self.assertIn('>seqdb|4829279', idList, "Expected sequence ID 4829279 is not found in the file")
+        
+        
+    def test_execute_script_raw_fasta(self):
+        #OK. Time: 26.66s
+        
+        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
+                            self.output_file_name, self.output_taxon_file_name)
+        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
+        #Better test for the number of sequences in the file
+        #self.assertEqual(138996, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 138996 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        idList = []
+        with open(self.output_fasta_file_name) as f:
+            for line in f:
+                if line.startswith('>'):
+                    idList.append(line.split()[0])        
+        self.assertIn('>seqdb|1' , idList, "Expected sequence ID 1 is not found in the file")
+        self.assertIn('>seqdb|79390', idList, "Expected sequence ID 79390 is not found in the file")
+        self.assertIn('>seqdb|126059', idList, "Expected sequence ID 126059 is not found in the file")
     
-    '''
+    # CHANGED    
+    def test_execute_script_all_fasta(self):
+        #OK. Time: 28.818s
+        
+        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "all", "--geneRegion", "EF-1a"], 
+                            self.output_file_name, self.output_taxon_file_name)
+        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
+        self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
+        #Better test for the number of sequences in the file
+        #self.assertEqual(557033, os.stat(self.output_fasta_file_name).st_size, "File size expected to 557033 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        idList = []
+        with open(self.output_fasta_file_name) as f:
+            for line in f:
+                if line.startswith('>'):
+                    idList.append(line.split()[0])        
+        self.assertIn('>seqdb|1689', idList, "Expected sequence ID 1689 is not found in the file")
+        self.assertIn('>seqdb|103372', idList, "Expected sequence ID 103372 is not found in the file")
+        self.assertIn('>seqdb|149807', idList, "Expected sequence ID 149807 is not found in the file")      
+        
+        
+    ### TESTING FASTQ FILE CREATION
+        
+    def test_execute_script_raw_fastq(self):
+        #OK. Time: 5.16s
+        
+        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fastq", "raw", "--sampleName", "LEV6103"], 
+                             self.output_file_name, self.output_taxon_file_name)
+        self.assertTrue(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
+        #Better test for the number of sequences in the file
+        #self.assertEqual(106623, os.stat(self.output_fastq_file_name).st_size, "File size expected to be 106623 bytes, but is %i." %os.stat(self.output_fastq_file_name).st_size)
+        idList = []
+        with open(self.output_fastq_file_name) as f:
+            for line in f:
+                if line.startswith('@'):
+                    idList.append(line.split()[0])
+        self.assertIn('@seqdb|266400', idList, "Expected sequence ID 266400 is not found in the file")
+        self.assertIn('@seqdb|301609', idList, "Expected sequence ID 301609 is not found in the file")
+        self.assertIn('@seqdb|331086', idList, "Expected sequence ID 331086 is not found in the file")   
+    
+    
+    ### TESTING TAXONOMY FILE CREATION
+    
     def test_execute_script_consensus_taxonomy(self):    
-        #time: 
+        #OK. Time: 1.384s
 
-        # Testing taxonomy file creation for consensus sequences
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "-t", "consensus", "--seqName", "Pyt_arrhenomanes_"], 
                                 self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        self.assertEqual(515, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 515 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
+        #Better test for the number of sequences in the file
+        #self.assertEqual(515, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 515 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
         idList = []
         with open(self.output_taxon_file_name) as f:
             for line in f:
-                idList.append(line.split()[0])
-        self.assertEqual('358301' , idList[0], "Expected taxonomy ID 358301 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('358327' , idList[2], "Expected taxonomy ID 358327 is not the same as the ID %s in the file." %idList[2])
-        self.assertEqual('358485' , idList[4], "Expected taxonomy ID 358485 is not the same as the ID %s in the file." %idList[4])
-    '''    
-        
-    def test_execute_script_raw_fasta(self):
-        # time: 44.538s
-        
-        # Testing fasta file creation for raw sequences 
-        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
-                            self.output_file_name, self.output_taxon_file_name)
-        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
-        self.assertEqual(138996, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 138996 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
-        idList = []
-        with open(self.output_fasta_file_name) as f:
-            for line in f:
-                idList.append(line.split()[0])        
-        self.assertEqual('>seqdb|1' , idList[0], "Expected sequence ID 1 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('>seqdb|79390', idList[1026], "Expected sequence ID 79390 is not the same as the ID %s in the file." %idList[1026])
-        self.assertEqual('>seqdb|126059', idList[1838], "Expected sequence ID 126059 is not the same as the ID %s in the file." %idList[1838])
-        
-    
-    
-    #This test does not fail, but instead of printing to output file JUST fastq sequences, it also prints fasta.    
-    def test_execute_script_raw_fastq(self):
-        
-        # Testing fastq file creation for raw sequences 
-        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fastq", "raw", "--sampleName", "LEV6103"], 
-                             self.output_file_name, self.output_taxon_file_name)
-        self.assertTrue(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
-        self.assertEqual(106623, os.stat(self.output_fastq_file_name).st_size, "File size expected to be 106623 bytes, but is %i." %os.stat(self.output_fastq_file_name).st_size)
-        idList = []
-        with open(self.output_fastq_file_name) as f:
-            for line in f:
-                idList.append(line.split()[0])
-        self.assertEqual('@seqdb|266400', idList[0], "Expected sequence ID 266400 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('@seqdb|301609', idList[140], "Expected sequence ID 301609 is not the same as the ID %s in the file." %idList[140])
-        self.assertEqual('@seqdb|331086', idList[228], "Expected sequence ID 331086 is not the same as the ID %s in the file." %idList[228])
-    
-        
-    #TEST IT   
-    def test_execute_script_raw_taxonomy(self):
-        #time: 40580.5s
-        
-        # Testing taxonomy file creation for raw sequences
-        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fastq", "raw", "-t", "--sampleName", "LEV6103"], 
-                             self.output_file_name, self.output_taxon_file_name)
-        self.assertTrue(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
-        self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
-        self.assertEqual(8822, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 8822 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
-        idList = []
-        with open(self.output_taxon_file_name) as f:
-            for line in f:
-                idList.append(line.split()[0])
-        self.assertEqual('266400' , idList[0], "Expected taxonomy ID 266400 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('299528' , idList[32], "Expected taxonomy ID 299528 is not the same as the ID %s in the file." %idList[32])
-        self.assertEqual('4777769' , idList[59], "Expected taxonomy ID 4777769 is not the same as the ID %s in the file." %idList[59])
-        
-        
-    def test_execute_script_all_fasta(self):
-        # time: 212.517s
-        
-        # Testing fasta file creation for all sequences
-        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "all", "--geneRegion", "ACA"], 
-                            self.output_file_name, self.output_taxon_file_name)
-        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
-        self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        self.assertEqual(1129727, os.stat(self.output_fasta_file_name).st_size, "File size expected to 1129727 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
-        idList = []
-        with open(self.output_fasta_file_name) as f:
-            for line in f:
-                idList.append(line.split()[0])        
-        self.assertEqual('>seqdb|6818', idList[0], "Expected sequence ID 6818 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('>seqdb|112673', idList[7794], "Expected sequence ID 112673 is not the same as the ID %s in the file." %idList[7794])
-        self.assertEqual('>seqdb|358505', idList[14604], "Expected sequence ID 358505 is not the same as the ID %s in the file." %idList[14604])
+                if line.startswith('>'):
+                    idList.append(line.split()[0])
+        self.assertIn('358301' , idList, "Expected taxonomy ID 358301 is not found in the file")
+        self.assertIn('358327' , idList, "Expected taxonomy ID 358327 is not found in the file")
+        self.assertIn('358485' , idList, "Expected taxonomy ID 358485 is not found in the file")
       
-    '''
-    def test_execute_script_all_taxonomy(self):
+      
+    def test_execute_script_raw_taxonomy(self):
+        #OK. Time: 3.872s
+
+        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "-t", "--sampleName", "INVITRO221"], 
+                             self.output_file_name, self.output_taxon_file_name)
+        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
+        self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
+        self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
+        #Better test for the number of sequences in the file        
+        #self.assertEqual(608, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 608 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
+        idList = []
+        with open(self.output_taxon_file_name) as f:
+            for line in f:
+                if line.startswith('>'):
+                    idList.append(line.split()[0])
+        self.assertIn('961' , idList, "Expected taxonomy ID 961 is not the found in the file")
+        self.assertIn('97830' , idList, "Expected taxonomy ID 97830 is not found in the file")
+        self.assertIn('97847' , idList, "Expected taxonomy ID 97847 is not found in the file")
         
-        # Testing taxonomy file creation for all sequences
+    def test_execute_script_all_taxonomy(self):
+        #OK. Time: 196.6s
+        
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "-t", "all", "--geneRegion", "ACA"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        self.assertEqual(111174, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 111174 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
+        #Better test for the number of sequences in the file
+        #self.assertEqual(111174, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 111174 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
         idList = []
         with open(self.output_taxon_file_name) as f:
             for line in f:
                 idList.append(line.split()[0])
-        self.assertEqual('6818' , idList[0], "Expected taxonomy ID 6818 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('112600' , idList[547], "Expected taxonomy ID 112600 is not the same as the %s ID in the file." %idList[547])
-        self.assertEqual('358502' , idList[1036], "Expected taxonomy ID 358502 is not the same as the ID %s in the file." %idList[1036])
-    '''
+        self.assertIn('358301' , idList, "Expected taxonomy ID 358301 is not found in the file")
+        self.assertIn('37674' , idList, "Expected taxonomy ID 37674 is not found in the file")
+        self.assertIn('148710' , idList, "Expected taxonomy ID 148710 is not found in the file")
+
     
-    '''  
-    def test_execute_script_taxonomy(self):
-        # time: 13.551s
-        
-        # Testing fasta file creation for consensus sequences
-        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus", "--taxRank", "species", "--taxValue", "arrhenomanes"], 
-                            self.output_file_name, self.output_taxon_file_name)
-        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
-        self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        self.assertEqual(13983492, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 13983492 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
-        idList = []
-        with open(self.output_fasta_file_name) as f:
-            for line in f:
-                idList.append(line.split()[0]) 
-        self.assertEqual('>seqdb|358301', idList[0], "Expected sequence ID 358301 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('>seqdb|358305', idList[52], "Expected sequence ID 358305 is not the same as the ID %s in the file." %idList[52])
-        self.assertEqual('>seqdb|4831259', idList[177585], "Expected sequence ID 358485 is not the same as the ID %s in the file." %idList[177585])
-    
-        # Testing taxonomy file creation for raw sequences
-        pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "-t", "consensus", "--taxRank", "genus", "--taxValue", "Pythium"], 
-                            self.output_file_name, self.output_taxon_file_name)
-        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
-        self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
-        self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        self.assertEqual(11293, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 11293 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
-        idList = []
-        with open(self.output_taxon_file_name) as f:
-            for line in f:
-                idList.append(line.split()[0])
-        self.assertEqual('358301' , idList[0], "Expected taxonomy ID 358301 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('358416' , idList[62], "Expected taxonomy ID 358416 is not the same as the ID %s in the file." %idList[62])
-        self.assertEqual('1582548' , idList[108], "Expected taxonomy ID 1582548 is not the same as the ID %s in the file." %idList[108])
-    '''
+    ### TESTING ITS SEQUENCES
         
     def test_execute_script_its(self):
         #time 2002.27s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "its"], 
                             self.output_file_name, self.output_taxon_file_name)
-        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "ITS file was not created.")
+        self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
         self.assertFalse(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was created.")
-        self.assertEqual(19377145, os.stat(self.output_its_file_name).st_size, "File size expected to be 19377145 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        #Better test for the number of sequences in the file
+        #self.assertEqual(19377145, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 19377145 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
-                idList.append(line.split()[0])
-        self.assertEqual('>seqdb|131072', idList[0], "Expected sequence ID 131072 is not the same as the ID %s in the file." %idList[0])
-        self.assertEqual('>seqdb|11187', idList[124695], "Expected sequence ID 11187 is not the same as the ID %s in the file." %idList[124695])
-        self.assertEqual('>seqdb|131071', idList[249789], "Expected sequence ID 131071 is not the same as the ID %s in the file." %idList[249789])
+                if line.startswith('>'):
+                    idList.append(line.split()[0])
+        self.assertIn('>seqdb|131072', idList, "Expected sequence ID 131072 is not found in the file")
+        self.assertIn('>seqdb|11187', idList, "Expected sequence ID 11187 is not found in the file")
+        self.assertIn('>seqdb|131071', idList, "Expected sequence ID 131071 is not found in the file")
  
 if __name__ == "__main__":
     unittest.main()
