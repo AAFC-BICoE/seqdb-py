@@ -33,16 +33,19 @@ import tools_helper
 from api.ConsensusSequenceApi import ConsensusSequenceApi
 
 
-### Values below are used in Galaxy wrappers, so make sure you know what 
-### you're doing if you're changing any of them 
+### Values below are used in Galaxy wrappers, so make sure you know what you're doing if you're changing any of them 
 # File name where the pulled sequences will be stored. 
 output_file_name = "seqdb_sequences."
+
 # File name where taxonomy for the sequences will be stored. Optional output. 
 output_taxonomy_file_name = "seqdb_taxonomy_file.txt"
+
 # Values for the types of sequences this script downloads. I.e. "its" loads 
 # ITS sequences. Note that raw sequences are not implemented in SeqDB yet. "raw":"raw",
 pull_types_dict = {"its":"its", "consensus":"consensus", "raw":"raw", "all":"all"}
+
 return_types = {"fasta", "fastq"}
+
 # Taxonomy ranks that can be specified as a filter parameter with corresponding value
 # These are used as a drop-down value in the wrapper
 taxonomy_ranks = {"species", "genus", "family", "order", "class", "phylum"}
@@ -62,12 +65,13 @@ def set_up_logging():
     logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
     
 
-
-# Parses command line arguments 
-# Returns seqdb api_key and base url to use for web services requests
 def parse_input_args(argv):
-    ''' Parses command line arguments '''
-    
+    ''' Parses command line arguments 
+    Args:
+        argv: command line arguments
+    Returns:
+        seqdb api_key and base_url to use for web services requests
+    '''   
     pull_types_set = frozenset(pull_types_dict.values())
     
     parser = argparse.ArgumentParser(description="Load sequences from SeqDB")
@@ -96,8 +100,7 @@ def parse_input_args(argv):
         parser.error('Return type (-r) should be one of the following: {}'.format(return_types))
     elif args.return_type == "fastq" and args.seq_type != pull_types_dict["raw"]:
         parser.error('Fastq file format is only possible for raw sequences.')
-        
-        
+         
     if not (args.config_file or (args.base_url and args.api_key)):
         parser.error('Either -c <configuration file>, or -u <base_url> -k <api_key> have to be specified')
     
@@ -106,25 +109,25 @@ def parse_input_args(argv):
     
     if bool(args.tax_rank) != bool(args.tax_value):
         parser.error('Either both --taxRank and --taxValue have to be specified, or none.')
-    
         
     return args
-    
 
-def __init__(self, base_url, api_key):
-    self.base_url = base_url
-    self.api_key = api_key
 
-def get_ITS_seq_ids(seqdbWS):
-    ''' Get all sequence ids, which are associated with the ITS regions '''
-
+def get_ITS_seq_ids(rawSequenceEntity):
+    ''' Gets all sequence ids, which are associated with the ITS regions
+    Args:
+        rawSequenceEntity: Raw Sequence Entity
+    Returns:
+        a list of ITS sequence IDs
+    '''
     ### Get sequence IDs for the ITS regions
     its_seq_ids = set()
     its_region_names = ["18s", "its", "28s",  "ssu", "16s", "5.8s", "lsu", "23s", "25s", "internal transcribed spacer"]
     for its_region_keyword in its_region_names:
         #TODO: parallelize; use locking when appending to its_seq_ids
         try:
-            curr_seq_ids = seqdbWS.getRawSequenceIds(regionName=its_region_keyword)
+            rawSequenceEntity.regionNameFilter = its_region_keyword
+            curr_seq_ids = rawSequenceEntity.getIds()
             its_seq_ids.update(curr_seq_ids)    
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
@@ -154,6 +157,7 @@ def get_ITS_seq_ids(seqdbWS):
     logging.info("%s %i " % (msg_numITSseqs, len(its_seq_ids)))
 
     return list(its_seq_ids)
+
 
 """    Will be removed
 def get_seq_ids(seqdbWS, pull_type,
@@ -266,9 +270,18 @@ def get_seq_ids(seqdbWS, pull_type,
         
     return seq_ids
 """
-         
-def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
-    # Get fasta sequences based on ids and write to a file 
+
+   
+def write_sequence_file(rawSequenceEntity, its_seq_ids, file_name, file_type):
+    ''' Gets fasta or fastq sequences for only ITS sequences based on IDs and writes to a file 
+    Args:
+        rawSequenceEntity: Raw Sequence Entity
+        its_seq_ids: ITS sequence IDs
+        file_name: name of output file
+        file_type: fasta or fastq file types
+    Returns
+        a list of IDs that have been successfully written to file
+    '''
     output_file = open(file_name + file_type, 'w')
     
     success_ids = []
@@ -280,8 +293,10 @@ def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
         t = threading.Thread(target=<this try code>, args(seq_id,)
         '''
         try:
-            # Request sequence in fasto format from SeqDB:
-            sequence = seqdbWS.getFormattedSeq(seq_id, file_type)
+            if file_type == 'fasta':
+                sequence = rawSequenceEntity.getFastaSequence(seq_id)
+            elif file_type == 'fastq':
+                sequence = rawSequenceEntity.getFastqSequence(seq_id)
             output_file.write(sequence)
             success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
@@ -319,18 +334,24 @@ def write_sequence_file(seqdbWS, its_seq_ids, file_name, file_type):
     return success_ids
     
 
-def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
-    # Get fasta sequences based on ids and write to a file 
+def write_taxonomy_file(rawSequenceEntity, seq_ids, output_file_name):
+    ''' Gets fasta sequences based on IDs and writes to a file
+    Args:
+        rawSequenceEntity: Raw Sequence Entity
+        seq_ids: a list of sequence IDs
+        output_file_name: name of output file
+    Returns:
+        a list of IDs that have been successfully written to file
+    '''   
     output_file = open(output_file_name, 'w')
     
     success_ids = []
     for seq_id in seq_ids:
-        
         try:
             # Quiime/Mothur taxonomy file format as described in Unite:
             # https://unite.ut.ee/repository.php
             unclassified_keyword = u'unclassified'
-            determ_jsn = seqdbWS.getAcceptedSpecimenDetermination(seq_id)
+            determ_jsn = rawSequenceEntity.getAcceptedSpecimenDetermination(seq_id)
             if determ_jsn:
                 t_kingdom = determ_jsn["taxonomy"]["kingdom"]
                 if t_kingdom:
@@ -419,8 +440,8 @@ def write_taxonomy_file(seqdbWS, seq_ids, output_file_name):
     msg_fileName = "Taxonomy written to a file:"
     logging.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
     
-
     return success_ids
+
 
 def write_sequences_file(sequenceApiObj, fileName, fileType):
     # writeType: "w" or "a"
@@ -459,11 +480,10 @@ def write_sequences_file(sequenceApiObj, fileName, fileType):
 def execute_script(input_args, output_file_name=output_file_name, output_taxonomy_file_name=output_taxonomy_file_name):
     
     ### Load main configuration file and set up logging for the script
-    
     set_up_logging()
     
-    ### Parse sript's input arguments
     
+    ### Parse sript's input arguments
     parsed_args = parse_input_args(input_args)
     
     if parsed_args.config_file:
@@ -478,22 +498,22 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     
     
     ### Script execution
-    
-    seqdbWS = seqdbWebService(api_key, base_url)
-    
-     
+    sequenceApiObj = BaseSequenceEntity(api_key=api_key,base_url=base_url, request_url=None)
+
     if pull_types_dict["its"] == parsed_args.seq_type:
         logging.info(tools_helper.log_msg_ITSLoad)
-        
-        seq_ids = get_ITS_seq_ids(seqdbWS)
+        rawSequenceEntity = copy.deepcopy(sequenceApiObj)
+        rawSequenceEntity.__class__ = RawSequenceApi
+        rawSequenceEntity.request_url = 'sequence'
+        seq_ids = get_ITS_seq_ids(rawSequenceEntity)
+        success_seq_ids = write_sequence_file(rawSequenceEntity, seq_ids, output_file_name, parsed_args.return_type)
+        print("Number of sequences retrived from Sequence Database: {}".format(len(success_seq_ids)))
+    
     else:
         log_msg = "Loading %s sequences." %parsed_args.seq_type
         logging.info(log_msg)
         
-        
-        sequenceApiObj = BaseSequenceEntity(api_key=api_key,base_url=base_url, request_url=None)
         sequenceApiObj.collectionCodeFilter = parsed_args.collection_code
-        #sequenceApiObj.specimenNumFilter = parsed_args.specimen_nums
         sequenceApiObj.sequenceNameFilter = parsed_args.sequence_name
         sequenceApiObj.sampleNameFilter = parsed_args.sample_name
         sequenceApiObj.pubRefSeqFilter = parsed_args.pub_ref_seqs
@@ -553,17 +573,16 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
                     seq_ids.extend(curr_seq_ids)
                 
     if parsed_args.output_taxonomy_file and seq_ids:
-        write_taxonomy_file(seqdbWS, seq_ids, output_taxonomy_file_name)
+        write_taxonomy_file(rawSequenceEntity, seq_ids, output_taxonomy_file_name)
         print("Taxonomy file is written to a file: '%s'" % output_taxonomy_file_name)
 
-    
     ### Post-execution: messages and logging
     #print("Number of sequences retrieved from Sequence Database:  {}".format(len(success_seq_ids))) 
     print("Sequences are written to a file: {}".format(output_file_name + parsed_args.return_type))
     print("Execution complete.")
 
-    
     logging.info(tools_helper.log_msg_execEnded)
+
 
 def main():
     ''' This method has to have no arguments to create entry point to the egg.
@@ -571,6 +590,7 @@ def main():
         tests for the whole script execution.
     '''
     execute_script(sys.argv[1:])
+
 
 if __name__ == '__main__':
     main()
