@@ -26,9 +26,9 @@ import sys
 
 import requests.exceptions
 
+from api.BaseSeqdbApi import UnexpectedContent
 from api.BaseSequenceEntity import BaseSequenceEntity
 from api.RawSequenceApi import RawSequenceApi
-from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
 import tools_helper
 from api.ConsensusSequenceApi import ConsensusSequenceApi
