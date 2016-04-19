@@ -12,6 +12,7 @@ from config import config_root
 from tools import pull_seqdb_seqs
 from api.RawSequenceApi import RawSequenceApi
 from api.ConsensusSequenceApi import ConsensusSequenceApi
+from api.seqdbWebService import seqdbWebService
 
 
 class TestPullSeqdbSeqs(unittest.TestCase):
@@ -19,8 +20,8 @@ class TestPullSeqdbSeqs(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
-        self.rawSeqFixture = RawSequenceApi(api_key=config['seqdb']['api_key'], base_url=config['seqdb']['base_url'])
-        self.consensusSeqFixture = ConsensusSequenceApi(api_key=config['seqdb']['api_key'], base_url=config['seqdb']['base_url'])
+        self.fixture = seqdbWebService(api_key=config['seqdb']['api_key'],
+                                                   base_url=config['seqdb']['base_url'])
         self.output_file_name = "test_output_file."
         self.output_fasta_file_name = self.output_file_name + "fasta"
         self.output_fastq_file_name = self.output_file_name + "fastq"
@@ -60,8 +61,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, pull_type="raw")    
         self.assertEqual(480088 , len(seq_ids), "Expected 480,088 sequences (total), but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
     '''
-    
-    
+
     '''
     #Method no longer used
     
@@ -189,22 +189,25 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", taxonomy_rank="species", taxonomy_value="megasperma")
         self.assertEqual(218, len(seq_ids), "Expected 218 sequences, but got %i." % len(seq_ids))
     '''
+
+
     ### TESTING FASTA FILE CREATION 
 
     def test_execute_script_consensus_fasta(self):
-        #OK. Time: 55.56ss
+        #OK. Time: 50.61s
         
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        #Better test for the number of sequences in the file
-        #self.assertEqual(13983492, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 13983492 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        count = 0
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
-                if line.startswith('>'):
+                if line.startswith('>'):     
+                    count = count + 1
                     idList.append(line.split()[0])
+        self.assertEqual(5555, count, "Expected 5,555 sequences but got {}".format(count))
         self.assertIn('>seqdb|358301', idList, "Expected sequence ID 358301 is not found in the file")
         self.assertIn('>seqdb|4823203', idList, "Expected sequence ID 4823203 is not found in the file")
         self.assertIn('>seqdb|4829279', idList, "Expected sequence ID 4829279 is not found in the file")
@@ -216,18 +219,19 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
-        #Better test for the number of sequences in the file
-        #self.assertEqual(138996, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 138996 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        count = 0
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
                 if line.startswith('>'):
-                    idList.append(line.split()[0])        
-        self.assertIn('>seqdb|1' , idList, "Expected sequence ID 1 is not found in the file")
+                    count = count + 1
+                    idList.append(line.split()[0])
+        self.assertEqual(134, count, "Expected 134 sequences but got {}".format(count))        
+        self.assertIn('>seqdb|1', idList, "Expected sequence ID 1 is not found in the file")
         self.assertIn('>seqdb|79390', idList, "Expected sequence ID 79390 is not found in the file")
         self.assertIn('>seqdb|126059', idList, "Expected sequence ID 126059 is not found in the file")
     
-    # CHANGED    
+ 
     def test_execute_script_all_fasta(self):
         #OK. Time: 28.818s
         
@@ -235,16 +239,17 @@ class TestPullSeqdbSeqs(unittest.TestCase):
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        #Better test for the number of sequences in the file
-        #self.assertEqual(557033, os.stat(self.output_fasta_file_name).st_size, "File size expected to 557033 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        count = 0
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
                 if line.startswith('>'):
-                    idList.append(line.split()[0])        
+                    count = count + 1
+                    idList.append(line.split()[0]) 
+        self.assertEqual(492, count, "Expected 492 sequences but got {}".format(count))     
         self.assertIn('>seqdb|1689', idList, "Expected sequence ID 1689 is not found in the file")
         self.assertIn('>seqdb|103372', idList, "Expected sequence ID 103372 is not found in the file")
-        self.assertIn('>seqdb|149807', idList, "Expected sequence ID 149807 is not found in the file")      
+        self.assertIn('>seqdb|149807', idList, "Expected sequence ID 149807 is not found in the file")
         
         
     ### TESTING FASTQ FILE CREATION
@@ -255,97 +260,104 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fastq", "raw", "--sampleName", "LEV6103"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
-        #Better test for the number of sequences in the file
-        #self.assertEqual(106623, os.stat(self.output_fastq_file_name).st_size, "File size expected to be 106623 bytes, but is %i." %os.stat(self.output_fastq_file_name).st_size)
+        count = 0
         idList = []
         with open(self.output_fastq_file_name) as f:
             for line in f:
                 if line.startswith('@'):
+                    count = count + 1
                     idList.append(line.split()[0])
+        self.assertEqual(60, count, "Expected 60 sequences but got {}".format(count))
         self.assertIn('@seqdb|266400', idList, "Expected sequence ID 266400 is not found in the file")
         self.assertIn('@seqdb|301609', idList, "Expected sequence ID 301609 is not found in the file")
         self.assertIn('@seqdb|331086', idList, "Expected sequence ID 331086 is not found in the file")   
-    
-    
+
+ 
+     
     ### TESTING TAXONOMY FILE CREATION
     
     def test_execute_script_consensus_taxonomy(self):    
-        #OK. Time: 1.384s
+        #OK. Time: 1.06s
 
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "-t", "consensus", "--seqName", "Pyt_arrhenomanes_"], 
                                 self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        #Better test for the number of sequences in the file
-        #self.assertEqual(515, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 515 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
+        count = 0
         idList = []
         with open(self.output_taxon_file_name) as f:
             for line in f:
-                if line.startswith('>'):
-                    idList.append(line.split()[0])
-        self.assertIn('358301' , idList, "Expected taxonomy ID 358301 is not found in the file")
-        self.assertIn('358327' , idList, "Expected taxonomy ID 358327 is not found in the file")
-        self.assertIn('358485' , idList, "Expected taxonomy ID 358485 is not found in the file")
+                count = count + 1
+                idList.append(line.split()[0])
+        self.assertEqual(5, count, "Expected 5 sequence but got {}".format(count))
+        self.assertIn('358301', idList, "Expected taxonomy ID 358301 is not found in the file")
+        self.assertIn('358327', idList, "Expected taxonomy ID 358327 is not found in the file")
+        self.assertIn('358485', idList, "Expected taxonomy ID 358485 is not found in the file")
       
       
     def test_execute_script_raw_taxonomy(self):
-        #OK. Time: 3.872s
+        #OK. Time: 3.40s
 
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "-t", "--sampleName", "INVITRO221"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
-        #Better test for the number of sequences in the file        
-        #self.assertEqual(608, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 608 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
+        count = 0
         idList = []
         with open(self.output_taxon_file_name) as f:
             for line in f:
-                if line.startswith('>'):
-                    idList.append(line.split()[0])
-        self.assertIn('961' , idList, "Expected taxonomy ID 961 is not the found in the file")
-        self.assertIn('97830' , idList, "Expected taxonomy ID 97830 is not found in the file")
-        self.assertIn('97847' , idList, "Expected taxonomy ID 97847 is not found in the file")
+                count = count + 1
+                idList.append(line.split()[0])
+        self.assertEqual(6, count, "Expected 6 sequences but got {}".format(count))
+        self.assertIn('961', idList, "Expected taxonomy ID 961 is not the found in the file")
+        self.assertIn('97830', idList, "Expected taxonomy ID 97830 is not found in the file")
+        self.assertIn('97847', idList, "Expected taxonomy ID 97847 is not found in the file")
+        
         
     def test_execute_script_all_taxonomy(self):
-        #OK. Time: 196.6s
+        #OK. Time: 124.98s
         
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "-t", "all", "--geneRegion", "ACA"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertTrue(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
-        #Better test for the number of sequences in the file
-        #self.assertEqual(111174, os.stat(self.output_taxon_file_name).st_size, "File size expected to be 111174 bytes, but is %i." %os.stat(self.output_taxon_file_name).st_size)
+        count = 0
         idList = []
         with open(self.output_taxon_file_name) as f:
             for line in f:
+                count = count + 1
                 idList.append(line.split()[0])
-        self.assertIn('358301' , idList, "Expected taxonomy ID 358301 is not found in the file")
-        self.assertIn('37674' , idList, "Expected taxonomy ID 37674 is not found in the file")
-        self.assertIn('148710' , idList, "Expected taxonomy ID 148710 is not found in the file")
+        self.assertEqual(1041, count, "Expected 1,041 sequences but got {}".format(count))
+        self.assertIn('358301', idList, "Expected taxonomy ID 358301 is not found in the file")
+        self.assertIn('37674', idList, "Expected taxonomy ID 37674 is not found in the file")
+        self.assertIn('148710', idList, "Expected taxonomy ID 148710 is not found in the file")
 
     
     ### TESTING ITS SEQUENCES
         
     def test_execute_script_its(self):
-        #time 2002.27s
+        #OK. Time: 963.44s
+        
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "its"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
         self.assertFalse(os.path.isfile(self.output_fastq_file_name), "Fastq file was created.")
         self.assertFalse(os.path.isfile(self.output_taxon_file_name), "Taxonomy file was created.")
-        #Better test for the number of sequences in the file
-        #self.assertEqual(19377145, os.stat(self.output_fasta_file_name).st_size, "File size expected to be 19377145 bytes, but is %i." %os.stat(self.output_fasta_file_name).st_size)
+        count = 0
         idList = []
         with open(self.output_fasta_file_name) as f:
             for line in f:
                 if line.startswith('>'):
+                    count = count + 1
                     idList.append(line.split()[0])
+        self.assertEqual(17787, count, "Expected 17787 sequences but got {}".format(count))
         self.assertIn('>seqdb|131072', idList, "Expected sequence ID 131072 is not found in the file")
-        self.assertIn('>seqdb|11187', idList, "Expected sequence ID 11187 is not found in the file")
-        self.assertIn('>seqdb|131071', idList, "Expected sequence ID 131071 is not found in the file")
- 
+        self.assertIn('>seqdb|111872', idList, "Expected sequence ID 11187 is not found in the file")
+        self.assertIn('>seqdb|131058', idList, "Expected sequence ID 131071 is not found in the file")             
+
+
 if __name__ == "__main__":
     unittest.main()

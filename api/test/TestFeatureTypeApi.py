@@ -17,7 +17,7 @@ class TestFeatureTypeApi(unittest.TestCase):
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
         self.fixture = FeatureTypeApi(api_key=config['seqdb']['api_key'],
-                                                   base_url=config['seqdb']['api_url'])
+                                                   base_url=config['seqdb']['base_url'])
     
 
     def setUp(self):

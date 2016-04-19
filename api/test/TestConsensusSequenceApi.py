@@ -17,7 +17,7 @@ class TestConsensusSequenceApi(unittest.TestCase):
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
         self.fixture = ConsensusSequenceApi(api_key=config['seqdb']['api_key'],
-                                                   base_url=config['seqdb']['api_url'])
+                                                   base_url=config['seqdb']['base_url'])
     
 
     def setUp(self):
@@ -29,6 +29,7 @@ class TestConsensusSequenceApi(unittest.TestCase):
     
     def testFilters(self):
         # specimenNumber - tested below, skipping
+        
         # sequenceName
         self.fixture.sequenceNameFilter = "Pyt_arrhenomanes_BR0"
         self.assertEqual([358381,358485], self.fixture.getIds(), "Expecting 2 consensus sequences filtered by sequenceName = Pyt_arrhenomanes_BR0")
@@ -121,8 +122,7 @@ class TestConsensusSequenceApi(unittest.TestCase):
         self.assertTrue(actual, "Fasta sequence is empty.")
         self.assertIn(">seqdb|358301", actual, "Fasta does not contain >seqdb|358301.")
               
-            
-
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
