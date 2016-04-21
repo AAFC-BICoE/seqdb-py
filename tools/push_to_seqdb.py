@@ -13,6 +13,7 @@ with one of the following options:
 Other arguments:
    -h   help (prints this message)
 '''
+
 import argparse
 import logging.config
 import sys 
@@ -20,19 +21,21 @@ import sys
 import requests.exceptions
 
 from TaxonomyLineage import TaxonomyLineage
-from api.seqdbWebService import seqdbWebService, UnexpectedContent
+from api.BaseSeqdbApi import UnexpectedContent
 from config import config_root
 import tools_helper
+from api.FeatureTypeApi import FeatureTypeApi
+from api.FeatureApi import FeatureApi
+from api.DeterminationApi import DeterminationApi
 
 
-### Values below are used in Galaxy wrappers, so make sure you know what 
-### you're doing if you're changing any of them 
+### Values below are used in Galaxy wrappers, so make sure you know what you're doing if you're changing any of them 
 # Values for the types of sequences this script downloads. I.e. "its" loads 
 # ITS sequences. Note that raw sequences are not implemented in SeqDB yet. "raw":"raw",
 push_types_dict = {"its":"itsx_features", "taxonomy":"findLCA_taxonomy"}
 
-###
 
+###
 
 
 def parse_input_args(argv):
@@ -43,7 +46,7 @@ def parse_input_args(argv):
     parser = argparse.ArgumentParser(description="Write information to SeqDB")
     parser.add_argument('push_type', help="Type of information to write", type=str, choices=push_types_set)
     parser.add_argument('-c', help="SeqDB config file", dest="config_file", required=False)
-    parser.add_argument('-u', help="SeqDB API URL", dest="api_url", required=False)
+    parser.add_argument('-u', help="SeqDB API URL", dest="base_url", required=False)
     parser.add_argument('-k', help="SeqDB API key", dest="api_key", required=False)    
     parser.add_argument('--lca_results_file', help="FindLCA results file", dest="lca_results_file", required=False)    
     parser.add_argument('--itsx_positions_file', help="ITSx feature positions file (.positions.txt)", dest="itsx_positions_file", required=False)    
@@ -51,8 +54,8 @@ def parse_input_args(argv):
     
     args = parser.parse_args(argv)
 
-    if not (args.config_file or (args.api_url and args.api_key)):
-        parser.error('Either -c <configuration file>, or -u <api_url> -k <api_key> have to be specified')
+    if not (args.config_file or (args.base_url and args.api_key)):
+        parser.error('Either -c <configuration file>, or -u <base_url> -k <api_key> have to be specified')
     
     if args.push_type == push_types_dict["its"] and not (args.itsx_positions_file and args.itsx_extraction_file):
         parser.error('To write its features to SeqDB, ITSx positions (.positions.txt) \
@@ -62,8 +65,7 @@ def parse_input_args(argv):
     if args.push_type == push_types_dict["taxonomy"] and not args.lca_results_file:
         parser.error('To write taxonomy information to SeqDB, FindLCA results file \
         needs to be supplied. Use --lca_results_file option.')
-        
-        
+              
     return args
     
 
@@ -93,7 +95,7 @@ def get_lieage_taxids(tax_parent_ids, taxon_id, lineage=None):
     '''
     
 
-def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
+def push_taxonomy_data(determinationApi, info_file_name, taxonomy_dir):
     ''' Extracts taxon id from the findLCA output file, finds lineage for the taxon id
         and pushes taxonomic identification to SeqDB
     Args:
@@ -113,7 +115,7 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
     or
     Query: seqdb|6802    No suitable matches found."""
     
-    # Parse input file and extract (seqdb sequence ID, ncbi taxon id) pairs
+    # Parse input file and extract (SeqDB sequence ID, NCBI Taxon ID) pairs
     seqdb_sequence_taxon = {}
     try:
         with open(info_file_name, "r") as info_file_handler:
@@ -149,8 +151,7 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
                     else:
                         # There were no matched found for this sequence id, so save the message from a file
                         seqdb_sequence_taxon[sequenceId] = line_tokens[1].rstrip()
-                        
-                    
+                                    
                 except:
                     logging.error(error_msg)
                     sys.exit(tools_helper.log_msg_sysExitFile)
@@ -164,8 +165,8 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
         else:
             raise
 
-    
-    # For each (sequence_id, taxonomy_id) pair, find full lineage (from NCBI) and write to seqdb
+
+    # For each (sequence_id, taxonomy_id) pair, find full lineage (from NCBI) and write to SeqDB
     tax_lineage = TaxonomyLineage(taxonomy_dir)
     
     determinationIds = list()
@@ -182,7 +183,7 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
             notes = taxonomyId + " " + notes
         
         try:
-            determinationId = seqdbWS.insertSequenceDetermination(sequenceId=sequenceId, 
+            determinationId = determinationApi.createSequenceDetermination(sequenceId=sequenceId, 
                                                                   taxonomy=lineage_names,
                                                                   isAccepted=False, 
                                                                   notes=notes)
@@ -208,14 +209,14 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
             logging.info(warning_msg)
 
     
-    # Write determination ids, which were written to SeqDB, to a file (for Galaxy purposes)
+    # Write determination IDs, which were written to SeqDB, to a file (for Galaxy purposes)
     output_file = open(output_file_name, 'w')
     for detId in determinationIds:
         output_file.write(str(detId) + '\n')
     output_file.close()
   
-    log_msg1 = "Number of determinations written to Sequence Dababase:   %i " % len(determinationIds)
-    log_msg2 = "Created determination ids are written to a file: '%s'" % output_file_name
+    log_msg1 = "Number of determinations written to Sequence Database:   %i " % len(determinationIds)
+    log_msg2 = "Created determination IDs are written to a file: '%s'" % output_file_name
     logging.info(log_msg1)
     logging.info(log_msg2)
     
@@ -225,49 +226,44 @@ def push_taxonomy_data(seqdbWS, info_file_name, taxonomy_dir):
 
 
 # B15_17_SH817_ITS_ITS5    622 bp.    SSU: Not found    ITS1: 1-241    5.8S: 242-399    ITS2: 400-557    LSU: 558-622
-def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=None):
-    ''' Extracts found ITS features from ITSx tools results .positions.txt file
-        and writes these features to SeqDB
-        
+def push_its_features(featureTypeApi, featureApi, features_file_name, extraction_results_file_name=None):
+    ''' Extracts found ITS features from ITSx tools results .positions.txt file and writes these features to SeqDB     
     Args:
         seqdbWS: api.seqdbWebService object with accessor methods to Seq
         features_file: file handler with opened .positions.txt file
         extraction_results_file_name: file name of the .extraction.results file from ITSx 
                         execution with a "--detailed_results T" option
-        
     Return:
         list of SeqDB feature_ids for those features that were successfully written to SeqDB
     '''
     # Output file name for this execution. Is used in Galaxy, so don't change UYKWYD
     output_file_name = 'seqdb_feature_ids.txt'
-    # The name of the feature type for each itsx feature in SeqDB
-    its_feature_type_name = "misc_RNA"  # agreen on convention
+   
+    # The name of the feature type for each ITSx feature in SeqDB
+    its_feature_type_name = "misc_RNA"  # agreed on convention
     rRna_feature_type_name = "rRNA"     # agreed on convention
     feature_description = "Generated by ITSx tool."
     input_file_line_example = "seqdb|1685    321 bp.    SSU: 1-46    ITS1: 47-283    5.8S: No end    ITS2: Not found    LSU: Not found    Broken or partial sequence, only partial 5.8S!"
 
-    
     created_feature_ids = []
     
-   
     # Get all feature types from seqDB
-    seqdb_feat_types = seqdbWS.getFeatureTypesWithIds()
+    seqdb_feat_types = featureTypeApi.getFeatureTypesWithIds()
     
     its_feature_type_id = ''
     rRna_feature_type_id = ''
-    # Create feature type in SeqDB, if don't exist already
+    # Create feature type in SeqDB, if doesn't exist already
     if its_feature_type_name not in seqdb_feat_types:
-        its_feature_type_id = seqdbWS.createFeatureType(its_feature_type_name)
+        its_feature_type_id = featureTypeApi.create(its_feature_type_name)
     else:
         its_feature_type_id = seqdb_feat_types[its_feature_type_name]
         
     if rRna_feature_type_name not in seqdb_feat_types:
-        rRna_feature_type_id = seqdbWS.createFeatureType(rRna_feature_type_name)
+        rRna_feature_type_id = featureTypeApi.create(rRna_feature_type_name)
     else:
         rRna_feature_type_id = seqdb_feat_types[rRna_feature_type_name]
     
             
-    
     ## Read strand information from the .extraction.results file
     match_strand = {}
     if extraction_results_file_name:
@@ -352,8 +348,8 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
                 location = [{"start":location[0],"end":location[1],"frame":1,"strand":strand}]
                 feature_type_id = its_feature_type_id
                 if feature_location_pair[0] in {"SSU", "5.8S", "LSU"}:
-                    feature_type_id = rRna_feature_type_id
-                fid = seqdbWS.insertFeature(feature_location_pair[0], feature_type_id, location, sequenceId, description=feature_description)
+                    feature_type_id = rRna_feature_type_id  
+                fid = featureApi.create(feature_location_pair[0], feature_type_id, location, sequenceId, description=feature_description)
                 created_feature_ids.append(fid)
             except requests.exceptions.ConnectionError as e:
                 logging.error(tools_helper.log_msg_noDbConnection)
@@ -377,14 +373,14 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
 
     info_file_handler.close()
 
-    # Write ids of the inserted features into a file
+    # Write IDs of the inserted features into a file
     output_file = open(output_file_name, 'w')
     for fid in created_feature_ids:
         output_file.write(str(fid) + '\n')
     output_file.close()
   
-    log_msg1 = "Number of features written to Sequence Dababase:   %i " % len(created_feature_ids)
-    log_msg2 = "Created feature ids are written to a file: '%s'" % output_file_name
+    log_msg1 = "Number of features written to Sequence Database:   %i " % len(created_feature_ids)
+    log_msg2 = "Created feature IDs are written to a file: '%s'" % output_file_name
     logging.info(log_msg1)
     logging.info(log_msg2)
         
@@ -394,8 +390,8 @@ def push_its_features(seqdbWS, features_file_name, extraction_results_file_name=
 def main():
     ''' Write provided information to SeqDB '''
     
-    ### Load main configuration file and set up logging for the script
     
+    ### Load main configuration file and set up logging for the script
     main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
 
     if not main_conf:
@@ -406,44 +402,41 @@ def main():
     
     logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
     
-    ### Parse sript's input arguments
     
+    ### Parse sript's input arguments 
     parsed_args = parse_input_args(sys.argv[1:])
     
     if parsed_args.config_file:
         tool_config = tools_helper.load_config(parsed_args.config_file)
-        api_url = tool_config['seqdb']['api_url'] 
+        base_url = tool_config['seqdb']['base_url'] 
         api_key = tool_config['seqdb']['api_key'] 
     else:
-        api_url = parsed_args.api_url 
+        base_url = parsed_args.base_url 
         api_key = parsed_args.api_key 
     
-    logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, api_url))
+    logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, base_url))
     
-    ### Script execution
     
-    seqdbWS = seqdbWebService(api_key, api_url)
-             
+    ### Script execution             
     if push_types_dict["its"] == parsed_args.push_type:
         #sys.exit("Not yet implemented")
         log_msg = "Writing ITS features to SeqDB."
-        logging.info(log_msg) 
-        success_feat_ids = push_its_features(seqdbWS, parsed_args.itsx_positions_file, parsed_args.itsx_extraction_file)
+        logging.info(log_msg)
+        featureTypeApi = FeatureTypeApi(api_key=api_key, base_url=base_url)
+        featureApi = FeatureApi(api_key=api_key, base_url=base_url)
+        success_feat_ids = push_its_features(featureTypeApi, featureApi, parsed_args.itsx_positions_file, parsed_args.itsx_extraction_file)
+        print success_feat_ids
             
         
     elif push_types_dict["taxonomy"] == parsed_args.push_type:
         log_msg = "Writing taxonomy lineage information to SeqDB."
         logging.info(log_msg) 
-        
-        push_taxonomy_data(seqdbWS, parsed_args.lca_results_file, main_conf['galaxy']['ncbi_taxonomy_dir'])
-
+        determinationApi = DeterminationApi(api_key=api_key, base_url=base_url)
+        push_taxonomy_data(determinationApi, parsed_args.lca_results_file, main_conf['galaxy']['ncbi_taxonomy_dir'])
 
     
     ### Post-execution: messages and logging
-    
-    
     print(tools_helper.log_msg_execEnded)
-
     logging.info(tools_helper.log_msg_execEnded)
     
     

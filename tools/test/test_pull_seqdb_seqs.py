@@ -8,9 +8,11 @@ import unittest
 
 import yaml
 
-from api.seqdbWebService import seqdbWebService
 from config import config_root
 from tools import pull_seqdb_seqs
+from api.RawSequenceApi import RawSequenceApi
+from api.ConsensusSequenceApi import ConsensusSequenceApi
+from api.seqdbWebService import seqdbWebService
 
 
 class TestPullSeqdbSeqs(unittest.TestCase):
@@ -59,7 +61,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, pull_type="raw")    
         self.assertEqual(480088 , len(seq_ids), "Expected 480,088 sequences (total), but got %i. Doublecheck test db to make sure the numbers haven't changed there." % len(seq_ids))
     '''
-            
+
     '''
     #Method no longer used
     
@@ -269,6 +271,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertIn('@seqdb|266400', idList, "Expected sequence ID 266400 is not found in the file")
         self.assertIn('@seqdb|301609', idList, "Expected sequence ID 301609 is not found in the file")
         self.assertIn('@seqdb|331086', idList, "Expected sequence ID 331086 is not found in the file")   
+
  
      
     ### TESTING TAXONOMY FILE CREATION

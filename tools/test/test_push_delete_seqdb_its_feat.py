@@ -7,9 +7,10 @@ import unittest
 import yaml
 
 from tools import push_to_seqdb, delete_seqdb_features
-from api.seqdbWebService import seqdbWebService
 from config import config_root
 import os.path
+from api.FeatureTypeApi import FeatureTypeApi
+from api.FeatureApi import FeatureApi
 
 
 class Test(unittest.TestCase):
@@ -17,8 +18,8 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         config = yaml.load(file(config_root.path() + '/config4tests.yaml', 'r'))        
-        self.fixture = seqdbWebService(api_key=config['seqdb']['api_key'],
-                                                   base_url=config['seqdb']['api_url'])
+        self.featureTypeFixture = FeatureTypeApi(api_key=config['seqdb']['api_key'], base_url=config['seqdb']['base_url'])
+        self.featureFixture = FeatureApi(api_key=config['seqdb']['api_key'], base_url=config['seqdb']['base_url'])
         self.itsx_positions_file_name = "data/test.positions.txt"
         self.push_to_seqdb_output_file_name = "seqdb_feature_ids.txt"
         self.failed_ids_output_file_name = "delete_failed_feature_ids.txt"
@@ -39,15 +40,15 @@ class Test(unittest.TestCase):
 
 
     def test_create_delete_features_from_seqdb(self):
-        # time: 1.477s
+        #OK. Time: 1.660s
         
-        created_feature_ids = push_to_seqdb.push_its_features(self.fixture, self.itsx_positions_file_name)
+        created_feature_ids = push_to_seqdb.push_its_features(self.featureTypeFixture, self.featureFixture, self.itsx_positions_file_name)
         self.assertTrue(os.path.isfile(self.push_to_seqdb_output_file_name), "SeqDB feature IDs file was not created")
         self.assertEqual(6, len(created_feature_ids), "Expected 6 feature IDs to be successfully written to SeqDB, but wrote %i feature IDs." % len(created_feature_ids))
-        success_ids = delete_seqdb_features.delete_from_seqdb(self.fixture, self.push_to_seqdb_output_file_name, "features")
+        success_ids = delete_seqdb_features.delete_from_seqdb(self.featureFixture, self.push_to_seqdb_output_file_name, "features")
         self.assertEqual(6, len(success_ids[0]), "Expected 6 feature IDs to be successfully deleted from SeqDB, but deleted %i feature IDs." % len(success_ids[0]))
         for created_feature_id in created_feature_ids:
-            self.assertFalse(self.fixture.getFeature(created_feature_id), "Feature was found after being deleted.")
+            self.assertFalse(self.featureFixture.getEntity(created_feature_id), "Feature was found after being deleted.")
 
                 
 if __name__ == "__main__":

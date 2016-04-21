@@ -17,6 +17,7 @@ with one of the following options:
 Other arguments:
    -h   help (prints this message)
 '''
+
 import argparse
 import copy
 import logging.config
@@ -25,9 +26,9 @@ import sys
 
 import requests.exceptions
 
+from api.BaseSeqdbApi import UnexpectedContent
 from api.BaseSequenceEntity import BaseSequenceEntity
 from api.RawSequenceApi import RawSequenceApi
-from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
 import tools_helper
 from api.ConsensusSequenceApi import ConsensusSequenceApi
@@ -50,7 +51,9 @@ return_types = {"fasta", "fastq"}
 # These are used as a drop-down value in the wrapper
 taxonomy_ranks = {"species", "genus", "family", "order", "class", "phylum"}
 
+
 ###
+
 
 def set_up_logging():
     ''' Loads main configuration file and sets up logging for the script '''
@@ -68,10 +71,10 @@ def set_up_logging():
 def parse_input_args(argv):
     ''' Parses command line arguments 
     Args:
-        argv: command line arguments
-    Returns:
+        argv: command line arguments 
+    Returns: 
         seqdb api_key and base_url to use for web services requests
-    '''   
+    '''
     pull_types_set = frozenset(pull_types_dict.values())
     
     parser = argparse.ArgumentParser(description="Load sequences from SeqDB")
@@ -100,7 +103,7 @@ def parse_input_args(argv):
         parser.error('Return type (-r) should be one of the following: {}'.format(return_types))
     elif args.return_type == "fastq" and args.seq_type != pull_types_dict["raw"]:
         parser.error('Fastq file format is only possible for raw sequences.')
-         
+
     if not (args.config_file or (args.base_url and args.api_key)):
         parser.error('Either -c <configuration file>, or -u <base_url> -k <api_key> have to be specified')
     
@@ -109,7 +112,7 @@ def parse_input_args(argv):
     
     if bool(args.tax_rank) != bool(args.tax_value):
         parser.error('Either both --taxRank and --taxValue have to be specified, or none.')
-        
+         
     return args
 
 
@@ -174,6 +177,15 @@ def get_seq_ids(seqdbWS, pull_type,
         pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
         specimen_nums: if specified, list of specimen numbers for which the sequence ids will be retrieved
     '''
+    BaseSequenceEntity.sequenceNameFilter = sequence_name
+    BaseSequenceEntity.sampleNameFilter = sample_name
+    BaseSequenceEntity.pubRefSeqFilter = pub_ref_seqs
+    BaseSequenceEntity.regionNameFilter = region_name
+    BaseSequenceEntity.projectNameFilter = project_name
+    BaseSequenceEntity.collectionCodeFilter = collection_code
+    BaseSequenceEntity.taxonomyRankFilter = taxonomy_rank
+    BaseSequenceEntity.taxonomyValueFilter = taxonomy_value
+        
     if pull_type not in pull_types_dict.values():
         msg = "Value for pull_type should be one of the following: %s" %pull_types_dict.values()
         logging.error(msg)
@@ -182,66 +194,39 @@ def get_seq_ids(seqdbWS, pull_type,
     seq_ids = []
     
     if pull_type == pull_types_dict["its"]:
-        seq_ids = get_ITS_seq_ids(seqdbWS)
+        seq_ids = get_ITS_seq_ids(rawSequence)  
+    
     else:
         try:
+             
             if pull_type == pull_types_dict["consensus"]:
                 if not specimen_nums:
                     specimen_nums = [None]
                 for specimen_num in specimen_nums:
-                    curr_seq_ids = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, 
-                                                          sequenceName=sequence_name,
-                                                          sampleName=sample_name, 
-                                                          pubRefSeq=pub_ref_seqs,
-                                                          regionName=region_name,
-                                                          projectName=project_name,
-                                                          collectionCode=collection_code,
-                                                          taxonomyRank=taxonomy_rank, 
-                                                          taxonomyValue=taxonomy_value)
-                    seq_ids.extend(curr_seq_ids)
-                    
+                    BaseSequenceEntity.specimenNumFilter = specimen_num
+                    curr_seq_ids = consensusSequence.getIds()
+                    seq_ids.extend(curr_seq_ids)       
                 log_msg = "Number of consensus sequences retrieved:"
+            
             elif pull_type == pull_types_dict["all"]:
                 if not specimen_nums:
                     specimen_nums=[None]
                 for specimen_num in specimen_nums:
-                    curr_seq_ids_raw = seqdbWS.getRawSequenceIds(specimenNum=specimen_num, 
-                                                    sequenceName=sequence_name,
-                                                    sampleName=sample_name,
-                                                    pubRefSeq=pub_ref_seqs,
-                                                    regionName=region_name,
-                                                    projectName=project_name,
-                                                    collectionCode=collection_code,
-                                                    taxonomyRank=taxonomy_rank, 
-                                                    taxonomyValue=taxonomy_value)
-                    curr_seq_ids_consensus = seqdbWS.getConsensusSequenceIds(specimenNum=specimen_num, 
-                                                                    sequenceName=sequence_name,
-                                                                    sampleName=sample_name, 
-                                                                    pubRefSeq=pub_ref_seqs,
-                                                                    regionName=region_name,
-                                                                    projectName=project_name,
-                                                                    collectionCode=collection_code,
-                                                                    taxonomyRank=taxonomy_rank, 
-                                                                    taxonomyValue=taxonomy_value)
-                    seq_ids = curr_seq_ids_raw + curr_seq_ids_consensus
-                    
+                    BaseSequenceEntity.specimenNumFilter = specimen_num
+                    curr_seq_ids_raw = rawSequence.getIds()
+                    curr_seq_ids_consensus = consensusSequence.getIds()
+                    seq_ids = curr_seq_ids_raw + curr_seq_ids_consensus      
                 log_msg = "Number of all sequences retrieved:"
+            
             elif pull_type == pull_types_dict["raw"]:
                 if not specimen_nums:
                     specimen_nums = [None]
                 for specimen_num in specimen_nums:
-                    curr_seq_ids = seqdbWS.getRawSequenceIds(specimenNum=specimen_num, 
-                                                sequenceName=sequence_name,
-                                                sampleName=sample_name,
-                                                pubRefSeq=pub_ref_seqs,
-                                                regionName=region_name,
-                                                projectName=project_name,
-                                                collectionCode=collection_code,
-                                                taxonomyRank=taxonomy_rank, 
-                                                taxonomyValue=taxonomy_value)
+                    BaseSequenceEntity.specimenNumFilter = specimen_num
+                    curr_seq_ids = rawSequence.getIds()
                     seq_ids.extend(curr_seq_ids)
-                
                 log_msg = "Number of raw sequences retrieved:"
+        
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
             logging.error(e.message)
@@ -270,7 +255,6 @@ def get_seq_ids(seqdbWS, pull_type,
         
     return seq_ids
 """
-
    
 def write_sequence_file(rawSequenceEntity, its_seq_ids, file_name, file_type):
     ''' Gets fasta or fastq sequences for only ITS sequences based on IDs and writes to a file 
@@ -283,7 +267,7 @@ def write_sequence_file(rawSequenceEntity, its_seq_ids, file_name, file_type):
         a list of IDs that have been successfully written to file
     '''
     output_file = open(file_name + file_type, 'w')
-    
+
     success_ids = []
     for seq_id in its_seq_ids:
         #TODO: threads?
@@ -332,8 +316,8 @@ def write_sequence_file(rawSequenceEntity, its_seq_ids, file_name, file_type):
     logging.info("%s %s" % (msg_seqNum, len(success_ids)) )
 
     return success_ids
-    
 
+    
 def write_taxonomy_file(rawSequenceEntity, seq_ids, output_file_name):
     ''' Gets fasta sequences based on IDs and writes to a file
     Args:
@@ -437,12 +421,15 @@ def write_taxonomy_file(rawSequenceEntity, seq_ids, output_file_name):
      
     output_file.close()   
 
-    msg_fileName = "Taxonomy written to a file:"
+    msg_fileName = "Sequences written to a file:"
     logging.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
-    
+
+    msg_seqNum = "Number of sequences written:"
+    logging.info("%s %s" % (msg_seqNum, len(success_ids)) )
+
     return success_ids
-
-
+    
+    
 def write_sequences_file(sequenceApiObj, fileName, fileType):
     # writeType: "w" or "a"
     with open(fileName + fileType, 'a') as output_file:
@@ -481,8 +468,8 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
     
     ### Load main configuration file and set up logging for the script
     set_up_logging()
-    
-    
+
+
     ### Parse sript's input arguments
     parsed_args = parse_input_args(input_args)
     
@@ -495,8 +482,8 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
         api_key = parsed_args.api_key 
         
     logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, base_url))
-    
-    
+
+
     ### Script execution
     sequenceApiObj = BaseSequenceEntity(api_key=api_key,base_url=base_url, request_url=None)
 
