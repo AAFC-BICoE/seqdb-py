@@ -715,13 +715,17 @@ def parse_locations(gb_feature):
         None
     """
     locations = []
-    if not gb_feature['GBFeature_intervals']:
-        print "=======Need to wait for GBFeature_intervals"
-        time.sleep(200)
-    print "******GBFeature_interval: {}\n".format(gb_feature['GBFeature_intervals'])
+    #print "******GBFeature_interval: {}\n".format(gb_feature['GBFeature_intervals'])
     for interval in gb_feature['GBFeature_intervals']:
-        # TODO determined frame and strand, don't just default to 1
-        # There is another spot where I adjust the frame
+        #According to Entrez documentation (example: https://github.com/biopython/biopython/blob/master/Tests/Entrez/nucleotide1.xml)
+        #'GBInterval_from' and 'GBInterval_to' may not exist for a record.
+        #if 'GBInterval_from' in interval and 'GBInterval_to' in interval:
+            # TODO determined frame and strand, don't just default to 1
+            # There is another spot where I adjust the frame
+        while 'GBInterval_from' not in interval and 'GBInterval_to' not in interval:
+            print "=======Need to wait for GBInterval_from / to"
+            time.sleep(3)
+                
         locations.append(
             {
                 "start": interval['GBInterval_from'],
@@ -744,10 +748,7 @@ def parse_qualifiers(gb_feature):
         None
     """
     qualifiers = {}
-    if not gb_feature['GBFeature_quals']:
-        print "======Need to wait for GBFeature_quals"
-        time.sleep(200)
-    print "*******GBQualifier: {}\n".format(gb_feature['GBFeature_quals'])
+    #print "*******GBQualifier: {}\n".format(gb_feature['GBFeature_quals'])
     for qual in gb_feature['GBFeature_quals']:
         if qual['GBQualifier_name'] not in qualifiers:
             qualifiers[qual['GBQualifier_name']] = []
@@ -779,6 +780,7 @@ def parse_feature(gb_feature, seqdb_ws, lookup=None):
     gb_feature_record['feature_key'] = gb_feature['GBFeature_key']
     gb_feature_record['feature_type_id'] = check_feature_type(
         seqdb_ws, gb_feature['GBFeature_key'], create=True, lookup=lookup)
+    
     gb_feature_record['locations'] = parse_locations(gb_feature)
     gb_feature_record['qualifiers'] = parse_qualifiers(gb_feature)
     return gb_feature_record
@@ -836,6 +838,12 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
 
     features = []
     for gb_feature in record['GBSeq_feature-table']:
+        while 'GBFeature_intervals' not in gb_feature:
+            print "=======Need to wait for GBFeature_intervals"
+            time.sleep(3)
+        while 'GBFeature_quals' not in gb_feature:
+            print "======Need to wait for GBFeature_quals"
+            time.sleep(5)
         features.append(parse_feature(gb_feature, seqdb_ws, lookup=lookup))
 
     products = {}
@@ -1150,7 +1158,7 @@ def main():
                 lookup=feature_type_lookup,
                 delete=tool_config['gb_insert']['delete'],
                 update=tool_config['gb_insert']['update'])
-            print genbank_id
+            print ("\n >Seqid: {}".format(genbank_id))
 
         start += retrieve
 
