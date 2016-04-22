@@ -2,19 +2,20 @@
 """Script to use Entrez and SeqDB-WS APIs to load GenBank sequences into SeqDB
 """
 
+from Bio import Entrez
+import json
+import logging.config
 import os
 import re
-import sys
-import json
 import shelve
+import sys
+import time
 import urllib
-import logging.config
-import httplib as http_client
-import tools_helper
 
 from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
-from Bio import Entrez
+import httplib as http_client
+import tools_helper
 
 
 def merge(a, b, path=None):
@@ -255,15 +256,19 @@ def entrez_fetch(
             add_to_cache = True
 
     if record is None:
-        handle = Entrez.efetch(
-            db=database, id=genbank_id, rettype=rettype, retmode=retmode)
+        handle = Entrez.efetch(db=database, id=genbank_id, rettype=rettype, retmode=retmode)
 
         try:
             record = Entrez.read(handle)
         except Entrez.Parser.ValidationError:
-            logging.error(
-                "Failed to parse genbank record for gi:%s" % (genbank_id))
+            logging.error("Failed to parse genbank record for gi:{}".format(genbank_id))
             add_to_cache = False
+            handle = Entrez.efetch(db=database, id=genbank_id, rettype=rettype, retmode="text")
+            first_line = handle.readline().strip()
+            possibile_error_keywords = ["Error","Bad","Cannot","unavailable","unable","is empty"]
+            if first_line and any(error_substring in first_line for error_substring in possibile_error_keywords):
+                logging.error("Entrez error:{}".format(first_line))
+            
 
         handle.close()
 
@@ -321,8 +326,7 @@ def seqdb_ret_entrez_gene_region_id(seqdb_ws, record, products=None):
             seqdb_gene_region_id = check_region(
                 seqdb_ws, "Ribosomal Cistron", create=True)
             logging.debug("Identified Ribosomal Cistron based on features in "
-                          "0 gene region, SeqDB region id: %i" %
-                          (seqdb_gene_region_id))
+                          "0 gene region, SeqDB region id: {}".format(seqdb_gene_region_id))
         else:
             logging.debug("No gene region for 0 gene region, SeqDB region "
                           "id: %i" % (seqdb_gene_region_id))
@@ -357,8 +361,8 @@ def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
         db="nucleotide", id=genbank_id, rettype="gb", retmode="xml")
 
     additional = {
-        'chromatDir': tracefile_dir,
-        'chromatName': tracefile_name,
+        'fileDir': tracefile_dir,
+        'fileName': tracefile_name,
         'genBankGI': genbank_id,
         'genBankAccession': record[0]["GBSeq_primary-accession"],
         'genBankVersion': record[0]["GBSeq_accession-version"],
@@ -711,6 +715,10 @@ def parse_locations(gb_feature):
         None
     """
     locations = []
+    if not gb_feature['GBFeature_intervals']:
+        print "=======Need to wait for GBFeature_intervals"
+        time.sleep(200)
+    print "******GBFeature_interval: {}\n".format(gb_feature['GBFeature_intervals'])
     for interval in gb_feature['GBFeature_intervals']:
         # TODO determined frame and strand, don't just default to 1
         # There is another spot where I adjust the frame
@@ -736,6 +744,10 @@ def parse_qualifiers(gb_feature):
         None
     """
     qualifiers = {}
+    if not gb_feature['GBFeature_quals']:
+        print "======Need to wait for GBFeature_quals"
+        time.sleep(200)
+    print "*******GBQualifier: {}\n".format(gb_feature['GBFeature_quals'])
     for qual in gb_feature['GBFeature_quals']:
         if qual['GBQualifier_name'] not in qualifiers:
             qualifiers[qual['GBQualifier_name']] = []
@@ -990,7 +1002,7 @@ def process_entrez_entry(
     logging.debug("Checking for gi:%s in SeqDB" % (genbank_id))
 
     #result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
-    seq_ids = seqdb_ws.getAllConsensusSequenceIds(genBankGI=genbank_id)
+    seq_ids = seqdb_ws.getConsensusSequenceIds(genBankGI=genbank_id)
 
     if seq_ids and delete:
         logging.info(
@@ -1122,6 +1134,9 @@ def main():
     # repeat until we have all records
     while start < count:
 
+        print 'Count:' + str(count)
+        print 'Start:' + str(start)
+        
         # retrieve block of records
         logging.debug("Retrieving %i..%i" % (start, start + retrieve))
         record = entrez_search(query, retstart=start, retmax=retrieve)
@@ -1135,6 +1150,7 @@ def main():
                 lookup=feature_type_lookup,
                 delete=tool_config['gb_insert']['delete'],
                 update=tool_config['gb_insert']['update'])
+            print genbank_id
 
         start += retrieve
 
