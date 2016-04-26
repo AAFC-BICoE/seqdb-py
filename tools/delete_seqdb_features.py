@@ -32,7 +32,7 @@ def set_up_logging():
     
     logging.config.dictConfig(main_conf['logging'])
 
-    logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
+    logging.info("{} {}".format(tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
 
 
 def parse_input_args(argv):
@@ -75,7 +75,7 @@ def delete_from_seqdb(baseApiObj, seqdb_ids_file_name, delete_type):
         ids_file = open(seqdb_ids_file_name,"r")
     except IOError as e:
         if e.errno == 2:
-            logging.error("Could not open file <%s>." % seqdb_ids_file_name)
+            logging.error("Could not open file <{}>.".format(seqdb_ids_file_name))
             logging.error(e.message)
             print "Could not open SeqDB IDs file. See log file for details."
             sys.exit(1)
@@ -100,9 +100,9 @@ def delete_from_seqdb(baseApiObj, seqdb_ids_file_name, delete_type):
             current_feature_ids = map(int, current_feature_ids)
             delete_ids.extend(current_feature_ids)
         except:
-            logging.warning("Line number: %i. Could not parse line '%s'. Ignoring." % (line_number,line.replace('\n', '')))
+            logging.warning("Line number: {}. Could not parse line '{}'. Ignoring.".format((line_number,line.replace('\n', ''))))
     
-    logging.info("Identified %i items to be deleted." % len(delete_ids))
+    logging.info("Identified {} items to be deleted.".fo5rmat(len(delete_ids)))
     
     success_ids = []
     fail_ids = []        
@@ -144,11 +144,11 @@ def execute_script(input_args, output_file_name=output_file_name):
         base_url = parsed_args.base_url 
         api_key = parsed_args.api_key 
     
-    logging.info("%s '%s'" %  (tools_helper.log_msg_apiUrl, base_url))
+    logging.info("{} '{}'".format((tools_helper.log_msg_apiUrl, base_url)))
     
     
     ### Script execution             
-    logging.info("%s %s" % (tools_helper.log_msg_deletion, parsed_args.features_file_name))    
+    logging.info("{} {}".format((tools_helper.log_msg_deletion, parsed_args.features_file_name)))    
     
     baseApiObj = BaseApiEntity(api_key=api_key,base_url=base_url, request_url=None)
 
@@ -167,11 +167,11 @@ def execute_script(input_args, output_file_name=output_file_name):
                                              seqdb_ids_file_name=parsed_args.features_file_name) 
         
     ### Post-execution: messages and logging
-    logging.info("Number of items deleted from Sequence Database:   %i " % len(success_ids))  
-    print("Number of items deleted from Sequence Database:   %i " % len(success_ids))  
-    logging.info("Number of items which failed to be deleted:   %i " % len(fail_ids))
-    print("Number of items which failed to be deleted:   %i " % len(fail_ids))
-    logging.info("IDs, which failed to be deleted are written to a file: '%s'" % output_file_name)
+    logging.info("Number of items deleted from Sequence Database: {}".format(len(success_ids)))  
+    print("Number of items deleted from Sequence Database: {}".format(len(success_ids)))  
+    logging.info("Number of items which failed to be deleted: {}".format(len(fail_ids)))
+    print("Number of items which failed to be deleted: {}".format(len(fail_ids)))
+    logging.info("IDs, which failed to be deleted are written to a file: '{}'".format(output_file_name))
    
     print(tools_helper.log_msg_execEnded)
     

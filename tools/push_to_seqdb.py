@@ -79,7 +79,7 @@ def open_file(file_name):
         file_handler = open(file_name,"r")
     except IOError as e:
         if e.errno == 2:
-            error_msg = "Could not open file: %s." % file_name
+            error_msg = "Could not open file: {}.".format(file_name)
             logging.error(error_msg)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
@@ -120,19 +120,17 @@ def push_taxonomy_data(determinationApi, info_file_name, taxonomy_dir):
     try:
         with open(info_file_name, "r") as info_file_handler:
             
-            msg_inputFile = "Find LCA results file: %s" % info_file_name
+            msg_inputFile = "Find LCA results file: {}".format(info_file_name)
             logging.info(msg_inputFile)
     
             for line in info_file_handler:
-                error_msg = "%s Found line: \n%s\n Example of an expected line: \n%s" %(
-                            tools_helper.log_msg_wrongFileFormat, line, input_file_line_example)
+                error_msg = "{} Found line: \n{}\n Example of an expected line: \n{}".format(tools_helper.log_msg_wrongFileFormat, line, input_file_line_example)
                 
                 line_tokens = line.split('\t')
                 
                 # Do basic file format verification:
                 if len(line_tokens) != 10 and len(line_tokens) != 2:
-                    logging.error("%s Example of an expected line:\n%s" % (
-                            tools_helper.log_msg_wrongFileFormat, input_file_line_example))
+                    logging.error("{} Example of an expected line:\n{}".format(tools_helper.log_msg_wrongFileFormat, input_file_line_example))
                     sys.exit(tools_helper.log_msg_sysExitFile)
         
                 try:
@@ -158,7 +156,7 @@ def push_taxonomy_data(determinationApi, info_file_name, taxonomy_dir):
         
     except IOError as e:
         if e.errno == 2:
-            error_msg = "Could not open input file '%s'." % info_file_name
+            error_msg = "Could not open input file '{}'.".format(info_file_name)
             logging.error(error_msg)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
@@ -215,12 +213,12 @@ def push_taxonomy_data(determinationApi, info_file_name, taxonomy_dir):
         output_file.write(str(detId) + '\n')
     output_file.close()
   
-    log_msg1 = "Number of determinations written to Sequence Database:   %i " % len(determinationIds)
-    log_msg2 = "Created determination IDs are written to a file: '%s'" % output_file_name
+    log_msg1 = "Number of determinations written to Sequence Database: {}".format(len(determinationIds))
+    log_msg2 = "Created determination IDs are written to a file: '{}'".format(output_file_name)
     logging.info(log_msg1)
     logging.info(log_msg2)
     
-    logging.info("Determination IDs, written to SeqDB: %s" % determinationIds)
+    logging.info("Determination IDs, written to SeqDB: {}".format(determinationIds))
    
     return determinationIds
 
@@ -267,7 +265,7 @@ def push_its_features(featureTypeApi, featureApi, features_file_name, extraction
     ## Read strand information from the .extraction.results file
     match_strand = {}
     if extraction_results_file_name:
-        msg_inputFile = "ITSx extraction results file (.extraction.results): %s" % extraction_results_file_name
+        msg_inputFile = "ITSx extraction results file (.extraction.results): {}".format(extraction_results_file_name)
         logging.info(msg_inputFile)
     
         try:
@@ -281,7 +279,7 @@ def push_its_features(featureTypeApi, featureApi, features_file_name, extraction
                         match_strand[sequenceId] = strand
         except IOError as e:
             if e.errno == 2:
-                error_msg = "Could not open input file '%s'." % extraction_results_file_name
+                error_msg = "Could not open input file '{}'.".format(extraction_results_file_name)
                 logging.error(error_msg)
                 logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
@@ -290,7 +288,7 @@ def push_its_features(featureTypeApi, featureApi, features_file_name, extraction
     
     ## Parse the .positions.txt file and insert each found feature to SeqDB
     
-    msg_inputFile = "ITSx feature positions file (.positions.txt): %s" % features_file_name
+    msg_inputFile = "ITSx feature positions file (.positions.txt): {}".format(features_file_name)
     logging.info(msg_inputFile)
     
     
@@ -299,7 +297,7 @@ def push_its_features(featureTypeApi, featureApi, features_file_name, extraction
         info_file_handler = open(features_file_name,"r")
     except IOError as e:
         if e.errno == 2:
-            error_msg = "Could not open input file '%s'." % features_file_name
+            error_msg = "Could not open input file '{}'.".format(features_file_name)
             logging.error(error_msg)
             logging.error(e.message)
             sys.exit(tools_helper.log_msg_sysExit)
@@ -313,19 +311,19 @@ def push_its_features(featureTypeApi, featureApi, features_file_name, extraction
             sequenceId = line_tokens[0].split('|')[1]
             sequenceId = int(sequenceId)
         except:
-            error_msg = "Input file error. Could not extract sequence id from the input file. Example of an expected line:\n%s\n" % input_file_line_example
+            error_msg = "Input file error. Could not extract sequence id from the input file. Example of an expected line:\n{}\n".format(input_file_line_example)
             logging.error(error_msg)
             sys.exit(tools_helper.log_msg_sysExit)
         
         try:
             itsx_features = line_tokens[2:7]
         except IndexError as e:
-            error_msg = "Could not extract ITS features from the input file. Example of an expected line:\n%s\n" % input_file_line_example
+            error_msg = "Could not extract ITS features from the input file. Example of an expected line:\n{}\n".format(input_file_line_example)
             logging.error(error_msg)
             sys.exit(tools_helper.log_msg_sysExit)
         
         if not sequenceId or not itsx_features:
-            error_msg = "Input file not in the correct format. Example of an expected line:\n%s\n" % input_file_line_example
+            error_msg = "Input file not in the correct format. Example of an expected line:\n{}\n".format(input_file_line_example)
             logging.error(error_msg)
             sys.exit(tools_helper.log_msg_sysExit)
             
@@ -368,7 +366,7 @@ def push_its_features(featureTypeApi, featureApi, features_file_name, extraction
                 logging.error(e.message)
                 sys.exit(tools_helper.log_msg_sysExit)
             except:
-                warning_msg = "File token '%s' is not in the expected format of <feature name>:<position>. Ignoring." % itsx_feature_token
+                warning_msg = "File token '{}' is not in the expected format of <feature name>:<position>. Ignoring.".format(itsx_feature_token)
                 logging.info(warning_msg)
 
     info_file_handler.close()
@@ -379,8 +377,8 @@ def push_its_features(featureTypeApi, featureApi, features_file_name, extraction
         output_file.write(str(fid) + '\n')
     output_file.close()
   
-    log_msg1 = "Number of features written to Sequence Database:   %i " % len(created_feature_ids)
-    log_msg2 = "Created feature IDs are written to a file: '%s'" % output_file_name
+    log_msg1 = "Number of features written to Sequence Database: {}".format(len(created_feature_ids))
+    log_msg2 = "Created feature IDs are written to a file: '{}'".format(output_file_name)
     logging.info(log_msg1)
     logging.info(log_msg2)
         
@@ -400,7 +398,7 @@ def main():
     
     logging.config.dictConfig(main_conf['logging'])
     
-    logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
+    logging.info("{} '{}'".format(tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
     
     
     ### Parse sript's input arguments 
@@ -414,7 +412,7 @@ def main():
         base_url = parsed_args.base_url 
         api_key = parsed_args.api_key 
     
-    logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, base_url))
+    logging.info("{} '{}'".format(tools_helper.log_msg_apiUrl, base_url))
     
     
     ### Script execution             

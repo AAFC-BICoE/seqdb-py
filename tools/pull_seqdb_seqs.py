@@ -65,7 +65,7 @@ def set_up_logging():
     
     logging.config.dictConfig(main_conf['logging'])
     
-    logging.info("%s %s" % (tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
+    logging.info("{} '{}'".format(tools_helper.log_msg_scriptExecutionWithParams, sys.argv))
     
 
 def parse_input_args(argv):
@@ -157,7 +157,7 @@ def get_ITS_seq_ids(rawSequenceEntity):
             sys.exit(tools_helper.log_msg_sysExit)
     
     msg_numITSseqs = "Number of ITS sequences retrieved:"
-    logging.info("%s %i " % (msg_numITSseqs, len(its_seq_ids)))
+    logging.info("{} {}".format(msg_numITSseqs, len(its_seq_ids)))
 
     return list(its_seq_ids)
 
@@ -310,10 +310,10 @@ def write_sequence_file(rawSequenceEntity, its_seq_ids, file_name, file_type):
     output_file.close()   
 
     msg_fileName = "Sequences written to a file:"
-    logging.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
+    logging.info("{} {}".format(msg_fileName, os.path.abspath(output_file.name)))
 
     msg_seqNum = "Number of sequences written:"
-    logging.info("%s %s" % (msg_seqNum, len(success_ids)) )
+    logging.info("{} {}".format(msg_seqNum, len(success_ids)))
 
     return success_ids
 
@@ -422,10 +422,10 @@ def write_taxonomy_file(rawSequenceEntity, seq_ids, output_file_name):
     output_file.close()   
 
     msg_fileName = "Sequences written to a file:"
-    logging.info("%s %s" % (msg_fileName, os.path.abspath(output_file.name)))
+    logging.info("{} {}".format(msg_fileName, os.path.abspath(output_file.name)))
 
     msg_seqNum = "Number of sequences written:"
-    logging.info("%s %s" % (msg_seqNum, len(success_ids)) )
+    logging.info("{} {}".format(msg_seqNum, len(success_ids)))
 
     return success_ids
     
@@ -481,7 +481,7 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
         base_url = parsed_args.base_url 
         api_key = parsed_args.api_key 
         
-    logging.info("%s '%s'" % (tools_helper.log_msg_apiUrl, base_url))
+    logging.info("{} {}".format(tools_helper.log_msg_apiUrl, base_url))
 
 
     ### Script execution
@@ -497,7 +497,7 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
         print("Number of sequences retrived from Sequence Database: {}".format(len(success_seq_ids)))
     
     else:
-        log_msg = "Loading %s sequences." %parsed_args.seq_type
+        log_msg = "Loading {} sequences.".format(parsed_args.seq_type)
         logging.info(log_msg)
         
         sequenceApiObj.collectionCodeFilter = parsed_args.collection_code
@@ -561,7 +561,7 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
                 
     if parsed_args.output_taxonomy_file and seq_ids:
         write_taxonomy_file(rawSequenceEntity, seq_ids, output_taxonomy_file_name)
-        print("Taxonomy file is written to a file: '%s'" % output_taxonomy_file_name)
+        print("Taxonomy file is written to a file: '{}'".format(output_taxonomy_file_name))
 
     ### Post-execution: messages and logging
     #print("Number of sequences retrieved from Sequence Database:  {}".format(len(success_seq_ids))) 
