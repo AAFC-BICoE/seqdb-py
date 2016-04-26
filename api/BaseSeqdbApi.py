@@ -31,6 +31,7 @@ class BaseSeqdbApi(object):
             base_url = base_url + "/"
         self.base_url = base_url
 
+
     def retrieve(self, request_url, params=None):
         ''' Submits a request to SeqDB web services
         Kwargs:
@@ -47,6 +48,8 @@ class BaseSeqdbApi(object):
         req_header = { 'apikey': self.api_key }
         
         resp = requests.get(request_url, headers=req_header, params=params)
+        logging.debug("Request: {} {} {}".format(resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: {}".format(resp.status_code))
         #resp.content: str {"count":288,"limit":20,"message":"Query completed successfully","offset":0,"result":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"sortColumn":"regionId","sortOrder":1,"statusCode":200}
         
         if resp.status_code == 404:
@@ -56,12 +59,11 @@ class BaseSeqdbApi(object):
             try:
                 resp.raise_for_status()
             except requests.exceptions.HTTPError as e:
-                error_msg = "Retrieve failed. Request body: \n %s \nRequest URL: %s.\nError message: %s." % (e.request.body, e.request.url, e.response.text)
+                error_msg = "Retrieve failed. Request body: \n {} \nRequest URL: {}.\nError message: {}.".format(e.request.body, e.request.url, e.response.text)
                 e.message = e.message + error_msg
                 logging.error(error_msg)
                 raise e
       
-
         return resp
 
 
@@ -88,6 +90,7 @@ class BaseSeqdbApi(object):
                 raise UnexpectedContent(response=jsn_resp)
                     
         return resp
+    
     
     def retrieveJsonWithOffset(self, request_url, params=None, offset=0, limit=0):
         ''' Submits a request to SeqDB web services with offset to handle paginated results
@@ -145,12 +148,9 @@ class BaseSeqdbApi(object):
             if (result_total_num > result_returned_so_far):    
                 result_offset = result_returned_so_far
             
-        
         return jsn_resp, result_offset
        
     
-
-
     def update(self, request_url, json_data):
         ''' Updates a SeqDB entity
         Raises:
@@ -161,15 +161,16 @@ class BaseSeqdbApi(object):
         req_header = {
             'apikey': self.api_key, 'Content-Type': 'application/json'}
         resp = requests.put(request_url, headers=req_header, data=json_data)
+        logging.debug("Request: {} {} {}".format(resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: {}".format(resp.status_code))
 
         try:
             resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            error_msg = "Update failed. Request body: \n %s \nRequest URL: %s.\nError message: %s." % (e.request.body, e.request.url, e.response.text)
+            error_msg = "Update failed. Request body: \n {} \nRequest URL: {}.\nError message: {}.".format(e.request.body, e.request.url, e.response.text)
             e.message = e.message + error_msg
             logging.error(error_msg)
             raise e
-      
 
         return resp
 
@@ -185,11 +186,13 @@ class BaseSeqdbApi(object):
             'apikey': self.api_key, 'Content-Type': 'application/json'}
         # (url, data, json)
         resp = requests.post(request_url, headers=req_header, data=json_data)
+        logging.debug("Request: {} {} {}".format(resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: {}".format(resp.status_code))
 
         try:
             resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            error_msg = "Create failed. Request body: \n %s \nRequest URL: %s.\nError message: %s." % (e.request.body, e.request.url, e.response.text)
+            error_msg = "Create failed. Request body: \n {} \nRequest URL: {}.\nError message: {}.".format(e.request.body, e.request.url, e.response.text)
             e.message = e.message + error_msg
             logging.error(error_msg)
             if resp.status_code == 401:
@@ -209,18 +212,18 @@ class BaseSeqdbApi(object):
 
         req_header = {'apikey': self.api_key}
         resp = requests.delete(request_url, headers=req_header)
+        logging.debug("Request: {} {} {}".format(resp.request.method, resp.request.url, resp.request.body))
+        logging.debug("Response Status Code: {}".format(resp.status_code))
 
         # Will raise HTTPError exception if response status was not ok
         try:
             resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            error_msg = "Delete failed. Request body: \n %s \nRequest URL: %s.\nError message: %s." % (e.request.body, e.request.url, e.response.text)
+            error_msg = "Delete failed. Request body: \n {} \nRequest URL: {}.\nError message: {}.".format(e.request.body, e.request.url, e.response.text)
             e.message = e.message + error_msg
             logging.error(error_msg)
             if resp.status_code == 401:
                 logging.error("Not sufficient permissions to delete information from SeqDB. Please contact SeqDB administrator.")
             raise e
-        
 
-        return resp
-    
+        return resp  
