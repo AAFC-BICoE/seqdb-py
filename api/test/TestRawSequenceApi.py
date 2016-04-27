@@ -29,15 +29,23 @@ class TestRawSequenceApi(unittest.TestCase):
     
     def testFilters(self):
         # specimenNumber - tested below, skipping
+        
         # sequenceName
         self.fixture.sequenceNameFilter = "SH-254"
         self.assertEqual([13808,65268], self.fixture.getIds(), "Expecting 2 raw sequences filtered by sequenceName = SH-254")
         self.fixture.clearAllFilters()
-        
+
+        self.fixture.sequenceNameFilter = "Y10_16_F167"
+        self.assertEqual(2, self.fixture.getNumber(), "Expecting 2 raw sequences filtered by sequenceName = Y10_16_F167, but got {}.".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+                
         # sampleNameFilter
         self.fixture.sampleNameFilter = "LEV4277"
-        self.assertEqual(15, self.fixture.getNumber(), 
-                         "Expecting 15 raw sequences filtered by sampleName = LEV4277, but got {}".format(self.fixture.getNumber()))
+        self.assertEqual(15, self.fixture.getNumber(), "Expecting 15 raw sequences filtered by sampleName = LEV4277, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+
+        self.fixture.sampleNameFilter = "LEV6103"
+        self.assertEqual(60, self.fixture.getNumber(), "Expecting 60 raw sequences filtered by sampleName = LEV6103, but got {}".format(self.fixture.getNumber()))
         self.fixture.clearAllFilters()
         
         # pubRefSeqFilter
@@ -63,23 +71,27 @@ class TestRawSequenceApi(unittest.TestCase):
         
         # regionNameFilter
         self.fixture.regionNameFilter = "ITS/LR6"
-        self.assertEqual(58, self.fixture.getNumber(), 
-                         "Expecting 58 raw sequences filtered by regionName = ITS/LR6, but got {}".format(self.fixture.getNumber()))
+        self.assertEqual(58, self.fixture.getNumber(), "Expecting 58 raw sequences filtered by regionName = ITS/LR6, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+        
+        self.fixture.regionNameFilter = "ef-1a"
+        self.assertEqual(492, self.fixture.getNumber(), "Expecting 492 raw sequences filtered by regionName = ef-1a, but got {}".format(self.fixture.getNumber()))
         self.fixture.clearAllFilters()
         
         # collectionCodeFilter
         self.fixture.collectionCodeFilter = "lev"
-        self.assertEqual(32799, self.fixture.getNumber(), 
-                         "Expecting 32799 raw sequences filtered by collectionCode = lev, but got {}".format(self.fixture.getNumber()))
+        self.assertEqual(32799, self.fixture.getNumber(), "Expecting 32799 raw sequences filtered by collectionCode = lev, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()
+        
+        self.fixture.collectionCodeFilter = "pm"
+        self.assertEqual(148, self.fixture.getNumber(), "Expecting 148 raw sequences filtered by collectionCode = pm, but got {}".format(self.fixture.getNumber()))
         self.fixture.clearAllFilters()
         
         # taxonomyRankFilter
         self.fixture.taxonomyRankFilter = "species"
         self.fixture.taxonomyValueFilter = "megasperma"
-        self.assertEqual(215, self.fixture.getNumber(), 
-                         "Expecting 215 raw sequences filtered by taxonomy, but got {}".format(self.fixture.getNumber()))
-        self.fixture.clearAllFilters()
-        
+        self.assertEqual(215, self.fixture.getNumber(), "Expecting 215 raw sequences filtered by taxonomy, but got {}".format(self.fixture.getNumber()))
+        self.fixture.clearAllFilters()     
         
         # TODO: test combinations of filters
         
