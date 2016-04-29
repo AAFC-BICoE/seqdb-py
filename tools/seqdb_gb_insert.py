@@ -10,10 +10,19 @@ import shelve
 import sys
 import urllib
 
-from api.seqdbWebService import seqdbWebService, UnexpectedContent
+#from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
 import httplib as http_client
 import tools_helper
+from api.BaseSeqdbApi import UnexpectedContent
+from api.ConsensusSequenceApi import ConsensusSequenceApi
+from api.FeatureTypeApi import FeatureTypeApi
+from api.FeatureApi import FeatureApi
+from api.DeterminationApi import DeterminationApi
+from api.GeneRegionApi import GeneRegionApi
+from api.RawSequenceApi import RawSequenceApi
+from api.SeqSourceApi import SeqSourceApi
+from api.SpecimenApi import SpecimenApi
 
 
 def merge(a, b, path=None):
@@ -101,7 +110,7 @@ def extract_gene_names(record):
     return genes.keys()
 
 
-def check_feature_type(seqdb_ws, ftn, create=False, lookup=None):
+def check_feature_type(api_key, url, ftn, create=False, lookup=None):
     """Check to see if SeqDB contains a Feature Type with desired name
     Args:
         seqdb_ws (obj): reference to instance of api.seqdbWebService
@@ -116,6 +125,8 @@ def check_feature_type(seqdb_ws, ftn, create=False, lookup=None):
         None
     """
     logging.debug("Checking SeqDB for feature type: {}.  Create == {}".format(ftn, create))
+    
+    featureTypeApi = FeatureTypeApi(api_key=api_key, base_url=url)
 
     feature_type_id = None
 
@@ -123,11 +134,13 @@ def check_feature_type(seqdb_ws, ftn, create=False, lookup=None):
         feature_type_id = lookup[ftn]
 
     if feature_type_id is None:
-        feature_types = seqdb_ws.getFeatureTypesWithIds()
+        #feature_types = seqdb_ws.getFeatureTypesWithIds()
+        feature_types = featureTypeApi.getFeatureTypesWithIds()
         if ftn in feature_types:
             feature_type_id = feature_types[ftn]
         elif create is True:
-            feature_type_id = seqdb_ws.createFeatureType(ftn, "GenBank Feature Type: {}".format(ftn))
+            #feature_type_id = seqdb_ws.createFeatureType(ftn, "Genbank Feature Type: %s" % (ftn))
+            feature_type_id = featureTypeApi.create(ftn, "GenBank Feature Type: {}".format(ftn))
 
     if lookup is not None:
         lookup[ftn] = feature_type_id
@@ -138,7 +151,7 @@ def check_feature_type(seqdb_ws, ftn, create=False, lookup=None):
 
 
 # TODO filter by group
-def check_region(seqdb_ws, gene, create=False):
+def check_region(api_key, url, gene, create=False):
     """Check to see if SeqDB contains a region with a name as per gene.
     Args:
         seqdb_ws (obj): reference to instance of api.seqdbWebService
@@ -154,9 +167,13 @@ def check_region(seqdb_ws, gene, create=False):
     """
     logging.debug("Checking SeqDB for region: {}. Create == {}".format(gene, create))
     region_id = None
-    region_ids = seqdb_ws.getRegionIdsByName(gene)
+    geneRegionApi = GeneRegionApi(api_key=api_key, base_url=url)
+    geneRegionApi.nameFilter = gene
+    #region_ids = seqdb_ws.getRegionIdsByName(gene)
+    region_ids = geneRegionApi.getIds()
     if len(region_ids) == 0 and create is True:
-        region_id = seqdb_ws.createRegion(gene, "GenBank Gene: {}".format(gene))
+        #region_id = seqdb_ws.createRegion(gene, "GenBank Gene: {}".format(gene))
+        region_id = geneRegionApi.create(gene, "GenBank Gene: {}".format(gene))
         logging.debug("Created region: {} in SeqDB for {}".format(region_id, gene))
     elif len(region_ids) == 1:
         region_id = region_ids[0]
@@ -243,7 +260,7 @@ def entrez_fetch(genbank_id, rettype="gb", database="nucleotide", retmode=None, 
     return record
 
 
-def seqdb_ret_entrez_gene_region_id(seqdb_ws, record, products=None):
+def seqdb_ret_entrez_gene_region_id(api_key, url, record, products=None):
     """Retrieve the SeqDB gene region id corresponding to the gene name on this Entrez sequence.
     Args:
         seqdb_ws (obj): reference to instance of api.seqdbWebService
@@ -264,18 +281,21 @@ def seqdb_ret_entrez_gene_region_id(seqdb_ws, record, products=None):
     seqdb_gene_region_id = None
     genes = extract_gene_names(record[0])
     if len(genes) > 1:
-        seqdb_gene_region_id = check_region(seqdb_ws, "Multigene Region", create=True)
+        #seqdb_gene_region_id = check_region(seqdb_ws, "Multigene Region", create=True)
+        seqdb_gene_region_id = check_region(api_key, url, "Multigene Region", create=True)
         logging.debug("Adding multigene sequence, SeqDB region ID: {}".format(seqdb_gene_region_id))
 
     elif len(genes) == 1:
-        seqdb_gene_region_id = check_region(seqdb_ws, genes[0], create=True)
+        #seqdb_gene_region_id = check_region(seqdb_ws, genes[0], create=True)
+        seqdb_gene_region_id = check_region(api_key, url, genes[0], create=True)
         logging.debug("Found gene: {}, SeqDB region ID: {}".format(genes[0], seqdb_gene_region_id))
 
     elif len(genes) == 0 and products is not None:
         if "18S ribosomal RNA" or "internal transcribed spacer 1" or \
                 "5.8S ribosomal RNA" or "internal transcribed spacer 2" or \
                 "28S ribosomal RNA" in products:
-            seqdb_gene_region_id = check_region(seqdb_ws, "Ribosomal Cistron", create=True)
+            #seqdb_gene_region_id = check_region(seqdb_ws, "Ribosomal Cistron", create=True)
+            seqdb_gene_region_id = check_region(api_key, url, "Ribosomal Cistron", create=True)
             logging.debug("Identified Ribosomal Cistron based on features in "
                           "0 gene region, SeqDB region ID: {}".format(seqdb_gene_region_id))
         else:
@@ -285,7 +305,7 @@ def seqdb_ret_entrez_gene_region_id(seqdb_ws, record, products=None):
     return seqdb_gene_region_id
 
 
-def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
+def seqdb_insert_entrez_sequence(consensusSequenceEntity, genbank_id, record):
     """Insert the GenBank sequence into SeqDB.
     Args:
         seqdb_ws (obj): reference to instance of api.seqdbWebService
@@ -319,7 +339,8 @@ def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
     dict_for_logging.update(additional)
     tools_helper.pretty_log_json(dict_for_logging, level="debug", message="Creating consensus (non-default values): ")
 
-    seqdb_id, code, message = seqdb_ws.createConsensusSequence(seq_name, sequence, additional=additional)
+    #seqdb_id, code, message = seqdb_ws.createConsensusSequence(seq_name, sequence, additional=additional)
+    seqdb_id, code, message = consensusSequenceEntity.create(seq_name, sequence, additional=additional)
 
     logging.info(
         "Created Consensus Sequence (seqdbid: {}) "
@@ -328,7 +349,7 @@ def seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record):
     return seqdb_id
 
 
-def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
+def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
     """Associate the sequence with a Specimen in SeqDB based on
        supported GBQualifier values.  Currently supported values include:
 
@@ -342,6 +363,7 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
         prefixes and check values for additional qualifier keys.
     """
     logging.info("Linking sequence to available source Specimen")
+    specimenApi = SpecimenApi(api_key=api_key, base_url=url)
     for supported in ['culture_collection', 'strain', 'specimen voucer', 'isolate']:
 
         if supported in feature['qualifiers']:
@@ -350,7 +372,8 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
 
                 code = None
                 identifier = None
-                jsn_resp = None
+                specimenIds = None
+                #jsn_resp = None
 
                 # some source entries are a list split with a semi-colon
                 sources = source_entry.split(";")
@@ -412,7 +435,10 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
                                           "Code: {}, Identifier: {}".format(code, identifier))
 
                             try:
-                                jsn_resp = seqdb_ws.getJsonSpecimenIdsByOtherIds(code, identifier)
+                                #jsn_resp = seqdb_ws.getJsonSpecimenIdsByOtherIds(code, identifier)
+                                specimenApi.otherIdsFilter = code + identifier
+                                specimenIds = specimenApi.getIds()
+                                
 
                             except UnexpectedContent, e:
                                 logging.error("Exception querying Specimen using "
@@ -429,7 +455,10 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
                             logging.debug("\tChecking SeqDB for Specimen "
                                           "Code: {}, Identifier: {}".format(code, identifier))
 
-                            jsn_resp = seqdb_ws.getJsonSpecimenIdsBySpecimenId(code, identifier)
+                            #jsn_resp = seqdb_ws.getJsonSpecimenIdsBySpecimenId(code, identifier)
+                            specimenApi.otherIdsFilter = code + identifier
+                            specimenIds = specimenApi.getIds()
+                            
 
                         else:
 
@@ -447,11 +476,11 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
 
                         continue
 
-                    if jsn_resp is None or jsn_resp['count'] <= 0:
+                    if not specimenIds:
 
                         logging.info("\tNo specimen found for code: {} and id: {}".format(code, identifier))
 
-                    elif jsn_resp['count'] > 1:
+                    elif len(specimenIds) > 1:
 
                         logging.warn("\tUnable to link Sequence to Specimen using "
                                      "Code: {}, Identifier: {}. "
@@ -459,13 +488,15 @@ def seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature):
 
                     else:  # jsn_resp['count'] == 1:
 
-                        seqdb_update_seqsource_specimen(seqdb_ws, seqdb_id, jsn_resp['result'][0])
+                        seqdb_update_seqsource_specimen(api_key, url, seqdb_id, specimenIds[0])
 
 
-def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, taxon_id, organism, feature):
+def seqdb_link_to_taxonomy(api_key, url, seqdb_id, taxon_id, organism, feature):
     """Associate the sequence with a Taxa in the SeqDB Taxonomy based on the
        GBQualifier "organism" value"""
-       
+    
+    determinationApi = DeterminationApi(api_key=api_key, base_url=url)
+
     taxon_id_value = taxon_id.split(":")
     org_split = organism.split(" ")
 
@@ -474,16 +505,12 @@ def seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, taxon_id, organism, feature):
         "species":org_split[1]
     }
 
-    determinationId = seqdb_ws.insertSequenceDetermination(isAccepted="true", 
-                                                           sequenceId=seqdb_id, 
-                                                           taxonomy=taxonomy,
-                                                           ncbiTaxonId=taxon_id_value[1],
-                                                           notes="here are notes")
+    determinationId = determinationApi.createSequenceDetermination(isAccepted="true", sequenceId=seqdb_id, taxonomy=taxonomy,ncbiTaxonId=taxon_id_value[1], notes="here are notes")
   
     logging.info("Sequence determination: {}".format(organism))
 
 
-def seqdb_update_seqsource_region(seqdb_ws, seqdb_id, seqdb_region_id):
+def seqdb_update_seqsource_region(api_key, url, seqdb_id, seqdb_region_id):
     """Associate the sequence with a gene region.
     Args:
         seqdb_ws (obj): reference to instance of api.seqdbWebService
@@ -507,7 +534,9 @@ def seqdb_update_seqsource_region(seqdb_ws, seqdb_id, seqdb_region_id):
             }
         }
     }
-    existing = seqdb_ws.getJsonSeqSource(seqdb_id)
+    seqSourceApi = SeqSourceApi(api_key=api_key, base_url=url, sequence_id=seqdb_id)
+    #existing = seqdb_ws.getJsonSeqSource(seqdb_id)
+    existing = seqSourceApi.retrieveJson(seqSourceApi.request_url)
     region_id = None
     if 'result' in existing:
         # drop headers from response returned above by creating a new dict
@@ -520,7 +549,7 @@ def seqdb_update_seqsource_region(seqdb_ws, seqdb_id, seqdb_region_id):
 
         merge(existing, seqsource)
 
-        region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, existing)
+        region_id, code, message = seqSourceApi.update(seqSourceApi.request_url, existing)
 
         logging.debug("Updated SeqSource for sequence region linking "
                       "seqdbid: {}, Status: {}, Message: {}".format(seqdb_id, code, message))
@@ -532,7 +561,7 @@ def seqdb_update_seqsource_region(seqdb_ws, seqdb_id, seqdb_region_id):
     return region_id
 
 
-def seqdb_update_seqsource_specimen(seqdb_ws, seqdb_id, seqdb_specimen_id):
+def seqdb_update_seqsource_specimen(api_key, url, seqdb_id, seqdb_specimen_id):
     """Associate the sequence with a specimen.
     Args:
         seqdb_ws (obj): reference to instance of api.seqdbWebService
@@ -550,6 +579,9 @@ def seqdb_update_seqsource_specimen(seqdb_ws, seqdb_id, seqdb_specimen_id):
         None
     """
     logging.info("Linking Sequence (seqdbid: {}) to Specimen (seqdbid: {})".format(seqdb_id, seqdb_specimen_id))
+    
+    seqSourceApi = SeqSourceApi(api_key=api_key, base_url=url, sequence_id=seqdb_id)
+
 
     seqsource = {
         "seqSource": {
@@ -559,15 +591,16 @@ def seqdb_update_seqsource_specimen(seqdb_ws, seqdb_id, seqdb_specimen_id):
         }
     }
 
-    existing = seqdb_ws.getJsonSeqSource(seqdb_id)
+    #existing = seqdb_ws.getJsonSeqSource(seqdb_id)
+    existing = seqSourceApi.retrieveJson(seqSourceApi.request_url)
     region_id = None
     if 'result' in existing:
         # drop headers from response returned above by
         # creating a new dict containing only response 'result' portion
         existing = {'seqSource': existing['result']}
         merge(existing, seqsource)
-        region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, existing)
-
+        #region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, existing)
+        region_id, code, message = seqSourceApi.update(seqSourceApi.request_url, existing)
         logging.debug("Updated SeqSource for sequence specimen linking "
                       "seqdbid: {}, Status: {}, Message: {}".format(seqdb_id, code, message))
 
@@ -631,7 +664,7 @@ def parse_qualifiers(gb_feature):
     return qualifiers
 
 
-def parse_feature(gb_feature, seqdb_ws, lookup=None):
+def parse_feature(gb_feature, api_key, url, lookup=None):
     """Parse the GBFeature to create a dict from the record.
     Args:
         gb_feature: Reference to GBFeature block from Entrez XML
@@ -647,7 +680,7 @@ def parse_feature(gb_feature, seqdb_ws, lookup=None):
     gb_feature_record = {}
     gb_feature_record['location_description'] = gb_feature['GBFeature_location']
     gb_feature_record['feature_key'] = gb_feature['GBFeature_key']
-    gb_feature_record['feature_type_id'] = check_feature_type(seqdb_ws, gb_feature['GBFeature_key'], create=True, lookup=lookup)
+    gb_feature_record['feature_type_id'] = check_feature_type(api_key, url, gb_feature['GBFeature_key'], create=True, lookup=lookup)
     gb_feature_record['locations'] = parse_locations(gb_feature)
     gb_feature_record['qualifiers'] = parse_qualifiers(gb_feature)
     
@@ -677,7 +710,7 @@ def adjust_feature_for_codon_start(feature):
     return feature
 
 
-def process_features(seqdb_ws, seqdb_id, record, lookup=None):
+def process_features(seqdb_id, record, api_key, url, lookup=None):
     """Process features contained in Entrez GBSeq_feature-table and add them to
        the sequence in seqdb.
     Args:
@@ -702,7 +735,7 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
         #while 'GBFeature_quals' not in gb_feature:
         #    print "======Need to wait for GBFeature_quals"
         #    time.sleep(5)
-        features.append(parse_feature(gb_feature, seqdb_ws, lookup=lookup))
+        features.append(parse_feature(gb_feature, api_key, url, lookup=lookup))
 
     products = {}
     gene_id = None
@@ -765,12 +798,17 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
         # child of these gene.
         # TODO check range of parent and null gene/cds/mrna ids once we are
         # outside the range
-        if feature['feature_key'] == 'gene':
-            gene_id = seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description)
 
+        if feature['feature_key'] == 'gene':
+            #gene_id = seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description)
+            featureApi = FeatureApi(api_key=api_key, base_url=url)
+            gene_id = featureApi.create(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description)
+            
         elif feature['feature_key'] == 'mRNA':
             feature = adjust_feature_for_codon_start(feature)
-            mrna_id = seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=gene_id)
+            #mrna_id = seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=gene_id)
+            featureApi = FeatureApi(api_key=api_key, base_url=url)
+            mrna_id = featureApi.create(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=gene_id)
 
         elif feature['feature_key'] == 'CDS':
             parent_id = mrna_id
@@ -778,18 +816,26 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
                 parent_id = gene_id
 
             feature = adjust_feature_for_codon_start(feature)
-            cds_id = seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=parent_id)
+            #cds_id = seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=parent_id)
+            featureApi = FeatureApi(api_key=api_key, base_url=url)
+            cds_id = featureApi.create(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=parent_id)
 
         # TODO do these necessarily have a parent gene?
         elif feature['feature_key'] in ['tRNA', 'rRNA', 'misc_RNA']:
-            seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=gene_id)
+            #seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=gene_id)
+            featureApi = FeatureApi(api_key=api_key, base_url=url)
+            featureApi.create(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description, parentId=gene_id)
+
 
         elif feature['feature_key'] in ['repeat_region', 'misc_feature', 'misc_difference']:
-            seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description)
+            #seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description)
+            featureApi = FeatureApi(api_key=api_key, base_url=url)
+            featureApi.create(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description)
+
 
         elif feature['feature_key'] == 'source':
             # seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature)
-            seqdb_link_to_taxonomy(seqdb_ws, seqdb_id, taxon_id, organism_name, feature)
+            seqdb_link_to_taxonomy(api_key, url, seqdb_id, taxon_id, organism_name, feature)
 
         else:
             logging.warn("Unsupported feature type: {}".format(feature['feature_key']))
@@ -797,7 +843,7 @@ def process_features(seqdb_ws, seqdb_id, record, lookup=None):
     return products
 
 
-def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None, delete=False, update=False):
+def process_entrez_entry(consensusSequenceEntity, api_key, url, genbank_id, cache=None, lookup=None, delete=False, update=False):
     """Process an Entrez entry.
     Args:
         seqdb_ws (obj): reference to instance of api.seqdbWebService
@@ -827,12 +873,15 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None, delete=F
     logging.debug("Checking for GI: {} in SeqDB".format(genbank_id))
 
     #result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
-    seq_ids = seqdb_ws.getConsensusSequenceIds(genBankGI=genbank_id)
-
+    #seq_ids = seqdb_ws.getConsensusSequenceIds(genBankGI=genbank_id)
+    consensusSequenceEntity.genBankGIFilter = genbank_id
+    seq_ids = consensusSequenceEntity.getIds()
+    
     if seq_ids and delete:
         logging.info("Deleting existing Sequence (seqdbid: {})".format(seq_ids[0]))
-        seqdb_ws.deleteConsensusSequence(seq_ids[0])
-
+        #seqdb_ws.deleteConsensusSequence(seq_ids[0])
+        consensusSequenceEntity.delete(seq_ids[0])
+        
     record = None
     if not seq_ids or update:
         # retrieve GenBank record
@@ -848,23 +897,26 @@ def process_entrez_entry(seqdb_ws, genbank_id, cache=None, lookup=None, delete=F
     if not seq_ids:
 
         if "GBSeq_sequence" in record[0]:
-            seqdb_id = seqdb_insert_entrez_sequence(seqdb_ws, genbank_id, record)
+            seqdb_id = seqdb_insert_entrez_sequence(consensusSequenceEntity, genbank_id, record)
 
         else:
             logging.info("Skipping GI: {}, which does not contain a sequence.".format(genbank_id))
 
     if record is not None and seqdb_id is not None:
-        features = process_features(seqdb_ws, seqdb_id, record[0], lookup=lookup)
+        features = process_features(seqdb_id, record[0], api_key, url, lookup=lookup)
 
-        seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(seqdb_ws, record, features)
+        seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(api_key, url, record, features)
 
         if seqdb_gene_region_id is not None:
-            seqdb_update_seqsource_region(seqdb_ws, seqdb_id, seqdb_gene_region_id)
+            
+            seqdb_update_seqsource_region(api_key, url, seqdb_id, seqdb_gene_region_id)
 
         if logging.getLogger().isEnabledFor(logging.DEBUG):
             # retrieve inserted record and display to users for validation
             # purposes
-            result = seqdb_ws.getJsonSequence(seqdb_id)
+            #result = seqdb_ws.getJsonSequence(seqdb_id)
+            rawSequenceEntity = RawSequenceApi(api_key=api_key, base_url=url)
+            result = rawSequenceEntity.retrieveJson(rawSequenceEntity.request_url)
             tools_helper.pretty_log_json(result, level="debug", message="Final Consensus Sequence:")
 
 
@@ -881,11 +933,12 @@ def main():
     """
     print("Loading configuration file: {}".format(config_root.path()) + '/config.yaml')
     print("Loading tools configuration file: {}".format(os.path.dirname(__file__)) + '/seqdb_gb_insert_config.yaml')
-    main_conf = tools_helper.load_config(config_root.path() + '/config.yaml')
     
-    if not main_conf:
+    main_config = tools_helper.load_config(config_root.path() + '/config.yaml')
+    
+    if not main_config:
         logging.error(tools_helper.log_msg_noConfig)
-        sys.exit(tools_helper.log_msg_sysExit)
+        sys.exit(tools_helper.log_msg_sysExit) 
 
     tool_config = tools_helper.load_config(os.path.dirname(__file__) + '/seqdb_gb_insert_config.yaml')
 
@@ -893,9 +946,12 @@ def main():
         logging.error(tools_helper.log_msg_noConfig)
         sys.exit(tools_helper.log_msg_sysExit)
 
-    logging.config.dictConfig(main_conf['logging'])
+    url = main_config['seqdb']['url'] 
+    api_key = tool_config['seqdb']['api_key']
+
+    logging.config.dictConfig(main_config['logging'])
     
-    http_client.HTTPConnection.debuglevel = main_conf['http_connect']['debug_level']
+    http_client.HTTPConnection.debuglevel = main_config['http_connect']['debug_level']
 
     # caching the entrez records shaved 2 minutes off the time to load
     # ~740 sequences from query: "(*DAOM*[source] and levesque and not
@@ -920,7 +976,8 @@ def main():
 
     logging.info("Script executed with the following command and arguments: {}".format(sys.argv))
 
-    seqdb_ws = seqdbWebService(tool_config['seqdb']['apikey'], main_conf['seqdb']['url'])
+    #seqdb_ws = seqdbWebService(tool_config['seqdb']['apikey'], main_conf['seqdb']['url'])
+    consensusSequenceEntity = ConsensusSequenceApi(api_key=api_key, base_url=url)
 
     Entrez.email = tool_config['entrez']['email']
     query = tool_config['entrez']['query']
@@ -939,8 +996,8 @@ def main():
     # repeat until we have all records
     while start < count:
 
-        #print 'Count:' + str(count)
-        #print 'Start:' + str(start)
+        print 'Count:' + str(count)
+        print 'Start:' + str(start)
         
         # retrieve block of records
         logging.debug("Retrieving {}..{}".format(start, start + retrieve))
@@ -949,18 +1006,20 @@ def main():
         # process each returned id in the batch
         for genbank_id in record["IdList"]:
             process_entrez_entry(
-                seqdb_ws,
+                consensusSequenceEntity,
+                api_key,
+                url,
                 genbank_id,
                 cache=entrez_cache,
                 lookup=feature_type_lookup,
                 delete=tool_config['gb_insert']['delete'],
                 update=tool_config['gb_insert']['update'])
-            #print ("\n >Seqid: {}".format(genbank_id))
+            print ("\n >Seqid: {}".format(genbank_id))
 
         start += retrieve
     
     
-    #print "***Done***"
+    print "***Done***"
 
 if __name__ == "__main__":
     main()

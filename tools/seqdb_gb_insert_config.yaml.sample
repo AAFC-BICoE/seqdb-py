@@ -1,5 +1,5 @@
 seqdb:
-    apikey: "seqdb_api_key"    # from user profile in SeqDB Web Interface
+    api_key: "seqdb_api_key"    # from user profile in SeqDB Web Interface
 
 entrez:
     email: "your-name@your-institution.org"          # e.g. christopher.lewis@agr.gc.ca
