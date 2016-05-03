@@ -10,7 +10,6 @@ import shelve
 import sys
 import urllib
 
-#from api.seqdbWebService import seqdbWebService, UnexpectedContent
 from config import config_root
 import httplib as http_client
 import tools_helper
@@ -113,7 +112,6 @@ def extract_gene_names(record):
 def check_feature_type(api_key, url, ftn, create=False, lookup=None):
     """Check to see if SeqDB contains a Feature Type with desired name
     Args:
-        seqdb_ws (obj): reference to instance of api.seqdbWebService
         ftn (str): name of feature type to lookup
     Kargs:
         create (bool): If True, create feature types which are not found
@@ -154,7 +152,6 @@ def check_feature_type(api_key, url, ftn, create=False, lookup=None):
 def check_region(api_key, url, gene, create=False):
     """Check to see if SeqDB contains a region with a name as per gene.
     Args:
-        seqdb_ws (obj): reference to instance of api.seqdbWebService
         gene (str): name of region to lookup
     Kargs:
         create (bool): If True, create regions which are not found
@@ -263,7 +260,6 @@ def entrez_fetch(genbank_id, rettype="gb", database="nucleotide", retmode=None, 
 def seqdb_ret_entrez_gene_region_id(api_key, url, record, products=None):
     """Retrieve the SeqDB gene region id corresponding to the gene name on this Entrez sequence.
     Args:
-        seqdb_ws (obj): reference to instance of api.seqdbWebService
         genbank_id (str): The GenBank id of the record being processed
         record (obj): GenBank record retrieved from Entrez
     Kargs:
@@ -308,7 +304,6 @@ def seqdb_ret_entrez_gene_region_id(api_key, url, record, products=None):
 def seqdb_insert_entrez_sequence(consensusSequenceEntity, genbank_id, record):
     """Insert the GenBank sequence into SeqDB.
     Args:
-        seqdb_ws (obj): reference to instance of api.seqdbWebService
         genbank_id (str): The GenBank id of the record being inserted
         record (obj): GenBank record retrieved from Entrez
     Kargs:
@@ -513,7 +508,6 @@ def seqdb_link_to_taxonomy(api_key, url, seqdb_id, taxon_id, organism, feature):
 def seqdb_update_seqsource_region(api_key, url, seqdb_id, seqdb_region_id):
     """Associate the sequence with a gene region.
     Args:
-        seqdb_ws (obj): reference to instance of api.seqdbWebService
         seqdb_id (int): SeqDB id of the sequence to associate with the Region
         seqdb_region_id (int):
                         SeqDB id of the Region to associate with the Sequence
@@ -564,8 +558,6 @@ def seqdb_update_seqsource_region(api_key, url, seqdb_id, seqdb_region_id):
 def seqdb_update_seqsource_specimen(api_key, url, seqdb_id, seqdb_specimen_id):
     """Associate the sequence with a specimen.
     Args:
-        seqdb_ws (obj): reference to instance of api.seqdbWebService
-
         seqdb_id (int): SeqDB id of the sequence to associate with the Region
 
         seqdb_specimen_id (int):
@@ -668,7 +660,6 @@ def parse_feature(gb_feature, api_key, url, lookup=None):
     """Parse the GBFeature to create a dict from the record.
     Args:
         gb_feature: Reference to GBFeature block from Entrez XML
-        seqdb_ws (obj): Reference to instance of api.seqdbWebService
     Kargs:
         lookup (obj): Reference to a dict to locally cache feature type entries
     Returns:
@@ -714,7 +705,6 @@ def process_features(seqdb_id, record, api_key, url, lookup=None):
     """Process features contained in Entrez GBSeq_feature-table and add them to
        the sequence in seqdb.
     Args:
-        seqdb_ws (obj): reference to instance of api.seqdbWebService
         seqdb_id (int): SeqDB id of the sequence
         record (obj):   reference to the GBSeq block of the Entrez record
 
@@ -846,7 +836,6 @@ def process_features(seqdb_id, record, api_key, url, lookup=None):
 def process_entrez_entry(consensusSequenceEntity, api_key, url, genbank_id, cache=None, lookup=None, delete=False, update=False):
     """Process an Entrez entry.
     Args:
-        seqdb_ws (obj): reference to instance of api.seqdbWebService
         genbank_id (str): The GenBank id of the record being processed
     Kargs:
         cache (obj):    a "stash" in which to cache Entrez results returned from GenBank.
@@ -976,7 +965,6 @@ def main():
 
     logging.info("Script executed with the following command and arguments: {}".format(sys.argv))
 
-    #seqdb_ws = seqdbWebService(tool_config['seqdb']['apikey'], main_conf['seqdb']['url'])
     consensusSequenceEntity = ConsensusSequenceApi(api_key=api_key, base_url=url)
 
     Entrez.email = tool_config['entrez']['email']

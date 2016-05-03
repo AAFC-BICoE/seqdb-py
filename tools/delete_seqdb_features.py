@@ -102,7 +102,7 @@ def delete_from_seqdb(baseApiObj, seqdb_ids_file_name, delete_type):
         except:
             logging.warning("Line number: {}. Could not parse line '{}'. Ignoring.".format((line_number,line.replace('\n', ''))))
     
-    logging.info("Identified {} items to be deleted.".fo5rmat(len(delete_ids)))
+    logging.info("Identified {} items to be deleted.".format(len(delete_ids)))
     
     success_ids = []
     fail_ids = []        

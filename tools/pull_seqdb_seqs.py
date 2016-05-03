@@ -161,100 +161,6 @@ def get_ITS_seq_ids(rawSequenceEntity):
 
     return list(its_seq_ids)
 
-
-"""    Will be removed
-def get_seq_ids(seqdbWS, pull_type,
-                specimen_nums=None, 
-                sequence_name=None,
-                sample_name=None, 
-                pub_ref_seqs=None, 
-                region_name=None, 
-                project_name=None,
-                collection_code=None,
-                taxonomy_rank=None, taxonomy_value=None):
-    ''' Gets sequence ids based on specified parameters 
-    Agrs:
-        pull_type: string of pre-determined values. Values should correspond to the values of pull_types_dict
-        specimen_nums: if specified, list of specimen numbers for which the sequence ids will be retrieved
-    '''
-    BaseSequenceEntity.sequenceNameFilter = sequence_name
-    BaseSequenceEntity.sampleNameFilter = sample_name
-    BaseSequenceEntity.pubRefSeqFilter = pub_ref_seqs
-    BaseSequenceEntity.regionNameFilter = region_name
-    BaseSequenceEntity.projectNameFilter = project_name
-    BaseSequenceEntity.collectionCodeFilter = collection_code
-    BaseSequenceEntity.taxonomyRankFilter = taxonomy_rank
-    BaseSequenceEntity.taxonomyValueFilter = taxonomy_value
-        
-    if pull_type not in pull_types_dict.values():
-        msg = "Value for pull_type should be one of the following: %s" %pull_types_dict.values()
-        logging.error(msg)
-        sys.exit(tools_helper.log_msg_sysExit + msg)
-        
-    seq_ids = []
-    
-    if pull_type == pull_types_dict["its"]:
-        seq_ids = get_ITS_seq_ids(rawSequence)  
-    
-    else:
-        try:
-             
-            if pull_type == pull_types_dict["consensus"]:
-                if not specimen_nums:
-                    specimen_nums = [None]
-                for specimen_num in specimen_nums:
-                    BaseSequenceEntity.specimenNumFilter = specimen_num
-                    curr_seq_ids = consensusSequence.getIds()
-                    seq_ids.extend(curr_seq_ids)       
-                log_msg = "Number of consensus sequences retrieved:"
-            
-            elif pull_type == pull_types_dict["all"]:
-                if not specimen_nums:
-                    specimen_nums=[None]
-                for specimen_num in specimen_nums:
-                    BaseSequenceEntity.specimenNumFilter = specimen_num
-                    curr_seq_ids_raw = rawSequence.getIds()
-                    curr_seq_ids_consensus = consensusSequence.getIds()
-                    seq_ids = curr_seq_ids_raw + curr_seq_ids_consensus      
-                log_msg = "Number of all sequences retrieved:"
-            
-            elif pull_type == pull_types_dict["raw"]:
-                if not specimen_nums:
-                    specimen_nums = [None]
-                for specimen_num in specimen_nums:
-                    BaseSequenceEntity.specimenNumFilter = specimen_num
-                    curr_seq_ids = rawSequence.getIds()
-                    seq_ids.extend(curr_seq_ids)
-                log_msg = "Number of raw sequences retrieved:"
-        
-        except requests.exceptions.ConnectionError as e:
-            logging.error(tools_helper.log_msg_noDbConnection)
-            logging.error(e.message)
-            if repr(e.args[0].args[1]) == tools_helper.seqdbConnection_error_msg:
-                logging.error(tools_helper.log_msg_seqDBConnection)
-            if repr(e.args[0].args[1]) == tools_helper.invalidURL_error_msg:
-                logging.error(tools_helper.log_msg_invalidURL)
-            sys.exit(tools_helper.log_msg_sysExit)
-        except requests.exceptions.ReadTimeout as e:
-            logging.error(tools_helper.log_msg_slowConnection)
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        except requests.exceptions.HTTPError as e:
-            logging.error(tools_helper.log_msg_httpError)
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        except UnexpectedContent as e:
-            logging.error(tools_helper.log_msg_apiResponseFormat)
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        except Exception as e:
-            logging.error(e.message)
-            sys.exit(tools_helper.log_msg_sysExit)
-        
-        logging.info("%s %i " % (log_msg, len(seq_ids)))
-        
-    return seq_ids
-"""
    
 def write_sequence_file(rawSequenceEntity, its_seq_ids, file_name, file_type):
     ''' Gets fasta or fastq sequences for only ITS sequences based on IDs and writes to a file 
@@ -434,10 +340,10 @@ def write_sequences_file(sequenceApiObj, fileName, fileType):
     # writeType: "w" or "a"
     with open(fileName + fileType, 'a') as output_file:
         try:
-            sequenceStr, offset = sequenceApiObj.getSequencesWithOffset(offset=0, sequence_format=fileType)
+            sequenceStr, offset = sequenceApiObj.getSequencesWithOffset(offset=0, limit=100, sequence_format=fileType)
             output_file.write(sequenceStr)
             while offset >= 0:
-                sequenceStr, offset = sequenceApiObj.getSequencesWithOffset(offset=offset, sequence_format=fileType)
+                sequenceStr, offset = sequenceApiObj.getSequencesWithOffset(offset=offset, limit=100, sequence_format=fileType)
                 output_file.write(sequenceStr)
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)

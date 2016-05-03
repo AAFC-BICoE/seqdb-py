@@ -59,7 +59,7 @@ class GeneRegionApi(BaseApiEntity):
             current_ids, offset = self.getIdsWithOffset( offset=offset)
             its_region_ids.update(current_ids)
             while offset:
-                current_ids, offset = self.getRegionIdsWithOffset(regionName=its_name, offset=offset)
+                current_ids, offset = self.getIdsWithOffset(offset=offset)
                 its_region_ids.update(current_ids)       
         
         self.clearAllFilters()

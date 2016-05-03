@@ -116,10 +116,10 @@ class BaseSeqdbApi(object):
         ###    filterName="specimen.number"
          
         if params and type(params) is not str:
-            raise "seqdbWebServices.retrieveJsonWithOffset: Parameters to api have to be in the str format"
+            raise "BaseSeqdbApi.retrieveJsonWithOffset: Parameters to api have to be in the str format"
         
         if params and "offset=" in params:
-            raise "seqdbWebServices.retrieveJsonWithOffset: Parameters to api should not contain 'offset=' in this method"
+            raise "BaseSeqdbApi.retrieveJsonWithOffset: Parameters to api should not contain 'offset=' in this method"
 
         if offset:
             params ="{}&offset={}&".format(params,offset)

@@ -70,7 +70,8 @@ class RawSequenceApi(BaseSequenceEntity):
         resp = self.create(
             self.base_url + '/sequenceImport', json.dumps(post_data))
         jsn_resp = resp.json()
-
+        
+        
         if 'statusCode' and 'message' not in jsn_resp['metadata']:
             raise UnexpectedContent(response=jsn_resp)
 

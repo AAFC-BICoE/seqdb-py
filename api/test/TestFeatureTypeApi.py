@@ -48,7 +48,8 @@ class TestFeatureTypeApi(unittest.TestCase):
 
 
     def testCreateDeleteFeatureType_multiple_duplicate(self):
-        #self.fixture.delete("6")
+        # select * from FeatureTypes where Name like "Test%";
+        #self.fixture.delete("18")
         
         # Create
         featureTypeId1 = self.fixture.create("Test1", "Test")

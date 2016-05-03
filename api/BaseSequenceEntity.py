@@ -186,24 +186,33 @@ class BaseSequenceEntity(BaseApiEntity):
         
         resp = self.retrieve("{}{}.{}".format(self.base_url, self.request_url, sequence_format), params=params)
         
-        """
-        jsn_response, result_offset = self.retrieveJsonWithOffset(request_url=self.request_url + ".fasta", 
-                                                   params=self.getParamsStr(), 
-                                                   offset=offset, 
-                                                   limit=limit)
-        """
+        sequence_formatted_resp = resp.content
         
-        fasta_resp = resp.content
+        # This whole weirdness with getting the number of results from response, instead of just moving
+        # one frame forward (i.e. move by a number of sequences that is specified in "limit") is because
+        # SeqDB has a weird bug where the rest of the frame response is not returned if there is a problem 
+        # with a data record, i.e. it was not deleted properly and quering for its fasta sequence returns 
+        # no results.
+        curr_result_num = limit
+        if sequence_formatted_resp:
+            if sequence_format == "fasta":
+                curr_result_num = sequence_formatted_resp.count(">")
+            elif sequence_format == "fastq":
+                curr_result_num = sequence_formatted_resp.count("@seqdb")
+        else:
+            curr_result_num = 1
         
         # Calculate the new offset
         result_offset = -1
         #TODO: refactor for efficiency, see TODO above.
         result_total_num = self.getNumber()
-        result_returned_so_far =  limit + offset
+        result_returned_so_far =  curr_result_num + offset
         if (result_total_num > result_returned_so_far):    
             result_offset = result_returned_so_far 
         
-        return fasta_resp, result_offset
+        #print "Offset: {}\tReturned results: {}\t".format(offset, sequence_formatted_resp.count(">"))
+
+        return sequence_formatted_resp, result_offset
          
     def getFastaSequence(self, seqId):
         ''' Returns a sequence in a fasta format.

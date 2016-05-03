@@ -3,6 +3,7 @@ Created on Mar 30, 2016
 
 @author: Oksana Korol
 '''
+
 import unittest
 from api.test.TestSpecimenApi import TestSpecimenApi
 from api.test.TestProjectTagApi import TestProjectTagApi
@@ -13,7 +14,7 @@ from api.test.TestGeneRegionApi import TestGeneRegionApi
 from api.test.TestFeatureApi import TestFeatureApi
 from api.test.TestFeatureTypeApi import TestFeatureTypeApi
 
-def test_suite():
+def test_api_suite():
     test_suite = unittest.TestSuite()
     test_suite.addTest(unittest.makeSuite(TestSpecimenApi))
     test_suite.addTest(unittest.makeSuite(TestProjectTagApi))
@@ -25,6 +26,6 @@ def test_suite():
     test_suite.addTest(unittest.makeSuite(TestFeatureTypeApi))
     return test_suite
 
-api_suite = test_suite()
+api_suite = test_api_suite()
 runner = unittest.TextTestRunner()
 runner.run(api_suite)

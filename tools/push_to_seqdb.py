@@ -226,11 +226,7 @@ def push_taxonomy_data(determinationApi, info_file_name, taxonomy_dir):
 # B15_17_SH817_ITS_ITS5    622 bp.    SSU: Not found    ITS1: 1-241    5.8S: 242-399    ITS2: 400-557    LSU: 558-622
 def push_its_features(featureTypeApi, featureApi, features_file_name, extraction_results_file_name=None):
     ''' Extracts found ITS features from ITSx tools results .positions.txt file and writes these features to SeqDB     
-    Args:
-        seqdbWS: api.seqdbWebService object with accessor methods to Seq
-        features_file: file handler with opened .positions.txt file
-        extraction_results_file_name: file name of the .extraction.results file from ITSx 
-                        execution with a "--detailed_results T" option
+    
     Return:
         list of SeqDB feature_ids for those features that were successfully written to SeqDB
     '''

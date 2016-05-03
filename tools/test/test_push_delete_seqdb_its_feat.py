@@ -13,7 +13,7 @@ from api.FeatureTypeApi import FeatureTypeApi
 from api.FeatureApi import FeatureApi
 
 
-class Test(unittest.TestCase):
+class TestPushDeleteSeqdbFeatures(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):

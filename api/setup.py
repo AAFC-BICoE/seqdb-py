@@ -6,6 +6,8 @@ Created on Apr 27, 2015
 @author: korolo
 '''
 
+#TODO: is this used?
+
 #from distutils.core import setup
 from setuptools import setup
 

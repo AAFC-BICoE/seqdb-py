@@ -74,8 +74,8 @@ class TestConsensusSequenceApi(unittest.TestCase):
         self.assertEqual(4, self.fixture.getNumber(), "Expecting 4 consensus sequences filtered by regionName = ITS2-28S, but got {}".format(self.fixture.getNumber()))
         self.fixture.clearAllFilters()
         
-        self.fixture.regionNameFilter = "28s"
-        self.assertEqual(69, self.fixture.getNumber(), "Expecting 69 consensus sequences filtered by regionName = 28s, but got {}".format(self.fixture.getNumber()))
+        self.fixture.regionNameFilter = "18s-28s"
+        self.assertEqual(1, self.fixture.getNumber(), "Expecting 1 consensus sequences filtered by regionName = 18s-28s, but got {}".format(self.fixture.getNumber()))
         self.fixture.clearAllFilters()
         
         # projectName
@@ -88,7 +88,7 @@ class TestConsensusSequenceApi(unittest.TestCase):
         
         # collectionCodeFilter
         self.fixture.collectionCodeFilter = "lev"
-        self.assertEqual(211, self.fixture.getNumber(), "Expecting 211 consensus sequences filtered by collectionCode = lev, but got {}".format(self.fixture.getNumber()))
+        self.assertEqual(229, self.fixture.getNumber(), "Expecting 229 consensus sequences filtered by collectionCode = lev, but got {}".format(self.fixture.getNumber()))
         self.fixture.clearAllFilters()
         
         # taxonomyRankFilter
@@ -111,7 +111,7 @@ class TestConsensusSequenceApi(unittest.TestCase):
         self.fixture.specimenNumFilter = 4264
         actual = self.fixture.getIds()
         self.assertTrue(actual, "No Sequence IDs returned.")
-        self.assertEqual(2, len(actual), "Expecting 2 consensus sequences associated with this specimen.")
+        self.assertEqual(2, len(actual), "Expecting 2 consensus sequences associated with this specimen, but got {}".format(len(actual)))
         self.assertIn(358302, actual, "Sequence ID 358302 is expected to be in results, since it is consensus")
         self.assertIn(4825628, actual, "Sequence ID 4825628 is expected to be in results, since it is consensus")
         self.assertNotIn(27755, actual, "Sequence ID 27755 is not expected to be in results, since it is consensus.")

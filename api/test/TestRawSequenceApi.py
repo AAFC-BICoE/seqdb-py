@@ -80,7 +80,7 @@ class TestRawSequenceApi(unittest.TestCase):
         
         # collectionCodeFilter
         self.fixture.collectionCodeFilter = "lev"
-        self.assertEqual(32799, self.fixture.getNumber(), "Expecting 32799 raw sequences filtered by collectionCode = lev, but got {}".format(self.fixture.getNumber()))
+        self.assertEqual(33156, self.fixture.getNumber(), "Expecting 33156 raw sequences filtered by collectionCode = lev, but got {}".format(self.fixture.getNumber()))
         self.fixture.clearAllFilters()
         
         self.fixture.collectionCodeFilter = "pm"

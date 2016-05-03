@@ -29,69 +29,14 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         
         if os.path.isfile(self.output_fastq_file_name):
             os.remove(self.output_fastq_file_name) 
-
-    '''
-    #Method no longer used'
-    
-    ** NOTE: pull_seqdb_seqs.get_seq_ids is removed. TODO: make sure that the equivalent tests exist in API tests for filters
-
-    # The remaining tests for "All Sequences" do not exist yet in API tests for filters. This is why they have been left commented out in here.
-
-    def test_get_seq_ids_specimen(self):  
-     
-        # all
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", [4405])
-        self.assertEqual(23, len(seq_ids), "Expected 23 sequences, but got {}.".format(len(seq_ids)))
-
-
-    def test_get_seq_ids_sequenceName(self):  
-
-        # all
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", sequence_name="Y10_16_F167")
-        self.assertEqual(2, len(seq_ids), "Expected 2 sequences, but got %i" % len(seq_ids))
-        
-        
-    def test_get_ids_sampleName(self):
-
-        # all
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", sample_name="LEV6103")
-        self.assertEquals(61, len(seq_ids), "Expected 61 sequences, but got %i." % len(seq_ids))
-
-
-    def test_get_seq_ids_regionName(self): 
- 
-        # all
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", region_name="ACA")  
-        self.assertEqual(1041, len(seq_ids), "Expected 1,041 sequences, but got %i." % len(seq_ids))
-
-    
-    #Note: Failing. Error message: exceptions must be old-style classes or derived from BaseException, not str
-    def test_get_seq_ids_projectName(self):  
-    
-       # all 
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", project_name="Pythium Type Specimens")
-        self.assertEqual(4373, len(seq_ids), "Expected 4,373 sequences, but got %i." % len(seq_ids))
     
     
-    def test_get_seq_ids_colletionCode(self): 
-        
-        # all
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", collection_code="BISS")
-        self.assertEqual(25, len(seq_ids), "Expected 25 sequences, but got %i." % len(seq_ids))
-
-    def test_get_seq_ids_taxonomy(self):    
-        
-        # all
-        seq_ids = pull_seqdb_seqs.get_seq_ids(self.rawSeqFixture, self.consensusSeqFixture, "all", taxonomy_rank="species", taxonomy_value="megasperma")
-        self.assertEqual(218, len(seq_ids), "Expected 218 sequences, but got %i." % len(seq_ids))
-    '''
-
-
     ### TESTING FASTA FILE CREATION 
 
     def test_execute_script_consensus_fasta(self):
         
-        # Getting all Consensus Sequences. Time: 56.56s
+        #  Time: 86.143s
+    
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
@@ -104,13 +49,15 @@ class TestPullSeqdbSeqs(unittest.TestCase):
                 if line.startswith('>'):     
                     count = count + 1
                     idList.append(line.split()[0])
-        self.assertEqual(5593, count, "Expected 5,593 sequences but got {}".format(count))
+        # Note that the number of all consensus sequences you get in SeqDB UI is 15037. This is a bug in
+        # SeqDB that there are some sequences that are not deleted properly, so they are reported as there,
+        # but they don't have any sequence information.
+        self.assertEqual(15036, count, "Expected 15037 sequences but got {}".format(count))
         self.assertIn('>seqdb|358301', idList, "Expected sequence ID 358301 is not found in the file")
         self.assertIn('>seqdb|4823203', idList, "Expected sequence ID 4823203 is not found in the file")
         self.assertIn('>seqdb|4829279', idList, "Expected sequence ID 4829279 is not found in the file")
         
         
-        # Filtering on Gene Region Name. Time: 2.71s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus", "--geneRegion", "28s"],
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
@@ -123,13 +70,12 @@ class TestPullSeqdbSeqs(unittest.TestCase):
                 if line.startswith('>'):     
                     count = count + 1
                     idList.append(line.split()[0])
-        self.assertEqual(69, count, "Expected 69 sequences but got {}".format(count))
+        self.assertEqual(1499, count, "Expected 1499 sequences but got {}".format(count))
         self.assertIn('>seqdb|1582548', idList, "Expected sequence ID 358301 is not found in the file")
         self.assertIn('>seqdb|4825579', idList, "Expected sequence ID 4823203 is not found in the file")
         self.assertIn('>seqdb|4827758', idList, "Expected sequence ID 4829279 is not found in the file")
 
 
-        # Filtering on Specimen Identifier. Time: 1.32s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "consensus", "--specNums", "4405,4264"],
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
@@ -146,7 +92,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertIn('>seqdb|358301', idList, "Expected sequence ID 358301 is not found in the file")
         self.assertIn('>seqdb|358302', idList, "Expected sequence ID 358301 is not found in the file")
         self.assertIn('>seqdb|4825628', idList, "Expected sequence ID 358301 is not found in the file")
-              
+        
         
     def test_execute_script_raw_fasta(self):
         
@@ -165,7 +111,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertEqual(480088, count, "Expected 480,088 sequences but got {}".format(count))                
         '''
         
-        # Filtering on Sequence Name. Time: 26.66s
+        # Time: 10.5s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--seqName", "S-SH-"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
@@ -184,7 +130,6 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertIn('>seqdb|126059', idList, "Expected sequence ID 126059 is not found in the file")
     
     
-        # Filtering on Collection Code. Time: 1.91s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--collectionCode", "pm"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
@@ -203,7 +148,6 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertIn('>seqdb|356572', idList, "Expected sequence ID 126059 is not found in the file")
         
         
-        # Filtering on Specimen Identifier. Time: 6.03s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "raw", "--specNums", "4405,4264"],
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
@@ -239,7 +183,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertEqual(485643, count, "Expected 485,643 sequences but got {}".format(count))     
         '''
                 
-        # Filtering on Gene Region Name. Time: 28.82s
+        # Time: 32.8s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "all", "--geneRegion", "EF-1a"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
@@ -258,7 +202,6 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         self.assertIn('>seqdb|149807', idList, "Expected sequence ID 149807 is not found in the file")
         
         
-        # Filtering on Project Name. Time: 83.99s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fasta", "all", "--projectName", "Pythium Type Specimens"], 
                             self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fasta_file_name), "Fasta file was not created.")
@@ -282,7 +225,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         
     def test_execute_script_raw_fastq(self):
 
-        # Filtering on Sample Name. Time: 5.16s
+        # Filtering on Sample Name. Time: 4.6s
         pull_seqdb_seqs.execute_script(["-c", config_root.path() + '/config4tests.yaml', "-r", "fastq", "raw", "--sampleName", "LEV6103"], 
                              self.output_file_name, self.output_taxon_file_name)
         self.assertTrue(os.path.isfile(self.output_fastq_file_name), "Fastq file was not created.")
