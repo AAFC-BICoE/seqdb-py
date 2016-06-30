@@ -24,9 +24,10 @@ setup(name='seqdb-py',
                     '': ['*.yaml.sample', 'README'],
                     },
     install_requires = [
-        'biopython==1.65',
+        'numpy==1.11.0',
+        'biopython==1.67',
         'PyYAML==3.11',
-        'requests==2.6.0', 
+        'requests==2.10', 
     ],
     entry_points={
     'console_scripts': [
