@@ -52,7 +52,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
         # Note that the number of all consensus sequences you get in SeqDB UI is 15037. This is a bug in
         # SeqDB that there are some sequences that are not deleted properly, so they are reported as there,
         # but they don't have any sequence information.
-        self.assertEqual(15036, count, "Expected 15037 sequences but got {}".format(count))
+        self.assertEqual(15037, count, "Expected 15037 sequences but got {}".format(count))
         self.assertIn('>seqdb|358301', idList, "Expected sequence ID 358301 is not found in the file")
         self.assertIn('>seqdb|4823203', idList, "Expected sequence ID 4823203 is not found in the file")
         self.assertIn('>seqdb|4829279', idList, "Expected sequence ID 4829279 is not found in the file")
@@ -343,7 +343,7 @@ class TestPullSeqdbSeqs(unittest.TestCase):
                 if line.startswith('>'):
                     count = count + 1
                     idList.append(line.split()[0])
-        self.assertEqual(17787, count, "Expected 17787 sequences but got {}".format(count))
+        self.assertEqual(23517, count, "Expected 23517 sequences but got {}".format(count))
         self.assertIn('>seqdb|131072', idList, "Expected sequence ID 131072 is not found in the file")
         self.assertIn('>seqdb|111872', idList, "Expected sequence ID 11187 is not found in the file")
         self.assertIn('>seqdb|131058', idList, "Expected sequence ID 131071 is not found in the file")             

@@ -13,7 +13,7 @@ from tools.test.test_push_delete_seqdb_its_feat import TestPushDeleteSeqdbFeatur
 
 def test_script_suite():
     test_suite = unittest.TestSuite()
-    #test_suite.addTest(unittest.makeSuite(TestPullSeqdbSeqs))
+    test_suite.addTest(unittest.makeSuite(TestPullSeqdbSeqs))
     test_suite.addTest(unittest.makeSuite(TestSeqdbConfigMaker))
     test_suite.addTest(unittest.makeSuite(TestPushDeleteSeqdbFeatures))
     return test_suite
