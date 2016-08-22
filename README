@@ -95,6 +95,25 @@ If you would like to contribute to seqdb-py codebase, do the following.
    
    > pip install -r requirements.txt
    
+* Don' forget to run the tests before you touch the code and before you commit.
+
+
+Tests
+=====
+
+seqdb-py has a testing framework, implemented using python's PyUnit. To keep the code maintainable and to minimise frustraction at the merging time, please run all tests before you touch the code and before you commit. Here is what you need:
+
+* Running local instance of SeqDB. Rationale: since testing seqdb-py essentially means testing that SeqDB API calls will work with current SeqDB API, you need a current SeqDB applicaion. Also, since the tests create and delete features, it is preferable that the SeqDB instance is local. Even though the tests are designed not to leave any mess behind, there is not guarantee. 
+
+* Admin access to local instance of SeqDB.
+
+* config/config4tests.yaml file. Create it using a supplied template.
+
+* Run the tests for api and tools suite separately (the combined suite is not working at the moment):
+
+   api/test/TestApiSuite.py
+   
+   tools/test/TestScriptSuite.py
 
 
 
