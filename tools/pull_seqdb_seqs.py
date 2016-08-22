@@ -469,7 +469,7 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
                            taxonomy_rank=parsed_args.tax_rank,
                            taxonomy_value=parsed_args.tax_value)
 
-        success_seq_ids = write_sequence_file(seqdbWS, seq_ids, output_file_name, parsed_args.return_type)
+    success_seq_ids = write_sequence_file(seqdbWS, seq_ids, output_file_name, parsed_args.return_type)
     if (parsed_args.output_taxonomy_file):
         write_taxonomy_file(seqdbWS, seq_ids, output_taxonomy_file_name)
         print("Taxonomy file is written to a file: '%s'" % output_taxonomy_file_name)
