@@ -9,6 +9,7 @@ import re
 import shelve
 import sys
 import urllib
+import pdb
 
 from config import config_root
 import httplib as http_client
@@ -329,7 +330,6 @@ def seqdb_insert_entrez_sequence(consensusSequenceEntity, genbank_id, record):
         'genBankVersion': record[0]["GBSeq_accession-version"],
         'submittedToInsdc': 'true'
     }
-
     dict_for_logging = {'name': seq_name, 'sequence': sequence}
     dict_for_logging.update(additional)
     tools_helper.pretty_log_json(dict_for_logging, level="debug", message="Creating consensus (non-default values): ")
@@ -359,8 +359,8 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
     """
     logging.info("Linking sequence to available source Specimen")
     specimenApi = SpecimenApi(api_key=api_key, base_url=url)
-    for supported in ['culture_collection', 'strain', 'specimen voucer', 'isolate']:
-
+    for supported in ['culture_collection', 'strain', 'specimen voucher', 'isolate']:
+        
         if supported in feature['qualifiers']:
 
             for source_entry in feature['qualifiers'][supported]:
@@ -383,7 +383,7 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
                             source.startswith("INVAM") or \
                             source.startswith("NISK") or \
                             source.startswith("BR"):
-
+                        
                         logging.info("\tPossible known source {}.".format(source))
 
                         matched = None
@@ -392,7 +392,8 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
 
                             # TODO Also search / instead based on DAOM field in
                             # FungalInfo
-                            matched = re.search(r"(?P<collection>\w+)[: ]?(?P<identifier>[\d.]+)", source)
+                            # pdb.set_trace()
+                            matched = re.search(r"(?P<collection>\w+)[: ]?(?P<identifier>[\w.]+)", source)
 
                             if matched.groupdict()['identifier'].startswith("BR"):
 
@@ -433,7 +434,10 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
                                 #jsn_resp = seqdb_ws.getJsonSpecimenIdsByOtherIds(code, identifier)
                                 specimenApi.otherIdsFilter = code + identifier
                                 specimenIds = specimenApi.getIds()
-                                
+                                if (not specimenIds):
+                                    specimenApi.otherIdsFilter = code + " " + identifier
+                                    specimenIds = specimenApi.getIds()
+                                    
 
                             except UnexpectedContent, e:
                                 logging.error("Exception querying Specimen using "
@@ -536,14 +540,19 @@ def seqdb_update_seqsource_region(api_key, url, seqdb_id, seqdb_region_id):
         # drop headers from response returned above by creating a new dict
         # containing only response 'result' portion and then add additional
         # properties to it
-        existing = {'seqSource': existing['result']}
+        existing = {"seqSource": existing['result']}
 
         tools_helper.pretty_log_json(seqsource, level="debug", message="Merging")
         tools_helper.pretty_log_json(existing, level="debug", message="Into")
 
         merge(existing, seqsource)
 
-        region_id, code, message = seqSourceApi.update(seqSourceApi.request_url, existing)
+        response = seqSourceApi.update(seqSourceApi.request_url, existing)
+        code = response.status_code
+        message = ""
+        if (code == 200):
+            region_id = seqdb_region_id
+            message = response.json()['metadata']['message']
 
         logging.debug("Updated SeqSource for sequence region linking "
                       "seqdbid: {}, Status: {}, Message: {}".format(seqdb_id, code, message))
@@ -591,8 +600,15 @@ def seqdb_update_seqsource_specimen(api_key, url, seqdb_id, seqdb_specimen_id):
         # creating a new dict containing only response 'result' portion
         existing = {'seqSource': existing['result']}
         merge(existing, seqsource)
-        #region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, existing)
-        region_id, code, message = seqSourceApi.update(seqSourceApi.request_url, existing)
+        # region_id, code, message = seqdb_ws.updateSeqSource(seqdb_id, existing)
+        
+        # region_id, code, message = seqSourceApi.update(seqSourceApi.request_url, existing)
+        response = seqSourceApi.update(seqSourceApi.request_url, existing)
+        code = response.status_code
+        message = ""
+        if (code == 200):
+            region_id = 1
+            message = response.json()['metadata']['message']
         logging.debug("Updated SeqSource for sequence specimen linking "
                       "seqdbid: {}, Status: {}, Message: {}".format(seqdb_id, code, message))
 
@@ -788,7 +804,6 @@ def process_features(seqdb_id, record, api_key, url, lookup=None):
         # child of these gene.
         # TODO check range of parent and null gene/cds/mrna ids once we are
         # outside the range
-
         if feature['feature_key'] == 'gene':
             #gene_id = seqdb_ws.insertFeature(name, feature['feature_type_id'], feature['locations'], seqdb_id, description=description)
             featureApi = FeatureApi(api_key=api_key, base_url=url)
@@ -824,8 +839,10 @@ def process_features(seqdb_id, record, api_key, url, lookup=None):
 
 
         elif feature['feature_key'] == 'source':
-            # seqdb_link_to_specimen(seqdb_ws, seqdb_id, feature)
+            #seqdb_link_to_specimen(api_key, url, seqdb_id, feature)
             seqdb_link_to_taxonomy(api_key, url, seqdb_id, taxon_id, organism_name, feature)
+            seqdb_link_to_specimen(api_key, url, seqdb_id,feature)
+            
 
         else:
             logging.warn("Unsupported feature type: {}".format(feature['feature_key']))
@@ -889,11 +906,10 @@ def process_entrez_entry(consensusSequenceEntity, api_key, url, genbank_id, cach
             seqdb_id = seqdb_insert_entrez_sequence(consensusSequenceEntity, genbank_id, record)
 
         else:
-            logging.info("Skipping GI: {}, which does not contain a sequence.".format(genbank_id))
+            print("Skipping GI: {}, which does not contain a sequence.".format(genbank_id))
 
     if record is not None and seqdb_id is not None:
         features = process_features(seqdb_id, record[0], api_key, url, lookup=lookup)
-
         seqdb_gene_region_id = seqdb_ret_entrez_gene_region_id(api_key, url, record, features)
 
         if seqdb_gene_region_id is not None:
@@ -989,8 +1005,8 @@ def main():
         
         # retrieve block of records
         logging.debug("Retrieving {}..{}".format(start, start + retrieve))
-        record = entrez_search(query, retstart=start, retmax=retrieve)
 
+        record = entrez_search(query, retstart=start, retmax=retrieve)
         # process each returned id in the batch
         for genbank_id in record["IdList"]:
             process_entrez_entry(

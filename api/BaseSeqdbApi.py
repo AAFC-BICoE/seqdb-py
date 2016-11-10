@@ -8,7 +8,7 @@ Sequence DB Web Services module. Define basic API calls.
 import json
 import logging
 import requests
-
+import pdb
 
 class UnexpectedContent(requests.exceptions.RequestException):
     error_msg = "Unexpected content of the Web Services response: "
@@ -158,9 +158,12 @@ class BaseSeqdbApi(object):
             requests.exceptions.ReadTimeout
             requests.exceptions.HTTPError
         '''
+        json_data = str(json_data)
+        json_data = json_data.replace("u'", "\"")
+        json_data = json_data.replace("'","\"")
         req_header = {
             'apikey': self.api_key, 'Content-Type': 'application/json'}
-        resp = requests.put(request_url, headers=req_header, data=json_data)
+        resp = requests.put(self.base_url + request_url, headers=req_header, data=json_data)
         logging.debug("Request: {} {} {}".format(resp.request.method, resp.request.url, resp.request.body))
         logging.debug("Response Status Code: {}".format(resp.status_code))
 

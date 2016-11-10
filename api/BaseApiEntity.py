@@ -6,6 +6,7 @@ Created on Feb 16, 2016
 Class that extracts common functionality for all SeqDB API entities
 '''
 
+import pdb
 from abc import abstractmethod
 from wsgiref.util import request_uri
 
