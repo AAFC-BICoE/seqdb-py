@@ -48,7 +48,7 @@ class DeterminationApi(BaseApiEntity):
                 "sequence": {"id": sequenceId},
                 "taxonomy": taxonomy,
                 "ncbiTaxonId": ncbiTaxonId,
-                "evidenceNotes": notes}
+                }
             }
 
         resp = super(DeterminationApi, self).create("{}{}".format(self.base_url, self.request_url), json.dumps(post_data))

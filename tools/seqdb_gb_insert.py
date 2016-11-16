@@ -359,7 +359,7 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
     """
     logging.info("Linking sequence to available source Specimen")
     specimenApi = SpecimenApi(api_key=api_key, base_url=url)
-    for supported in ['culture_collection', 'strain', 'specimen voucher', 'isolate']:
+    for supported in ['culture_collection', 'strain', 'specimen_voucher', 'isolate']:
         
         if supported in feature['qualifiers']:
 
@@ -389,15 +389,18 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
                         matched = None
 
                         if source.startswith("DAOM"):
+                            # pdb.set_trace()
 
                             # TODO Also search / instead based on DAOM field in
                             # FungalInfo
-                            # pdb.set_trace()
-                            matched = re.search(r"(?P<collection>\w+)[: ]?(?P<identifier>[\w.]+)", source)
+                            if source.startswith("DAOMC"):
+                                matched = re.search(r"(?P<collection>DAOM)[C: ]+(?P<identifier>[\w.]+)", source)
+                            else:
+                                matched = re.search(r"(?P<collection>[a-zA-Z]+)[_: ]?(?P<identifier>[\w.]+)", source)
 
-                            if matched.groupdict()['identifier'].startswith("BR"):
+                                if matched.groupdict()['identifier'].startswith("BR"):
 
-                                matched = re.search(r"(?P<collection>BR)(?P<identifier>[\d-]+)", matched.groupdict()['identifier'])
+                                    matched = re.search(r"(?P<collection>BR)(?P<identifier>[\d-]+)", matched.groupdict()['identifier'])
 
                         elif source.startswith("CCFC"):
 
@@ -435,6 +438,7 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
                                 specimenApi.otherIdsFilter = code + identifier
                                 specimenIds = specimenApi.getIds()
                                 if (not specimenIds):
+                                    # pdb.set_trace()
                                     specimenApi.otherIdsFilter = code + " " + identifier
                                     specimenIds = specimenApi.getIds()
                                     
@@ -501,10 +505,11 @@ def seqdb_link_to_taxonomy(api_key, url, seqdb_id, taxon_id, organism, feature):
 
     taxonomy = {
         "genus":org_split[0],
-        "species":org_split[1]
+        "species":org_split[1],
+        "notes":"Created from genbank script"
     }
 
-    determinationId = determinationApi.createSequenceDetermination(isAccepted="true", sequenceId=seqdb_id, taxonomy=taxonomy,ncbiTaxonId=taxon_id_value[1], notes="here are notes")
+    determinationId = determinationApi.createSequenceDetermination(isAccepted="true", sequenceId=seqdb_id, taxonomy=taxonomy,ncbiTaxonId=taxon_id_value[1], notes="Created from genbank script")
   
     logging.info("Sequence determination: {}".format(organism))
 
@@ -583,12 +588,15 @@ def seqdb_update_seqsource_specimen(api_key, url, seqdb_id, seqdb_specimen_id):
     
     seqSourceApi = SeqSourceApi(api_key=api_key, base_url=url, sequence_id=seqdb_id)
 
+    specimenApi =  SpecimenApi(api_key=api_key, base_url=url, specimen_request_url="specimen/{}".format(seqdb_specimen_id))
+    specimenJson = specimenApi.retrieveJson(specimenApi.request_url)
 
     seqsource = {
         "seqSource": {
             "specimen": {
                 "id": seqdb_specimen_id,
             },
+            "group":{"id":specimenJson['result']['group']['id']}
         }
     }
 

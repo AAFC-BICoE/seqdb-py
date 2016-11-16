@@ -161,6 +161,8 @@ class BaseSeqdbApi(object):
         json_data = str(json_data)
         json_data = json_data.replace("u'", "\"")
         json_data = json_data.replace("'","\"")
+        json_data = json_data.replace("False","false")
+        json_data = json_data.replace("True","true")
         req_header = {
             'apikey': self.api_key, 'Content-Type': 'application/json'}
         resp = requests.put(self.base_url + request_url, headers=req_header, data=json_data)
