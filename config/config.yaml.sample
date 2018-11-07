@@ -1,5 +1,5 @@
 seqdb:
-    url: "http://<HOSTNAME>[:PORT]/<path>"       # e.g. "***REMOVED***/api/v1/"
+    url: "http://<HOSTNAME>[:PORT]/<path>"       # e.g. "REMOVED"
 
 galaxy:
     ncbi_taxonomy_dir: "<location of ncbi taxonomy dump (where nodes.dmp is)>"   #e.g. "/home/galaxy/galaxy-dist/tool-data/taxonomy/"
@@ -14,7 +14,7 @@ logging:
 
     formatters:
         briefFormatter:
-            format: '%(levelname)s: %(message)s' 
+            format: '%(levelname)s: %(message)s'
         preciseFormatter:
             format: '%(asctime)s - %(module)s - %(levelname)s: %(message)s'
             datefmt: '%Y/%m/%d %H:%M:%S'

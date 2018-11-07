@@ -20,25 +20,25 @@ class BaseApiEntity(BaseSeqdbApi):
             specific API call (request url)
         Args:
             api_key: user api key for accessing SeqDB
-            base_url: base SeqDB API url (ex. http://***REMOVED***/api/v1/)
+            base_url: base SeqDB API url (ex.***REMOVED***/api/v1/)
             request_url: specific entity request param that will be added at the end of base_url
                     (ex. "sequence")
         '''
         super(BaseApiEntity, self).__init__(api_key,base_url)
         self.request_url = request_url
-    
+
     @abstractmethod
     def getParamsStr(self):
         ''' Based on the object specified filter parameters, create a parameter
             string, which will be added to the request
         '''
         raise NotImplementedError("Must override getParamStr")
-    
-        
+
+
     def getEntity(self, entityId):
         ''' Retrieves an entity
         Args:
-            id: entity id 
+            id: entity id
         Returns:
             'result' from the json response OR nothing if entity was not found
         Raises:
@@ -54,7 +54,7 @@ class BaseApiEntity(BaseSeqdbApi):
             return jsn_resp['result']
         else:
             return ''
-    
+
     def getNumber(self):
         ''' Returns a number of entities
         '''
@@ -62,9 +62,9 @@ class BaseApiEntity(BaseSeqdbApi):
         #jsn_resp = self.retrieveJson(request_url=request_uri, params=paramStr)
         jsn_resp = self.retrieveJson(request_url=self.request_url, params=paramStr)
         result_num = int(jsn_resp['metadata']['resultCount'])
-        
+
         return result_num
-        
+
 
     def delete(self, entityId):
         ''' Deletes an entity from SeqDB
@@ -84,7 +84,7 @@ class BaseApiEntity(BaseSeqdbApi):
             raise UnexpectedContent(response=jsn_resp)
 
         return jsn_resp
-    
+
     def bulkDelete(self, entityIds):
         ''' Deletes a list of entities from SeqDB
         Args:
@@ -100,13 +100,13 @@ class BaseApiEntity(BaseSeqdbApi):
 
 
 
-    
+
     def getIdsWithOffset(self, offset=0, limit=0):
         ''' Get entity IDs with offset, filtered by specified filter parameters
-        Args: 
+        Args:
             offset: nothing if it is a first query, then number of records from which to load the next set of ids
         Returns:
-            a list of entity ids 
+            a list of entity ids
             offset of results. If 0 then all/last set of results have been retrieved, if > 0,
                 then the function has to be called again with this offset to retrieve more results
         Raises:
@@ -116,30 +116,28 @@ class BaseApiEntity(BaseSeqdbApi):
             UnexpectedContent
         '''
         paramStr = self.getParamsStr()
-        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url=self.request_url, 
-                                                              params=paramStr, 
-                                                              offset=offset, 
+        jsn_resp, result_offset = self.retrieveJsonWithOffset(request_url=self.request_url,
+                                                              params=paramStr,
+                                                              offset=offset,
                                                               limit=limit)
-        
+
         entity_ids = ""
-        
+
         if jsn_resp:
             entity_ids = jsn_resp['result']
-        
+
         return entity_ids, result_offset
-    
-    
+
+
     def getIds(self):
         ''' Returns all entity ids, that correspond to the set filters
         Companion method to getProjectTagWithOffset. Returns all the results, iterating with offset.
         '''
         result_limit = 50
         tag_ids, offset = self.getIdsWithOffset(offset=0, limit=result_limit)
-        
+
         while offset:
             curr_tag_ids, offset = self.getIdsWithOffset(offset=offset, limit=result_limit)
             tag_ids.extend(curr_tag_ids)
-        
+
         return tag_ids
-    
-  
