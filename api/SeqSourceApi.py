@@ -11,7 +11,7 @@ from api.BaseApiEntity import BaseApiEntity
 class SeqSourceApi(BaseApiEntity):
 
     def __init__(self, api_key, base_url, sequence_id):
-        self.clearAllFilters()
+        # self.clearAllFilters()
         super(SeqSourceApi, self).__init__(api_key=api_key, base_url=base_url, request_url="sequence/{}/seqSource".format(sequence_id))
         
         

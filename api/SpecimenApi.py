@@ -13,9 +13,9 @@ from api.BaseSeqdbApi import UnexpectedContent
 
 class SpecimenApi(BaseApiEntity):
 
-    def __init__(self, api_key, base_url):
+    def __init__(self, api_key, base_url, specimen_request_url="specimen"):
         self.clearAllFilters()
-        super(SpecimenApi, self).__init__(api_key=api_key, base_url=base_url, request_url="specimen")
+        super(SpecimenApi, self).__init__(api_key=api_key, base_url=base_url, request_url=specimen_request_url)
         
         
     @property
