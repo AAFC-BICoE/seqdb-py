@@ -52,7 +52,7 @@ class TestConsensusSequenceApi(unittest.TestCase):
         #TODO
         '''
         self.fixture.pubRefSeqFilter = True
-        #TODO: this fails, i.e. curl -H "apikey: ***REMOVED***" "***REMOVED***/sequence?filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
+        #TODO: this fails, i.e. curl -H "apikey: ***REMOVED***" "***REMOVED***?filterName=sequence.submittedToInsdc&filterValue=true&filterWildcard=false"
         # Investigate why
         va = self.fixture.getNumber()
         self.assertEqual(15, self.fixture.getNumber(),

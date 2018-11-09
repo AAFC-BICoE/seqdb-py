@@ -7,5 +7,5 @@
 #			first. You'd need to change the expected values for some tests.
 
 seqdb:
-    base_url: "http://<SeqDB url>/api/v1/"       # e.g. "http://localhost:2002/seqdb.web/api/v1/"
+    base_url: "***REMOVED***/api/v1/"       # e.g. "***REMOVED***/api/v1/"
     api_key: ""

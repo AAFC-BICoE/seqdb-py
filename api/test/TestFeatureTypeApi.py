@@ -28,21 +28,21 @@ class TestFeatureTypeApi(unittest.TestCase):
         pass
 
     def testGetFeatureTypes(self):
-        # "http://localhost:2002/seqdb\/api/v1/featureType"
+        # "http:/***REMOVED***\/api/v1/featureType"
         actual = self.fixture.getFeatureTypesWithIds()
         self.assertTrue(actual, "No feature types returned.")
         self.assertIn("Quality Trim", actual, "No feature type 'Quality Trim' found.")
 
 
     def testCreateDeleteFeatureType(self):
-        #curl -X POST -H "apikey:***REMOVED***" -H "Content-Type: application/json" -d '{"featureType":{"featureDescription":"test description 1231q","featureName":"test type 123123"}}' "***REMOVED***/featureType"
+        #curl -X POST -H "apikey:***REMOVED***" -H "Content-Type: application/json" -d '{"featureType":{"featureDescription":"test description 1231q","featureName":"test type 123123"}}' "***REMOVED***/api/v1/featureType"
 
         #self.fixture.deleteFeatureType("19")
 
         featureTypeID = self.fixture.create("test type", "test type description")
         self.assertTrue(featureTypeID, "Feature type ID was not returned after feature type creation.")
 
-        #curl -X DELETE -H "apikey: ***REMOVED***" "***REMOVED***/featureType/6"
+        #curl -X DELETE -H "apikey: ***REMOVED***" "***REMOVED***/api/v1/featureType/6"
         actual = self.fixture.delete(featureTypeID)
         self.assertEqual(200, actual['metadata']['statusCode'], "Could not delete feature type.")
 

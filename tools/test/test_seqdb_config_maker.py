@@ -20,7 +20,7 @@ class TestSeqdbConfigMaker(unittest.TestCase):
         
 
     def testCreateConfigFile(self):
-        config_file_abs = SeqdbConfigMaker(api_url="http://***REMOVED***.ca/seqdb", config_file_name=self.config_file_name).createConfigFile(api_key="blah")
+        config_file_abs = SeqdbConfigMaker(api_url="***REMOVED***b", config_file_name=self.config_file_name).createConfigFile(api_key=***REMOVED***)
         
         self.assertTrue(config_file_abs, "Config file was not created.")
         self.assertTrue(self.config_file_name in config_file_abs, "Created config file is not named as expected.")
@@ -30,7 +30,7 @@ class TestSeqdbConfigMaker(unittest.TestCase):
         config_file_abs.close()
         
         actual_lines = actual.splitlines()
-        expected_lines = ['seqdb:','    api_key: "blah"','    api_url: "http://***REMOVED***.ca/seqdb"']
+        expected_lines = ['seqdb:','    api_key: "***REMOVED***"','    api_url: "***REMOVED***']
 
         self.assertEqual(expected_lines, actual_lines, "User config file does not match expected content.")
                 
