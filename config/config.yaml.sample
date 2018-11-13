@@ -2,7 +2,7 @@ seqdb:
     url: "http://<HOSTNAME>[:PORT]/<path>"       # e.g. "REMOVED"
 
 galaxy:
-    ncbi_taxonomy_dir: "<location of ncbi taxonomy dump (where nodes.dmp is)>"   #e.g. "/home/galaxy/galaxy-dist/tool-data/taxonomy/"
+    ncbi_taxonomy_dir: "<location of ncbi taxonomy dump (where nodes.dmp is)>"
 
 http_connect:
     debug_level: 0 # 0 - No output, 1 - Output to stderr

@@ -1,39 +1,44 @@
-'''
+"""
 Created on Feb 16, 2016
 
 @author: Oksana Korol
 
 Class that extracts common functionality for all SeqDB API entities
-'''
+"""
 
 from api.BaseApiEntity import BaseApiEntity
+
 
 class ProjectTagApi(BaseApiEntity):
 
     def __init__(self, api_key, base_url):
-        self.clearAllFilters()
-        super(ProjectTagApi, self).__init__(api_key=api_key, base_url=base_url, request_url="projectTag")
+        self.clear_all_filters()
+        super(ProjectTagApi, self).__init__(api_key=api_key,
+                                            base_url=base_url,
+                                            request_url='projectTag'
+                                            )
         
         
     @property
-    def nameFilter(self):
-        return self.__nameFilter
+    def name_filter(self):
+        return self.__name_filter
     
-    @nameFilter.setter
-    def nameFilter(self, name):
-        self.__nameFilter = name
+    @name_filter.setter
+    def name_filter(self, name):
+        self.__name_filter = name
         
-    def getParamsStr(self):
+    def get_param_str(self):
         params = ''
-        if self.nameFilter:
-            params = "filterName=name&filterValue={}&filterWildcard=true&".format(self.nameFilter)
+        if self.name_filter:
+            params = 'filterName=name&filterValue={}&filterWildcard=true&'\
+                .format(self.name_filter)
         
         return params
     
-    def clearAllFilters(self):
-        self.nameFilter = None
+    def clear_all_filters(self):
+        self.name_filter = None
     
-    '''    
-    def getIds(self):
-        return super(ProjectTagApi, self).getIds(self.getParamsStr())
-    '''
+    """    
+    def get_ids(self):
+        return super(ProjectTagApi, self).get_ids(self.get_param_str())
+    """

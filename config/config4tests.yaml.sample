@@ -1,11 +1,11 @@
 #
 # This information is used to run the unit tests for the API and scripts.
-# BIG NOTE: tests are executed agains the url and api key provided here,
+# BIG NOTE: tests are executed against the url and api key provided here,
 #			therefore do not set this URL to production. Ever.
 # NOTE 2:	the tests depend on the information in the database and the
 #			groups that API Key user is subscribed to, so they may fail	
 #			first. You'd need to change the expected values for some tests.
 
 seqdb:
-    base_url: "***REMOVED***/api/v1/"       # e.g. "***REMOVED***/api/v1/"
+    base_url: "***REMOVED***"
     api_key: ""
