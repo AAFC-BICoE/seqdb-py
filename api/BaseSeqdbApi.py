@@ -45,7 +45,7 @@ class BaseSeqdbApi(object):
             requests.exceptions.HTTPError
             requests.exceptions.InvalidSchema
         """
-        req_header = { 'apikey': self.api_key }
+        req_header = {'apikey': self.api_key}
         
         resp = requests.get(request_url, headers=req_header, params=params)
         logging.debug('Request: {} {} {}'.format(resp.request.method,

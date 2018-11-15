@@ -39,7 +39,7 @@ class TestSpecimenApi(unittest.TestCase):
     def test_retrieve(self):
         # Test faulty connection
         self.assertRaises(requests.exceptions.ConnectionError,
-                          self.fixture.retrieve, ')http://jibberish')
+                          self.fixture.retrieve, 'http://jibberish')
 
     def testGetEntity(self):
         actual = self.fixture.get_entity(6601)

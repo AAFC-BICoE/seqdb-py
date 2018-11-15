@@ -20,10 +20,12 @@ from api.test.TestFeatureTypeApi import TestFeatureTypeApi
 def api_test_suite():
     test_suite = unittest.TestSuite()
     test_suite.addTest(unittest.makeSuite(TestSpecimenApi))
+    '''
+    These not tested yet
     test_suite.addTest(unittest.makeSuite(TestProjectTagApi))
     test_suite.addTest(unittest.makeSuite(TestRawSequenceApi))
     test_suite.addTest(unittest.makeSuite(TestConsensusSequenceApi))
-    '''
+    
     test_suite.addTest(unittest.makeSuite(TestDeterminationApi))
     test_suite.addTest(unittest.makeSuite(TestGeneRegionApi))
     test_suite.addTest(unittest.makeSuite(TestFeatureApi))
@@ -32,6 +34,10 @@ def api_test_suite():
     return test_suite
 
 
-if __name__ == '__main__':
+def main():
     runner = unittest.TextTestRunner(verbosity=3)
     runner.run(api_test_suite())
+
+
+if __name__ == '__main__':
+    main()

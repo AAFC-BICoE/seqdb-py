@@ -125,7 +125,7 @@ class RawSequenceApi(BaseSequenceEntity):
             file_stream = gzip.open(chromat_file, 'rb')
 
             # Remove .gz extension for file name
-            global chromat_file_name
+            chromat_file_name
             chromat_file_name = chromat_file_name[:-3]
 
         else:
