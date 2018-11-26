@@ -59,11 +59,13 @@ class RawSequenceApi(BaseSequenceEntity):
             UnexpectedContent
         """
 
+        # Base 64-encode chromat as required by SeqDB api
         chromat_b64 = base64.b64encode(blob)
+        chromat_b64_ascii = chromat_b64.decode('ascii')
 
         post_data = {
             'sequenceImportPayload': {
-                'base64File': chromat_b64,
+                'base64File': chromat_b64_ascii,
                 'fileName': dest_file_name,
                 'plateType': 1,
                 'createLocation': False,
@@ -71,9 +73,8 @@ class RawSequenceApi(BaseSequenceEntity):
                 'notes': notes
             }
         }
-
         resp = self.create(
-            self.base_url + '/sequenceImport', json.dumps(post_data))
+            self.base_url + 'sequenceImport', json.dumps(post_data))
         jsn_resp = resp.json()
         
         if 'statusCode' and 'message' not in jsn_resp['metadata']:
@@ -124,12 +125,8 @@ class RawSequenceApi(BaseSequenceEntity):
 
             file_stream = gzip.open(chromat_file, 'rb')
 
-            # Remove .gz extension for file name
-            chromat_file_name
-            chromat_file_name = chromat_file_name[:-3]
-
         else:
-            file_stream = open(chromat_file, 'r')
+            file_stream = open(chromat_file, 'rb')
 
         blob = file_stream.read()
 
