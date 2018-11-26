@@ -1,5 +1,5 @@
 seqdb:
-    url: "http://<HOSTNAME>[:PORT]/<path>"       # e.g. "REMOVED"
+    url: "http://<HOSTNAME>[:PORT]/<path>"
 
 galaxy:
     ncbi_taxonomy_dir: "<location of ncbi taxonomy dump (where nodes.dmp is)>"
@@ -32,5 +32,5 @@ logging:
             filename: seqdb_tools_debug.log
 
     root:
-        level: INFO # Not producing debug info by default
+        level: INFO     # Not producing debug info by default
         handlers: [console, file]
