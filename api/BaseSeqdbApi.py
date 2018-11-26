@@ -70,7 +70,7 @@ class BaseSeqdbApi(object):
                 error_msg = 'Retrieve failed. Request body: \n {} \nRequest URL: ' \
                             '{}.\nError message: {}.'\
                     .format(e.request.body, e.request.url, e.response.text)
-                e.message = e.message + error_msg
+                #e.message = e.message + error_msg
                 logging.error(error_msg)
                 raise e
       
@@ -94,7 +94,7 @@ class BaseSeqdbApi(object):
         """
         resp = self.retrieve('{}{}'.format(self.base_url, request_url), params=params)
         if resp:
-            jsn_resp =  json.loads(resp.text)
+            jsn_resp = json.loads(resp.text)
             resp = jsn_resp
             
             if 'result' not in jsn_resp:
@@ -137,10 +137,10 @@ class BaseSeqdbApi(object):
                             'in this method')
 
         if offset:
-            params = '{}&offset={}&'.format(params,offset)
+            params = '{}&offset={}&'.format(params, offset)
         
         if limit:
-            params = '{}&limit={}&'.format(params,limit)
+            params = '{}&limit={}&'.format(params, limit)
                        
         jsn_resp = self.retrieve_json(request_url, params)
         
@@ -212,6 +212,7 @@ class BaseSeqdbApi(object):
             requests.exceptions.ReadTimeout
             requests.exceptions.HTTPError
         """
+
         req_header = {
             'apikey': self.api_key, 'Content-Type': 'application/json'}
         # (url, data, json)
@@ -225,11 +226,14 @@ class BaseSeqdbApi(object):
         try:
             resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            error_msg = 'Create failed. Request body: \n {} \nRequest URL: ' \
-                        '{}.\nError message: {}.'\
-                .format(e.request.body, e.request.url, e.response.text)
+            error_msg = 'Create failed. RequestURL: {}.\nError message: {}'\
+                .format(e.request.url, e.response.text)
+            # error_msg = 'Create failed. Request body: \n {} \nRequest URL: ' \
+            #            '{}.\nError message: {}.'\
+            #    .format(#e.request.body,
+            #            e.request.url, e.response.text)
 
-            e.message = e.message + error_msg
+            # e.message = e.message + error_msg
             logging.error(error_msg)
             if resp.status_code == 401:
                 logging.error('Insufficient permissions to write to SeqDB. '
@@ -248,7 +252,7 @@ class BaseSeqdbApi(object):
         """
 
         req_header = {'apikey': self.api_key}
-        resp = requests.delete(request_url, headers=req_header)
+        resp = requests.delete(request_url, headers=req_header, verify=False)
         logging.debug('Request: {} {} {}'.format(resp.request.method,
                                                  resp.request.url,
                                                  resp.request.body))
@@ -262,7 +266,7 @@ class BaseSeqdbApi(object):
                         '{}.\nError message: {}.'\
                 .format(e.request.body, e.request.url, e.response.text)
 
-            e.message = e.message + error_msg
+            # e.message = e.message + error_msg
             logging.error(error_msg)
             if resp.status_code == 401:
                 logging.error('Insufficient permissions to delete from SeqDB. '
