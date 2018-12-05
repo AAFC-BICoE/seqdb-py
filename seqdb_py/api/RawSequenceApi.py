@@ -10,8 +10,8 @@ import logging
 import mimetypes
 import os
 
-from api.BaseSeqdbApi import UnexpectedContent
-from api.BaseSequenceEntity import BaseSequenceEntity
+from .BaseSeqdbApi import UnexpectedContent
+from .BaseSequenceEntity import BaseSequenceEntity
 
 
 class RawSequenceApi(BaseSequenceEntity):
