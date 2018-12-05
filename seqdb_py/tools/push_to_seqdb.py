@@ -181,10 +181,9 @@ def push_taxonomy_data(determinationApi, info_file_name, taxonomy_dir):
             notes = taxonomyId + " " + notes
         
         try:
-            determinationId = determinationApi.createSequenceDetermination(sequenceId=sequenceId, 
-                                                                  taxonomy=lineage_names,
-                                                                  isAccepted=False, 
-                                                                  notes=notes)
+            determinationId = determinationApi.create_sequence_determination(sequence_id=sequenceId,
+                                                                             taxonomy=lineage_names, is_accepted=False,
+                                                                             notes=notes)
             determinationIds.append(determinationId)
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)

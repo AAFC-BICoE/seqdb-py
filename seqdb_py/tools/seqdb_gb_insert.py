@@ -166,9 +166,9 @@ def check_region(api_key, url, gene, create=False):
     logging.debug("Checking SeqDB for region: {}. Create == {}".format(gene, create))
     region_id = None
     geneRegionApi = GeneRegionApi(api_key=api_key, base_url=url)
-    geneRegionApi.nameFilter = gene
+    geneRegionApi.name_filter = gene
     #region_ids = seqdb_ws.getRegionIdsByName(gene)
-    region_ids = geneRegionApi.getIds()
+    region_ids = geneRegionApi.get_ids()
     if len(region_ids) == 0 and create is True:
         #region_id = seqdb_ws.createRegion(gene, "GenBank Gene: {}".format(gene))
         region_id = geneRegionApi.create(gene, "GenBank Gene: {}".format(gene))
@@ -435,12 +435,12 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
 
                             try:
                                 #jsn_resp = seqdb_ws.getJsonSpecimenIdsByOtherIds(code, identifier)
-                                specimenApi.otherIdsFilter = code + identifier
-                                specimenIds = specimenApi.getIds()
+                                specimenApi.other_ids_filter = code + identifier
+                                specimenIds = specimenApi.get_ids()
                                 if (not specimenIds):
                                     # pdb.set_trace()
-                                    specimenApi.otherIdsFilter = code + " " + identifier
-                                    specimenIds = specimenApi.getIds()
+                                    specimenApi.other_ids_filter = code + " " + identifier
+                                    specimenIds = specimenApi.get_ids()
                                     
 
                             except UnexpectedContent, e:
@@ -459,8 +459,8 @@ def seqdb_link_to_specimen(api_key, url, seqdb_id, feature):
                                           "Code: {}, Identifier: {}".format(code, identifier))
 
                             #jsn_resp = seqdb_ws.getJsonSpecimenIdsBySpecimenId(code, identifier)
-                            specimenApi.otherIdsFilter = code + identifier
-                            specimenIds = specimenApi.getIds()
+                            specimenApi.other_ids_filter = code + identifier
+                            specimenIds = specimenApi.get_ids()
                             
 
                         else:
@@ -509,7 +509,10 @@ def seqdb_link_to_taxonomy(api_key, url, seqdb_id, taxon_id, organism, feature):
         "notes":"Created from genbank script"
     }
 
-    determinationId = determinationApi.createSequenceDetermination(isAccepted="true", sequenceId=seqdb_id, taxonomy=taxonomy,ncbiTaxonId=taxon_id_value[1], notes="Created from genbank script")
+    determinationId = determinationApi.create_sequence_determination(sequence_id=seqdb_id, taxonomy=taxonomy,
+                                                                     is_accepted="true",
+                                                                     ncbi_taxon_id=taxon_id_value[1],
+                                                                     notes="Created from genbank script")
   
     logging.info("Sequence determination: {}".format(organism))
 
@@ -539,7 +542,7 @@ def seqdb_update_seqsource_region(api_key, url, seqdb_id, seqdb_region_id):
     }
     seqSourceApi = SeqSourceApi(api_key=api_key, base_url=url, sequence_id=seqdb_id)
     #existing = seqdb_ws.getJsonSeqSource(seqdb_id)
-    existing = seqSourceApi.retrieveJson(seqSourceApi.request_url)
+    existing = seqSourceApi.retrieve_json(seqSourceApi.request_url)
     region_id = None
     if 'result' in existing:
         # drop headers from response returned above by creating a new dict
@@ -589,7 +592,7 @@ def seqdb_update_seqsource_specimen(api_key, url, seqdb_id, seqdb_specimen_id):
     seqSourceApi = SeqSourceApi(api_key=api_key, base_url=url, sequence_id=seqdb_id)
 
     specimenApi =  SpecimenApi(api_key=api_key, base_url=url, specimen_request_url="specimen/{}".format(seqdb_specimen_id))
-    specimenJson = specimenApi.retrieveJson(specimenApi.request_url)
+    specimenJson = specimenApi.retrieve_json(specimenApi.request_url)
 
     seqsource = {
         "seqSource": {
@@ -601,7 +604,7 @@ def seqdb_update_seqsource_specimen(api_key, url, seqdb_id, seqdb_specimen_id):
     }
 
     #existing = seqdb_ws.getJsonSeqSource(seqdb_id)
-    existing = seqSourceApi.retrieveJson(seqSourceApi.request_url)
+    existing = seqSourceApi.retrieve_json(seqSourceApi.request_url)
     region_id = None
     if 'result' in existing:
         # drop headers from response returned above by
@@ -888,8 +891,8 @@ def process_entrez_entry(consensusSequenceEntity, api_key, url, genbank_id, cach
 
     #result = seqdb_ws.getJsonConsensusSequenceIdsByGI(genbank_id)
     #seq_ids = seqdb_ws.getConsensusSequenceIds(genBankGI=genbank_id)
-    consensusSequenceEntity.genBankGIFilter = genbank_id
-    seq_ids = consensusSequenceEntity.getIds()
+    consensusSequenceEntity.gen_bank_GI_filter = genbank_id
+    seq_ids = consensusSequenceEntity.get_ids()
     
     if seq_ids and delete:
         logging.info("Deleting existing Sequence (seqdbid: {})".format(seq_ids[0]))
@@ -929,7 +932,7 @@ def process_entrez_entry(consensusSequenceEntity, api_key, url, genbank_id, cach
             # purposes
             #result = seqdb_ws.getJsonSequence(seqdb_id)
             rawSequenceEntity = RawSequenceApi(api_key=api_key, base_url=url)
-            result = rawSequenceEntity.retrieveJson(rawSequenceEntity.request_url)
+            result = rawSequenceEntity.retrieve_json(rawSequenceEntity.request_url)
             tools_helper.pretty_log_json(result, level="debug", message="Final Consensus Sequence:")
 
 

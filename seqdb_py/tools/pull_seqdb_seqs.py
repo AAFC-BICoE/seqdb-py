@@ -129,8 +129,8 @@ def get_ITS_seq_ids(rawSequenceEntity):
     for its_region_keyword in its_region_names:
         #TODO: parallelize; use locking when appending to its_seq_ids
         try:
-            rawSequenceEntity.regionNameFilter = its_region_keyword
-            curr_seq_ids = rawSequenceEntity.getIds()
+            rawSequenceEntity.region_name_filter = its_region_keyword
+            curr_seq_ids = rawSequenceEntity.get_ids()
             its_seq_ids.update(curr_seq_ids)    
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
@@ -184,9 +184,9 @@ def write_sequence_file(rawSequenceEntity, its_seq_ids, file_name, file_type):
         '''
         try:
             if file_type == 'fasta':
-                sequence = rawSequenceEntity.getFastaSequence(seq_id)
+                sequence = rawSequenceEntity.get_fasta_sequence(seq_id)
             elif file_type == 'fastq':
-                sequence = rawSequenceEntity.getFastqSequence(seq_id)
+                sequence = rawSequenceEntity.get_fastq_sequence(seq_id)
             output_file.write(sequence)
             success_ids.append(seq_id)
         except requests.exceptions.ConnectionError as e:
@@ -241,7 +241,7 @@ def write_taxonomy_file(rawSequenceEntity, seq_ids, output_file_name):
             # Quiime/Mothur taxonomy file format as described in Unite:
             # https://unite.ut.ee/repository.php
             unclassified_keyword = u'unclassified'
-            determ_jsn = rawSequenceEntity.getAcceptedSpecimenDetermination(seq_id)
+            determ_jsn = rawSequenceEntity.get_accepted_specimen_determination(seq_id)
             if determ_jsn:
                 t_kingdom = determ_jsn["taxonomy"]["kingdom"]
                 if t_kingdom:
@@ -340,10 +340,10 @@ def write_sequences_file(sequenceApiObj, fileName, fileType):
     # writeType: "w" or "a"
     with open(fileName + fileType, 'a') as output_file:
         try:
-            sequenceStr, offset = sequenceApiObj.getSequencesWithOffset(offset=0, limit=100, sequence_format=fileType)
+            sequenceStr, offset = sequenceApiObj.get_sequences_with_offset(offset=0, limit=100, sequence_format=fileType)
             output_file.write(sequenceStr)
             while offset >= 0:
-                sequenceStr, offset = sequenceApiObj.getSequencesWithOffset(offset=offset, limit=100, sequence_format=fileType)
+                sequenceStr, offset = sequenceApiObj.get_sequences_with_offset(offset=offset, limit=100, sequence_format=fileType)
                 output_file.write(sequenceStr)
         except requests.exceptions.ConnectionError as e:
             logging.error(tools_helper.log_msg_noDbConnection)
@@ -406,20 +406,20 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
         log_msg = "Loading {} sequences.".format(parsed_args.seq_type)
         logging.info(log_msg)
         
-        sequenceApiObj.collectionCodeFilter = parsed_args.collection_code
-        sequenceApiObj.sequenceNameFilter = parsed_args.sequence_name
-        sequenceApiObj.sampleNameFilter = parsed_args.sample_name
-        sequenceApiObj.pubRefSeqFilter = parsed_args.pub_ref_seqs
-        #sequenceApiObj.genBankGIFilter = parsed_args
-        sequenceApiObj.regionNameFilter = parsed_args.gene_region_name
-        sequenceApiObj.projectNameFilter = parsed_args.project_name
-        sequenceApiObj.collectionCodeFilter = parsed_args.collection_code
-        sequenceApiObj.taxonomyRankFilter = parsed_args.tax_rank
-        sequenceApiObj.taxonomyValueFilter = parsed_args.tax_value
+        sequenceApiObj.collection_code_filter = parsed_args.collection_code
+        sequenceApiObj.sequence_name_filter = parsed_args.sequence_name
+        sequenceApiObj.sample_name_filter = parsed_args.sample_name
+        sequenceApiObj.pub_ref_seq_filter = parsed_args.pub_ref_seqs
+        #sequenceApiObj.gen_bank_GI_filter = parsed_args
+        sequenceApiObj.region_name_filter = parsed_args.gene_region_name
+        sequenceApiObj.project_name_filter = parsed_args.project_name
+        sequenceApiObj.collection_code_filter = parsed_args.collection_code
+        sequenceApiObj.taxonomy_rank_filter = parsed_args.tax_rank
+        sequenceApiObj.taxonomy_value_filter = parsed_args.tax_value
         
         rawSequenceEntity = copy.deepcopy(sequenceApiObj)
         rawSequenceEntity.__class__ = RawSequenceApi
-            # This will reset all the filters, since there is a clearAllFilters() call in the init
+            # This will reset all the filters, since there is a clear_all_filters() call in the init
             # For this to work, need to specify all the filters in init params
             #RawSequenceApi.__init__(rawSequenceEntity, api_key, base_url)
         rawSequenceEntity.request_url = 'sequence'
@@ -441,28 +441,28 @@ def execute_script(input_args, output_file_name=output_file_name, output_taxonom
         seq_ids = []
         
         for specimen_num in specimen_nums_list:
-            rawSequenceEntity.specimenNumFilter = specimen_num
-            consensusSequenceEntity.specimenNumFilter = specimen_num
+            rawSequenceEntity.specimen_num_filter = specimen_num
+            consensusSequenceEntity.specimen_num_filter = specimen_num
             
             if pull_types_dict["raw"] == parsed_args.seq_type:
                 write_sequences_file(rawSequenceEntity, output_file_name, parsed_args.return_type)
                 
                 if parsed_args.output_taxonomy_file:
-                    curr_seq_ids = rawSequenceEntity.getIds()
+                    curr_seq_ids = rawSequenceEntity.get_ids()
                     seq_ids.extend(curr_seq_ids)
                     
             elif pull_types_dict["consensus"] == parsed_args.seq_type:
                 write_sequences_file(consensusSequenceEntity, output_file_name, "fasta")
                 if parsed_args.output_taxonomy_file:
-                    curr_seq_ids = consensusSequenceEntity.getIds()
+                    curr_seq_ids = consensusSequenceEntity.get_ids()
                     seq_ids.extend(curr_seq_ids)
             elif pull_types_dict["all"] == parsed_args.seq_type:
                 write_sequences_file(consensusSequenceEntity, output_file_name, "fasta")
                 write_sequences_file(rawSequenceEntity, output_file_name, "fasta")
                 if parsed_args.output_taxonomy_file:
-                    curr_seq_ids = consensusSequenceEntity.getIds()
+                    curr_seq_ids = consensusSequenceEntity.get_ids()
                     seq_ids.extend(curr_seq_ids)
-                    curr_seq_ids = rawSequenceEntity.getIds()
+                    curr_seq_ids = rawSequenceEntity.get_ids()
                     seq_ids.extend(curr_seq_ids)
                 
     if parsed_args.output_taxonomy_file and seq_ids:

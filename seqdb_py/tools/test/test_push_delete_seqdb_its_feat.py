@@ -48,7 +48,7 @@ class TestPushDeleteSeqdbFeatures(unittest.TestCase):
         success_ids = delete_seqdb_features.delete_from_seqdb(self.featureFixture, self.push_to_seqdb_output_file_name, "features")
         self.assertEqual(6, len(success_ids[0]), "Expected 6 feature IDs to be successfully deleted from SeqDB, but deleted %i feature IDs." % len(success_ids[0]))
         for created_feature_id in created_feature_ids:
-            self.assertFalse(self.featureFixture.getEntity(created_feature_id), "Feature was found after being deleted.")
+            self.assertFalse(self.featureFixture.get_entity(created_feature_id), "Feature was found after being deleted.")
 
                 
 if __name__ == "__main__":
