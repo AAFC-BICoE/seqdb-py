@@ -7,7 +7,7 @@ with open('README.md', 'r') as fh:
     long_description = fh.read()
 setup(
     name='seqdb_py',
-    version='1.6.0',
+    version='2.0',
     description='SeqDB Python3 API Extensions',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -26,8 +26,8 @@ setup(
     install_requires=[
         # 'numpy==1.11.0',
         # 'biopython==1.67',
-        'PyYAML==3.13',
-        'requests==2.19',
+        'PyYAML>=3.13',
+        'requests>=2.19',
     ],
 )
     #entry_points={

@@ -1,12 +1,14 @@
 dev branch
 ==========
-The dev branch of this project currently isn't functional.  It is being 
-modified to follow the conventions of and to utilize the tools available to 
-Python 3.
+The dev branch contains modifications implemented to reflect the use of 
+Python 3.  The migration to Python3 is not complete, and thus many of the 
+functionalities which existed in the Python2 version don't currently work.  
 
-At the moment, work is focused on making the API functional with Python 3.  The 
-tools directory hasn't been modified and likely is not compatible with the rest
-of the project.
+The main feature which has been modified and tested is the RawSequenceApi
+module within the API package.
+
+The tools package hasn't been modified and likely is not compatible with the 
+rest of the project.
 
 This message will be amended as work progresses.
 
@@ -119,13 +121,13 @@ Tests
 -----
 
 Seqdb-py has a testing framework, implemented using python's PyUnit. To keep 
-the code maintainable and to minimise frustraction at the merging time, 
+the code maintainable and to minimise frustration at merge time, 
 please run all tests before you touch the code and before you commit. 
 Here is what you need:
 
 * Running local instance of SeqDB. Rationale: since testing seqdb-py 
 essentially means testing that SeqDB API calls will work with current SeqDB 
-API, you need a current SeqDB applicaion. Also, since the tests create and 
+API, you need a current SeqDB application. Also, since the tests create and 
 delete features, it is preferable that the SeqDB instance is local. Even 
 though the tests are designed not to leave any mess behind, there is no 
 guarantee. 
