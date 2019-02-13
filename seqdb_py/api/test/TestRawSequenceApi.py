@@ -4,9 +4,7 @@ Created on Apr 1, 2016
 @author: korolo
 """
 import unittest
-
 import yaml
-
 from api.RawSequenceApi import RawSequenceApi
 from config import config_root
 
