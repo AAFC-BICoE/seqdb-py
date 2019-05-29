@@ -1,0 +1,3 @@
+include README
+include seqdb_py/config/*.yaml.sample
+include seqdb_py/api/test/data/*

@@ -1,0 +1,13 @@
+#
+# This information is used to run the unit tests for the API and scripts.
+# NOTES - 1: tests are executed against the url and api key provided here,
+#			therefore do not set this URL to production. Ever.
+#       - 2: the tests depend on the information in the database and the
+#			groups that API Key user is subscribed to, so they may fail	
+#			first. You'd need to change the expected values for some tests.
+
+seqdb:
+    base_url: <SeqDB base url>
+    api_key: <SeqDB api key>
+
+basepath: <basepath to seqdb-py project>    # e.g. /home/user/seqdb-py
