@@ -7,7 +7,7 @@ Created on Mar 30, 2016
 import unittest
 # from api.test.TestSpecimenApi import TestSpecimenApi
 # from api.test.TestProjectTagApi import TestProjectTagApi
-from api.test.TestRawSequenceApi import TestRawSequenceApi
+from TestRawSequenceApi import TestRawSequenceApi
 # from api.test.TestConsensusSequenceApi import TestConsensusSequenceApi
 '''
 from api.test.TestDeterminationApi import TestDeterminationApi

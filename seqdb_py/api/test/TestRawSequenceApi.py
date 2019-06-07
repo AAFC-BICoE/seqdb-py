@@ -4,8 +4,9 @@ Created on Apr 1, 2016
 @author: korolo
 """
 import unittest
+import os
 import yaml
-from api.RawSequenceApi import RawSequenceApi
+from context import RawSequenceApi
 from config import config_root
 
 
@@ -19,7 +20,8 @@ class TestRawSequenceApi(unittest.TestCase):
             cls.fixture = RawSequenceApi(
                 api_key=config['seqdb']['api_key'],
                 base_url=config['seqdb']['base_url'])
-            cls.base_path = config['basepath']
+            cls.dir_path=os.path.dirname(os.path.realpath(__file__))
+            #cls.base_path = config['basepath']
 
     def setUp(self):
         pass
@@ -213,7 +215,8 @@ class TestRawSequenceApi(unittest.TestCase):
         Test creating a sequence with binary .abi or .ab1 file (chromatogram)
         '''
         seq_id = self.fixture.import_chromat_sequences_from_file(
-            chromat_file='{}/api/test/data/asdfjka.abi'.format(self.base_path),
+            chromat_file='{}/data/asdfjka.abi'.format(self.dir_path),
+            #chromat_file='{}/seqdb_py/api/test/data/asdfjka.abi'.format(self.base_path),
             notes='This is a test upload.',
             trace_file_path='test_path',
             dest_file_name='test2.ab1'
@@ -235,7 +238,8 @@ class TestRawSequenceApi(unittest.TestCase):
         '''
 
         seq_id = self.fixture.import_chromat_sequences_from_file(
-            chromat_file='{}/api/test/data/blob_db.ab1.gz'.format(self.base_path)
+            chromat_file='{}/data/blob_db.ab1.gz'.format(self.dir_path)
+            #chromat_file='{}/seqdb_py/api/test/data/blob_db.ab1.gz'.format(self.base_path)
         )
         self.assertTrue(seq_id,
                         'Persisting chromatogram did not return an id.')

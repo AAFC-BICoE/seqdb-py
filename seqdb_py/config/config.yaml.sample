@@ -1,5 +1,5 @@
 seqdb:
-    url: "http://<HOSTNAME>[:PORT]/<path>"
+    url: "https://<HOSTNAME>[:PORT]/<path>"
 
 galaxy:
     ncbi_taxonomy_dir: "<location of ncbi taxonomy dump (where nodes.dmp is)>"
