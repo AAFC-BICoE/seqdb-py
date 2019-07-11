@@ -10,8 +10,8 @@ import logging
 import mimetypes
 import os
 
-from .BaseSeqdbApi import UnexpectedContent
-from .BaseSequenceEntity import BaseSequenceEntity
+from BaseSeqdbApi import UnexpectedContent
+from BaseSequenceEntity import BaseSequenceEntity
 
 
 class RawSequenceApi(BaseSequenceEntity):
@@ -122,9 +122,7 @@ class RawSequenceApi(BaseSequenceEntity):
                 os.path.basename(chromat_file_name))[0]
 
         if mimetypes.guess_type(chromat_file_name)[1] == 'gzip':
-
             file_stream = gzip.open(chromat_file, 'rb')
-
         else:
             file_stream = open(chromat_file, 'rb')
 

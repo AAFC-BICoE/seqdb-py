@@ -9,5 +9,3 @@
 seqdb:
     base_url: <SeqDB base url>
     api_key: <SeqDB api key>
-
-basepath: <basepath to seqdb-py project>    # e.g. /home/user/seqdb-py

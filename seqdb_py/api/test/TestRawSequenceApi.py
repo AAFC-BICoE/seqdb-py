@@ -4,8 +4,9 @@ Created on Apr 1, 2016
 @author: korolo
 """
 import unittest
+import os
 import yaml
-from api.RawSequenceApi import RawSequenceApi
+from context import RawSequenceApi
 from config import config_root
 
 
@@ -15,11 +16,12 @@ class TestRawSequenceApi(unittest.TestCase):
     def setUpClass(cls):
         with open(config_root.path() +
                   '/config4tests.yaml', 'r') as config_file:
-            config = yaml.load(config_file)
+            config = yaml.safe_load(config_file)
             cls.fixture = RawSequenceApi(
                 api_key=config['seqdb']['api_key'],
                 base_url=config['seqdb']['base_url'])
-            cls.base_path = config['basepath']
+            cls.dir_path=os.path.dirname(os.path.realpath(__file__))
+            #cls.base_path = config['basepath']
 
     def setUp(self):
         pass
@@ -209,33 +211,35 @@ class TestRawSequenceApi(unittest.TestCase):
     """
 
     def test_create_delete_chromat_sequence(self):
-        '''
+        """
         Test creating a sequence with binary .abi or .ab1 file (chromatogram)
-        '''
+        """
         seq_id = self.fixture.import_chromat_sequences_from_file(
-            chromat_file='{}/api/test/data/asdfjka.abi'.format(self.base_path),
+            chromat_file='{}/data/asdfjka.abi'.format(self.dir_path),
+            #chromat_file='{}/seqdb_py/api/test/data/asdfjka.abi'.format(self.base_path),
             notes='This is a test upload.',
             trace_file_path='test_path',
-            dest_file_name='test2.ab1'
+            dest_file_name='test2.abi'
         )
 
         self.assertTrue(seq_id, 'Persisting chromat did not return an id.')
-        '''
+        """
         # Delete
 
         delete_jsn_resp = self.fixture.delete(seq_id)
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'],
                          'Could not delete feature type.')
-        '''
+        """
 
     def test_create_delete_chromat_sequence_gzip_valid(self):
-        '''
+        """
         Test creating a sequence with a zipped binary file
         (chromatogram) i.e. ab1.gz
-        '''
+        """
 
         seq_id = self.fixture.import_chromat_sequences_from_file(
-            chromat_file='{}/api/test/data/blob_db.ab1.gz'.format(self.base_path)
+            chromat_file='{}/data/blob_db.ab1.gz'.format(self.dir_path)
+            #chromat_file='{}/seqdb_py/api/test/data/blob_db.ab1.gz'.format(self.base_path)
         )
         self.assertTrue(seq_id,
                         'Persisting chromatogram did not return an id.')
