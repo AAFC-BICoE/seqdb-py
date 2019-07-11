@@ -18,7 +18,7 @@ class TestDeterminationApi(unittest.TestCase):
     def setUpClass(cls):
         with open(config_root.path() +
                   '/config4tests.yaml', 'r') as config_file:
-            config = yaml.load(config_file)
+            config = yaml.safe_load(config_file)
             cls.fixture = DeterminationApi(
                 api_key=config['seqdb']['api_key'],
                 base_url=config['seqdb']['base_url'])

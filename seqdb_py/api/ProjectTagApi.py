@@ -6,7 +6,7 @@ Created on Feb 16, 2016
 Class that extracts common functionality for all SeqDB API entities
 """
 
-from .BaseApiEntity import BaseApiEntity
+from BaseApiEntity import BaseApiEntity
 
 
 class ProjectTagApi(BaseApiEntity):
