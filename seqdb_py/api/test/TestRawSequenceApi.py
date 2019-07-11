@@ -211,31 +211,31 @@ class TestRawSequenceApi(unittest.TestCase):
     """
 
     def test_create_delete_chromat_sequence(self):
-        '''
+        """
         Test creating a sequence with binary .abi or .ab1 file (chromatogram)
-        '''
+        """
         seq_id = self.fixture.import_chromat_sequences_from_file(
             chromat_file='{}/data/asdfjka.abi'.format(self.dir_path),
             #chromat_file='{}/seqdb_py/api/test/data/asdfjka.abi'.format(self.base_path),
             notes='This is a test upload.',
             trace_file_path='test_path',
-            dest_file_name='test2.ab1'
+            dest_file_name='test2.abi'
         )
 
         self.assertTrue(seq_id, 'Persisting chromat did not return an id.')
-        '''
+        """
         # Delete
 
         delete_jsn_resp = self.fixture.delete(seq_id)
         self.assertEqual(200, delete_jsn_resp['metadata']['statusCode'],
                          'Could not delete feature type.')
-        '''
+        """
 
     def test_create_delete_chromat_sequence_gzip_valid(self):
-        '''
+        """
         Test creating a sequence with a zipped binary file
         (chromatogram) i.e. ab1.gz
-        '''
+        """
 
         seq_id = self.fixture.import_chromat_sequences_from_file(
             chromat_file='{}/data/blob_db.ab1.gz'.format(self.dir_path)
