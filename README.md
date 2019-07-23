@@ -92,5 +92,5 @@ behind, there is no guarantee.
 * Run the tests for api suite ~~and tools suite separately (the combined suite is not 
 working at the moment)~~:
 
-        $ api/test/TestApiSuite.py   
+        seqdb-py$ python api/test/TestApiSuite.py   
      >~~$ tools/test/TestScriptSuite.py~~

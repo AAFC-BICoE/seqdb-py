@@ -6,8 +6,7 @@ Created on Apr 1, 2016
 import unittest
 import os
 import yaml
-from context import RawSequenceApi
-from config import config_root
+from context import RawSequenceApi, config_root
 
 
 class TestRawSequenceApi(unittest.TestCase):

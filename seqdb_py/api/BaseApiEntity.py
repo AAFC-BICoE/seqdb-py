@@ -9,8 +9,7 @@ Class that extracts common functionality for all SeqDB API entities
 # import pdb
 from abc import abstractmethod
 # from wsgiref.util import request_uri
-
-from BaseSeqdbApi import BaseSeqdbApi, UnexpectedContent
+from .BaseSeqdbApi import BaseSeqdbApi, UnexpectedContent
 
 
 class BaseApiEntity(BaseSeqdbApi):
